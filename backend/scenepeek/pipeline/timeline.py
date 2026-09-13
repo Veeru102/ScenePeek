@@ -40,31 +40,62 @@ def _depth_scores(emb: np.ndarray) -> np.ndarray:
     return depth
 
 
+def heading_cuts(headings: list[str | None]) -> list[int]:
+    """Boundaries where the on-screen slide title changes and the new title sticks around."""
+    filled: list[str | None] = []
+    for h in headings:  # a segment with no readable slide keeps the previous heading
+        filled.append(h or (filled[-1] if filled else None))
+    headings = filled
+    cuts = []
+    for b in range(1, len(headings)):
+        prev, cur = headings[b - 1], headings[b]
+        if not prev or not cur or prev.lower() == cur.lower():
+            continue
+        persists = b + 1 >= len(headings) or (headings[b + 1] or "").lower() == cur.lower()
+        if persists:
+            cuts.append(b)
+    return cuts
+
+
 def segment_topics(
-    starts: list[float], ends: list[float], emb: np.ndarray, min_topic_s: float = MIN_TOPIC_S
+    starts: list[float],
+    ends: list[float],
+    emb: np.ndarray,
+    min_topic_s: float = MIN_TOPIC_S,
+    forced: list[int] | None = None,
 ) -> list[Span]:
+    """Slide-heading boundaries (`forced`) are applied first with a relaxed minimum length; then
+    TextTiling-style embedding cuts fill in topic shifts that happen without a slide change."""
     n = len(starts)
     if n == 0:
         return []
     if n <= 2:
         return [Span(0, n)]
+    cuts: list[int] = []
+    for b in sorted(forced or []):
+        if 0 < b < n and _long_enough(cuts, b, n, starts, ends, min(min_topic_s, 10.0)):
+            cuts.append(b)
     depth = _depth_scores(emb)
     thresh = depth.mean() + 0.5 * depth.std()
     cut_candidates = sorted(range(len(depth)), key=lambda g: -depth[g])
-    cuts: list[int] = []
     for g in cut_candidates:
         if depth[g] < thresh or len(cuts) >= MAX_TOPICS - 1:
             break
         b = g + 1  # boundary before segment b
-        # enforce minimum topic length relative to existing cuts
-        neighbours = sorted(cuts + [0, n])
-        prev = max(c for c in neighbours if c <= b)
-        nxt = min(c for c in neighbours if c > b) if any(c > b for c in neighbours) else n
-        if ends[b - 1] - starts[prev] < min_topic_s or ends[nxt - 1] - starts[b] < min_topic_s:
+        if b in cuts or not _long_enough(cuts, b, n, starts, ends, min_topic_s):
             continue
         cuts.append(b)
-    bounds = [0] + sorted(cuts) + [n]
+    bounds = [0] + sorted(set(cuts)) + [n]
     return [Span(bounds[i], bounds[i + 1]) for i in range(len(bounds) - 1)]
+
+
+def _long_enough(
+    cuts: list[int], b: int, n: int, starts: list[float], ends: list[float], min_s: float
+) -> bool:
+    neighbours = sorted(cuts + [0, n])
+    prev = max(c for c in neighbours if c <= b)
+    nxt = min(c for c in neighbours if c > b)
+    return ends[b - 1] - starts[prev] >= min_s and ends[nxt - 1] - starts[b] >= min_s
 
 
 def slide_heading(frames: list, start_s: float, end_s: float) -> str | None:
@@ -115,9 +146,14 @@ def build_timeline(ctx: JobContext, payload: dict) -> None:
             ).all()
         )
 
+    headings = [slide_heading(frames, a, b) for a, b in zip(starts, ends, strict=True)]
     # short clips still deserve a few topics; long lectures get the full minimum
     spans = segment_topics(
-        starts, ends, emb, min_topic_s=min(MIN_TOPIC_S, max(10.0, (ends[-1] - starts[0]) / 6))
+        starts,
+        ends,
+        emb,
+        min_topic_s=min(MIN_TOPIC_S, max(10.0, (ends[-1] - starts[0]) / 6)),
+        forced=heading_cuts(headings),
     )
     topics = []
     use_llm = settings.ollama_enabled
