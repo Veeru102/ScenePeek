@@ -98,13 +98,15 @@ uv run scenepeek eval run -c ../eval/configs/default.yaml
 uv run scenepeek eval compare ../eval/reports/text_only.json ../eval/reports/hybrid_no_rerank.json ../eval/reports/default.json
 ```
 
-Results on the synthetic set (2 lectures, 23 queries across speech / lexical / OCR / multimodal):
+Results on the synthetic set (3 lectures, 31 queries across speech / lexical / OCR / multimodal):
 
 | config | MRR | R@1 | R@5 | nDCG@10 | p50 latency |
 |---|---|---|---|---|---|
-| dense text only | 0.906 | 0.826 | 1.000 | 0.930 | 23 ms |
-| hybrid (text + FTS + visual + OCR), no rerank | 0.957 | 0.913 | 1.000 | 0.968 | 23 ms |
-| **hybrid + cross-encoder rerank** (default) | **1.000** | **1.000** | 1.000 | 1.000 | 189 ms |
+| dense text only | 0.898 | 0.806 | 1.000 | 0.924 | 29 ms |
+| hybrid (text + FTS + visual + OCR), no rerank | 0.935 | 0.871 | 1.000 | 0.952 | 26 ms |
+| **hybrid + cross-encoder rerank** (default) | **1.000** | **1.000** | 1.000 | 1.000 | 233 ms |
+
+`eval compare` also prints per-query deltas, e.g. *"the slide that lists the ACID properties"* goes from rank 2 → 1 once OCR joins the fusion, and *"professor explains plan caching while the slide says invalidate on schema change"* is only rank 1 with the speech/visual split.
 
 The synthetic set is deliberately easy; its value is as a regression harness. Add real videos and hand-labelled queries to `eval/dataset.yaml` to measure something harder (`scripts/download_eval_videos.py` fetches CC-licensed lectures and clips with `yt-dlp`).
 
