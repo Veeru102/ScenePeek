@@ -18,10 +18,11 @@ frontend/dist/
 
 # Data
 data/
-eval/videos/
+eval/videos/*.mp4
 eval/reports/*.json
 *.mp4
 *.mkv
 *.mov
 *.wav
 backend/.python-version
+eval/videos/.work_*

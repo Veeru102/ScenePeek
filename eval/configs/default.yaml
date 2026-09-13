@@ -1,0 +1,6 @@
+name: default
+dataset: ../dataset.yaml
+limit: 10
+tolerance_s: 3
+restrict_to_dataset: true
+overrides: {}

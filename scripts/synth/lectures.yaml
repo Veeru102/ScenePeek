@@ -1,0 +1,125 @@
+# Synthetic lecture scripts. Each section becomes a slide + narration; its time range is the
+# ground truth for the queries listed under it. Rendered by scripts/make_synthetic.py.
+lectures:
+  - key: db_lecture
+    title: "CS 4400 Lecture 7: Indexing and Latency"
+    course: "CS 4400 Database Systems"
+    sections:
+      - title: "Storage and Indexing"
+        color: "0x1e3a5f"
+        bullets: ["Pages and the buffer pool", "Heap files vs. sorted files", "Why indexes exist"]
+        narration: >
+          Welcome to the database systems lecture. Today we begin with an overview of storage and indexing.
+          Databases keep data on disk in fixed size pages, and the buffer pool decides which pages stay in memory.
+          A heap file stores rows in no particular order, so without an index every lookup is a full scan.
+          Indexes exist to turn those scans into a handful of page reads.
+        queries:
+          - {text: "what is the buffer pool responsible for", modality: speech}
+          - {text: "slide titled Storage and Indexing", modality: ocr}
+      - title: "B+ Tree Leaf Nodes"
+        color: "0x3f1e5f"
+        bullets: ["All values live in the leaves", "Leaves form a sorted linked list", "Splits push keys upward"]
+        narration: >
+          Now let us talk about B plus trees. A B plus tree is a balanced search tree where all values live in the
+          leaf nodes. The leaf nodes are linked together in a sorted linked list, which makes range scans very
+          efficient. Internal nodes only store separator keys that guide the search down the tree. When a leaf
+          node fills up, it splits and pushes a key up to its parent, and that is how the tree stays balanced.
+        queries:
+          - {text: "where the professor explains B+ tree leaf nodes", modality: speech}
+          - {text: "how does a B+ tree stay balanced when a leaf fills up", modality: speech}
+          - {text: "leaves form a sorted linked list", modality: ocr}
+      - title: "Hash Indexes"
+        color: "0x5f1e3a"
+        bullets: ["Constant time equality lookups", "No support for range queries", "Extendible hashing grows gracefully"]
+        narration: >
+          Hash indexes are the other common structure. A hash index gives constant time equality lookups by
+          hashing the key to a bucket. The trade off is that hash indexes cannot answer range queries at all,
+          because nearby keys land in unrelated buckets. Extendible hashing lets the directory double in size
+          without rehashing every record, so the index grows gracefully as data arrives.
+        queries:
+          - {text: "why can't hash indexes answer range queries", modality: speech}
+          - {text: "extendible hashing", modality: lexical}
+      - title: "Query Latency"
+        color: "0x1e5f3a"
+        bullets: ["Latency = client send to result", "Network round trips add up", "Cache hot pages, use covering indexes"]
+        narration: >
+          Next, let us discuss query latency. Latency is the time from when a client sends a query until it
+          receives the result. In a distributed architecture, latency includes network round trips between the
+          coordinator and the storage nodes. Caching hot pages and using covering indexes are the most common
+          ways to reduce latency, and we will measure both in the lab.
+        queries:
+          - {text: "speaker mentions latency while showing a slide about network round trips", modality: multi}
+          - {text: "common ways to reduce query latency", modality: speech}
+      - title: "Transactions and WAL"
+        color: "0x5f3a1e"
+        bullets: ["ACID: atomicity, consistency, isolation, durability", "Write-ahead logging", "Log before data"]
+        narration: >
+          Finally, a quick word on transactions. A transaction groups several operations so they either all
+          succeed or all fail. The classic properties are atomicity, consistency, isolation, and durability.
+          Write ahead logging makes durability possible by recording every change in the log before it is
+          applied to the data pages, so a crash can always be replayed.
+        queries:
+          - {text: "what makes durability possible", modality: speech}
+          - {text: "the slide that lists the ACID properties", modality: ocr}
+          - {text: "write-ahead logging", modality: lexical}
+
+  - key: dist_lecture
+    title: "CS 6210 Lecture 3: Consensus and Replication"
+    course: "CS 6210 Distributed Systems"
+    sections:
+      - title: "Why Replicate?"
+        color: "0x14303f"
+        bullets: ["Fault tolerance", "Read scalability", "Geographic locality"]
+        narration: >
+          Welcome back. This lecture is about replication and consensus. We replicate data for three reasons.
+          First, fault tolerance: if one machine dies, another copy keeps serving. Second, read scalability,
+          because more replicas can absorb more read traffic. Third, geographic locality, so users in Europe
+          read from a replica in Europe instead of crossing the ocean.
+        queries:
+          - {text: "three reasons to replicate data", modality: speech}
+          - {text: "geographic locality", modality: lexical}
+      - title: "Leader-Based Replication"
+        color: "0x3a1f4f"
+        bullets: ["One leader accepts writes", "Followers apply the log", "Synchronous vs. asynchronous"]
+        narration: >
+          The simplest design is leader based replication. One node is the leader and accepts all writes.
+          Followers apply the leader's replication log in order. If replication is synchronous, the leader waits
+          for followers before acknowledging, which is safe but slow. Asynchronous replication is fast but a
+          crash can lose the most recent writes that never reached a follower.
+        queries:
+          - {text: "difference between synchronous and asynchronous replication", modality: speech}
+          - {text: "lecturer explains leader based replication while the slide says followers apply the log", modality: multi}
+      - title: "Raft Leader Election"
+        color: "0x4f2a1f"
+        bullets: ["Terms and randomized timeouts", "Majority vote wins", "Split votes retry"]
+        narration: >
+          Raft solves consensus with leader election. Time is divided into terms. When a follower hears nothing
+          from a leader before its randomized election timeout, it becomes a candidate and requests votes. A
+          candidate that collects votes from a majority becomes the new leader. If two candidates split the
+          vote, nobody wins that term, and the randomized timeouts make a retry almost always succeed.
+        queries:
+          - {text: "how does Raft elect a new leader", modality: speech}
+          - {text: "what happens when two candidates split the vote", modality: speech}
+          - {text: "slide about randomized timeouts", modality: ocr}
+      - title: "Log Replication and Commit"
+        color: "0x1f4f3a"
+        bullets: ["Append entries RPC", "Committed once on a majority", "Leader completeness"]
+        narration: >
+          Once elected, the leader replicates client commands through append entries messages. An entry is
+          committed once it is stored on a majority of servers, and only then is it applied to the state
+          machine. The leader completeness property guarantees that any future leader already holds every
+          committed entry, which is what makes the log safe across failures.
+        queries:
+          - {text: "when is a log entry considered committed in Raft", modality: speech}
+          - {text: "leader completeness", modality: lexical}
+      - title: "Consistency Models"
+        color: "0x4f3a14"
+        bullets: ["Linearizability", "Causal consistency", "Eventual consistency"]
+        narration: >
+          We close with consistency models. Linearizability means every operation appears to take effect
+          instantaneously at some point between its start and end. Causal consistency only preserves the order
+          of operations that depend on each other. Eventual consistency promises nothing about ordering, only
+          that replicas converge if writes stop, which is why it is cheap and popular.
+        queries:
+          - {text: "what does linearizability mean", modality: speech}
+          - {text: "the slide listing consistency models", modality: ocr}

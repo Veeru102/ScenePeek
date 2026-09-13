@@ -1,0 +1,4 @@
+name: weighted_fusion
+dataset: ../dataset.yaml
+overrides:
+  fusion_method: weighted

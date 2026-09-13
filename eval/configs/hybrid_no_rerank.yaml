@@ -1,0 +1,4 @@
+name: hybrid_no_rerank
+dataset: ../dataset.yaml
+overrides:
+  rerank_enabled: false

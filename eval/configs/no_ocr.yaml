@@ -1,0 +1,4 @@
+name: no_ocr
+dataset: ../dataset.yaml
+overrides:
+  weight_ocr: 0.0

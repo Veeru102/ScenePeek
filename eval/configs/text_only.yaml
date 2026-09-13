@@ -1,0 +1,7 @@
+name: text_only
+dataset: ../dataset.yaml
+overrides:
+  rerank_enabled: false
+  weight_visual: 0.0
+  weight_ocr: 0.0
+  weight_lexical: 0.0
