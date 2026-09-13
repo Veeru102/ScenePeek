@@ -96,11 +96,11 @@ export function SystemPage() {
           <div className="space-y-1.5 text-xs">
             {inference.map(([name, p]) => (
               <div key={name} className="flex items-center gap-2">
-                <span className="w-32 truncate font-mono text-fg-muted">{name}</span>
+                <span className="w-28 truncate font-mono text-fg-muted" title={name}>{name}</span>
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-elev">
                   <div className="h-full bg-accent" style={{ width: `${Math.min(100, ((p.p50_ms ?? 0) / Math.max(1, inference[0][1].p50_ms ?? 1)) * 100)}%` }} />
                 </div>
-                <span className="w-24 text-right font-mono tabular-nums">{ms(p.p50_ms)} / {ms(p.p95_ms)}</span>
+                <span className="w-32 whitespace-nowrap text-right font-mono tabular-nums">{ms(p.p50_ms)} / {ms(p.p95_ms)}</span>
                 <span className="w-10 text-right font-mono text-fg-dim">n={p.n}</span>
               </div>
             ))}

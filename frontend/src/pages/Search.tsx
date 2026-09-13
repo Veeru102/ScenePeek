@@ -120,8 +120,8 @@ export function SearchPage() {
       </div>
 
       {res && (
-        <div className={cn('grid gap-6', playing ? 'lg:grid-cols-[1fr_420px]' : '')}>
-          <div className="space-y-3">
+        <div className={cn('grid gap-6', playing ? 'lg:grid-cols-[minmax(0,1fr)_420px]' : '')}>
+          <div className="min-w-0 space-y-3">
             {hits.length === 0 && <div className="rounded-xl border border-border py-12 text-center text-sm text-fg-muted">No matches. Try different wording or index more videos.</div>}
             {hits.map((h, i) => (
               <ResultCard

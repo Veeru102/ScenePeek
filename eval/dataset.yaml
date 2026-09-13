@@ -8,6 +8,10 @@ videos:
   title: 'CS 6210 Lecture 3: Consensus and Replication'
   file: eval/videos/dist_lecture.mp4
   license: synthetic (generated)
+- key: qo_lecture
+  title: 'CS 4400 Lecture 9: Query Optimization'
+  file: eval/videos/qo_lecture.mp4
+  license: synthetic (generated)
 queries:
 - id: db_lecture.0.0
   text: what is the buffer pool responsible for
@@ -170,3 +174,59 @@ queries:
   - video: dist_lecture
     start_s: 93.52
     end_s: 116.88
+- id: qo_lecture.0.0
+  text: why do stale statistics cause bad query plans
+  modality: speech
+  relevant:
+  - video: qo_lecture
+    start_s: 0.0
+    end_s: 21.99
+- id: qo_lecture.0.1
+  text: slide about cost-based optimization
+  modality: ocr
+  relevant:
+  - video: qo_lecture
+    start_s: 0.0
+    end_s: 21.99
+- id: qo_lecture.1.0
+  text: which join algorithm builds a hash table on the smaller input
+  modality: speech
+  relevant:
+  - video: qo_lecture
+    start_s: 21.99
+    end_s: 44.08
+- id: qo_lecture.1.1
+  text: sort-merge join
+  modality: lexical
+  relevant:
+  - video: qo_lecture
+    start_s: 21.99
+    end_s: 44.08
+- id: qo_lecture.2.0
+  text: what goes wrong with the independence assumption for correlated columns
+  modality: speech
+  relevant:
+  - video: qo_lecture
+    start_s: 44.08
+    end_s: 66.93
+- id: qo_lecture.2.1
+  text: the slide that mentions histograms
+  modality: ocr
+  relevant:
+  - video: qo_lecture
+    start_s: 44.08
+    end_s: 66.93
+- id: qo_lecture.3.0
+  text: what is parameter sniffing
+  modality: speech
+  relevant:
+  - video: qo_lecture
+    start_s: 66.93
+    end_s: 89.25
+- id: qo_lecture.3.1
+  text: professor explains plan caching while the slide says invalidate on schema change
+  modality: multi
+  relevant:
+  - video: qo_lecture
+    start_s: 66.93
+    end_s: 89.25

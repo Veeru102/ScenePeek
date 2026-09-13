@@ -123,3 +123,52 @@ lectures:
         queries:
           - {text: "what does linearizability mean", modality: speech}
           - {text: "the slide listing consistency models", modality: ocr}
+
+  - key: qo_lecture
+    title: "CS 4400 Lecture 9: Query Optimization"
+    course: "CS 4400 Database Systems"
+    sections:
+      - title: "Cost-Based Optimization"
+        color: "0x1f2f4f"
+        bullets: ["Enumerate equivalent plans", "Estimate cost with statistics", "Pick the cheapest"]
+        narration: >
+          Today we look at how the query optimizer picks a plan. A cost based optimizer enumerates many
+          equivalent plans for the same SQL, estimates the cost of each one using table statistics, and
+          executes the cheapest. The estimates are only as good as the statistics, which is why stale
+          statistics are the number one cause of bad plans in production.
+        queries:
+          - {text: "why do stale statistics cause bad query plans", modality: speech}
+          - {text: "slide about cost-based optimization", modality: ocr}
+      - title: "Join Algorithms"
+        color: "0x4f1f2f"
+        bullets: ["Nested loop join", "Hash join", "Sort-merge join"]
+        narration: >
+          There are three classic join algorithms. Nested loop join is simple and works for any predicate but
+          is quadratic. Hash join builds a hash table on the smaller input and probes it with the larger one,
+          which is the workhorse for equality joins. Sort merge join sorts both inputs and merges them, and it
+          shines when the inputs are already sorted or the output must be ordered.
+        queries:
+          - {text: "which join algorithm builds a hash table on the smaller input", modality: speech}
+          - {text: "sort-merge join", modality: lexical}
+      - title: "Selectivity Estimation"
+        color: "0x2f4f1f"
+        bullets: ["Histograms per column", "Independence assumption", "Correlated columns mislead"]
+        narration: >
+          To estimate cost the optimizer needs selectivity, the fraction of rows a predicate keeps. Histograms
+          on each column give good single column estimates. The problem is the independence assumption:
+          multiplying selectivities of correlated columns, like city and zip code, underestimates the result
+          size by orders of magnitude and leads to terrible join orders.
+        queries:
+          - {text: "what goes wrong with the independence assumption for correlated columns", modality: speech}
+          - {text: "the slide that mentions histograms", modality: ocr}
+      - title: "Plan Caching"
+        color: "0x4f3f1f"
+        bullets: ["Reuse plans for prepared statements", "Parameter sniffing risks", "Invalidate on schema change"]
+        narration: >
+          Finally, optimization is expensive, so databases cache plans for prepared statements. The risk is
+          parameter sniffing, where a plan chosen for one parameter value is reused for a very different value.
+          Plans must also be invalidated when the schema or the statistics change, otherwise the cache keeps
+          serving a plan that no longer makes sense.
+        queries:
+          - {text: "what is parameter sniffing", modality: speech}
+          - {text: "professor explains plan caching while the slide says invalidate on schema change", modality: multi}

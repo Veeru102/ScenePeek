@@ -10,6 +10,8 @@ with ranked, timestamp-level results you can play instantly.
 
 ![demo](docs/demo.gif)
 
+<p align="center"><sub>Library with live indexing progress → multimodal query plan and per-modality match signals → topic timeline with search markers → system metrics</sub></p>
+
 ## What's inside
 
 | | |
@@ -23,6 +25,12 @@ with ranked, timestamp-level results you can play instantly.
 | **Observability** | Prometheus metrics, Grafana dashboard, and an in-app System page (throughput, time-to-first-searchable, p50/p95 latencies, workers, failures) |
 
 Everything runs locally on free, open models. No hosted LLM or vision API is required (an optional Ollama hook improves query decomposition and topic titles when present).
+
+## Screens
+
+| Search: "professor explains plan caching *while the slide says* invalidate on schema change" | Video detail: topic timeline, transcript, in-video search markers |
+|---|---|
+| ![search](docs/screenshots/search-player.jpg) | ![detail](docs/screenshots/video-search.jpg) |
 
 ## Architecture
 
