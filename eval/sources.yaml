@@ -1,0 +1,7 @@
+# Openly licensed videos for a harder, real-world eval. Fill in and run scripts/download_eval_videos.py,
+# then add the entries to eval/dataset.yaml with hand-labelled queries.
+videos:
+  # - key: mit_6006_hashing
+  #   title: "MIT 6.006 Lecture 8: Hashing with Chaining"
+  #   url: https://www.youtube.com/watch?v=...
+  #   license: CC BY-NC-SA 4.0

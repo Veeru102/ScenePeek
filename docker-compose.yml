@@ -57,6 +57,7 @@ services:
       S3_ENDPOINT: http://minio:9000
       S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
       HF_HOME: /models
+      RERANK_TOP_K: 15  # CPU reranking; the host API (make api-dev) uses the default 30 on MPS
     ports:
       - "8000:8000"
     volumes:
