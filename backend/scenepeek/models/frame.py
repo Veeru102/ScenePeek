@@ -34,7 +34,7 @@ class Frame(Base):
     t_s: Mapped[float] = mapped_column(Float, nullable=False)
     image_key: Mapped[str] = mapped_column(String(1024), nullable=False)
     visual_embedding = mapped_column(Vector(_VISUAL_DIM))
-    ocr_text: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    ocr_text: Mapped[str] = mapped_column(Text, server_default="", nullable=False)
     ocr_boxes: Mapped[list | None] = mapped_column(JSONB)
     phash: Mapped[str | None] = mapped_column(String(32))
     tags: Mapped[list | None] = mapped_column(JSONB)

@@ -31,9 +31,9 @@ class Video(Base):
     height: Mapped[int | None] = mapped_column(Integer)
     fps: Mapped[float | None] = mapped_column(Float)
     codec: Mapped[str | None] = mapped_column(String(64))
-    status: Mapped[str] = mapped_column(String(32), default=VideoStatus.UPLOADING, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), server_default=VideoStatus.UPLOADING, nullable=False)
     error: Mapped[str | None] = mapped_column(Text)
-    chunk_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    chunk_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
 
     created_at: Mapped[datetime] = created_at_col()
     upload_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

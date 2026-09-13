@@ -29,9 +29,9 @@ class VideoChunk(Base):
     index: Mapped[int] = mapped_column(Integer, nullable=False)
     start_s: Mapped[float] = mapped_column(Float, nullable=False)
     end_s: Mapped[float] = mapped_column(Float, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), default=ChunkStatus.PENDING, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), server_default=ChunkStatus.PENDING, nullable=False)
     stage: Mapped[str | None] = mapped_column(String(32))
-    attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
     error: Mapped[str | None] = mapped_column(Text)
 
     extracted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -27,4 +27,4 @@ class Topic(Base):
     label: Mapped[str] = mapped_column(String(256), nullable=False)
     keyphrases: Mapped[list | None] = mapped_column(JSONB)
     embedding = mapped_column(Vector(_TEXT_DIM))
-    source: Mapped[str] = mapped_column(String(16), default="extractive", nullable=False)
+    source: Mapped[str] = mapped_column(String(16), server_default="extractive", nullable=False)

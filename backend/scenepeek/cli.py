@@ -23,8 +23,9 @@ def migrate():
     """Apply database migrations."""
     from pathlib import Path
 
-    from alembic import command
     from alembic.config import Config
+
+    from alembic import command
 
     cfg = Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
     command.upgrade(cfg, "head")

@@ -28,13 +28,13 @@ class Job(Base):
 
     id: Mapped[uuid.UUID] = uuid_pk()
     type: Mapped[str] = mapped_column(String(64), nullable=False)
-    queue: Mapped[str] = mapped_column(String(16), default="cpu", nullable=False)
-    payload: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    queue: Mapped[str] = mapped_column(String(16), server_default="cpu", nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, server_default="{}", nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), default=JobStatus.QUEUED, nullable=False)
-    priority: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    max_attempts: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), server_default=JobStatus.QUEUED, nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    max_attempts: Mapped[int] = mapped_column(Integer, server_default="3", nullable=False)
     run_after: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
