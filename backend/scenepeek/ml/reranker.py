@@ -17,7 +17,14 @@ def rerank_scores(query: str, passages: list[str]) -> np.ndarray:
     if not passages:
         return np.zeros(0, dtype=np.float32)
     model = singleton("reranker", _load)
+    import torch
+
     with timed("reranker"):
-        logits = model.predict([(query, p) for p in passages], batch_size=16, show_progress_bar=False)
-    logits = np.asarray(logits, dtype=np.float32)
+        logits = model.predict(
+            [(query, p) for p in passages],
+            batch_size=16,
+            show_progress_bar=False,
+            activation_fn=torch.nn.Identity(),  # raw logits; we apply the sigmoid ourselves
+        )
+    logits = np.asarray(logits, dtype=np.float32).reshape(-1)
     return 1.0 / (1.0 + np.exp(-logits))
