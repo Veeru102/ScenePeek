@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-bg: #0b0d12;
+  --color-bg-elev: #12151d;
+  --color-bg-card: #161a24;
+  --color-border: #232838;
+  --color-border-strong: #313849;
+  --color-fg: #e8eaf0;
+  --color-fg-muted: #9aa3b5;
+  --color-fg-dim: #5f687a;
+  --color-accent: #7c9cff;
+  --color-accent-strong: #5b7fff;
+  --color-speech: #7c9cff;
+  --color-visual: #ff8fab;
+  --color-ocr: #ffd166;
+  --color-lexical: #6ee7b7;
+  --color-ok: #4ade80;
+  --color-warn: #fbbf24;
+  --color-err: #f87171;
+}
+
+:root { color-scheme: dark; }
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: color-mix(in oklab, var(--color-accent) 40%, transparent); }
+
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 8px; }
+
+mark { background: color-mix(in oklab, var(--color-ocr) 35%, transparent); color: inherit; border-radius: 3px; padding: 0 2px; }
+
+@keyframes shimmer { 0% { background-position: -400px 0 } 100% { background-position: 400px 0 } }
+.shimmer {
+  background: linear-gradient(90deg, var(--color-bg-card) 0%, var(--color-border) 50%, var(--color-bg-card) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+}

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Env / local
+.env
+*.local
+.DS_Store
+
+# Data
+data/
+eval/videos/
+eval/reports/*.json
+*.mp4
+*.mkv
+*.mov
+*.wav
+backend/.python-version
