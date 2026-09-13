@@ -71,7 +71,7 @@ _DEAD_SQL = text(
 _REAP_SQL = text(
     """
     UPDATE jobs SET status = CASE WHEN attempts >= max_attempts THEN 'dead' ELSE 'queued' END,
-                    last_error = 'lease expired (worker ' || COALESCE(locked_by, '?') || ' stopped heartbeating)',
+                    last_error = 'lease expired: worker ' || COALESCE(locked_by, '?') || ' went silent',
                     locked_by = NULL, locked_at = NULL, heartbeat_at = NULL
     WHERE status = 'running' AND heartbeat_at < now() - make_interval(secs => :timeout)
     RETURNING id, type, status
@@ -82,8 +82,14 @@ _STATS_SQL = text("SELECT queue, status, count(*) FROM jobs GROUP BY queue, stat
 
 
 def _params(
-    type: str, payload: dict[str, Any], idempotency_key: str, queue: str, priority: int,
-    max_attempts: int, run_after: datetime | None, video_id: uuid.UUID | str | None,
+    type: str,
+    payload: dict[str, Any],
+    idempotency_key: str,
+    queue: str,
+    priority: int,
+    max_attempts: int,
+    run_after: datetime | None,
+    video_id: uuid.UUID | str | None,
 ) -> dict[str, Any]:
     import json
 
@@ -101,9 +107,16 @@ def _params(
 
 
 async def enqueue(
-    session: AsyncSession, type: str, payload: dict[str, Any], *, idempotency_key: str,
-    queue: str = "cpu", priority: int = 0, max_attempts: int = 3,
-    run_after: datetime | None = None, video_id: uuid.UUID | str | None = None,
+    session: AsyncSession,
+    type: str,
+    payload: dict[str, Any],
+    *,
+    idempotency_key: str,
+    queue: str = "cpu",
+    priority: int = 0,
+    max_attempts: int = 3,
+    run_after: datetime | None = None,
+    video_id: uuid.UUID | str | None = None,
 ) -> uuid.UUID | None:
     """Async enqueue (API side). Returns the new job id or None if the key already existed."""
     r = await session.execute(
@@ -115,9 +128,16 @@ async def enqueue(
 
 
 def enqueue_sync(
-    conn: Connection, type: str, payload: dict[str, Any], *, idempotency_key: str,
-    queue: str = "cpu", priority: int = 0, max_attempts: int = 3,
-    run_after: datetime | None = None, video_id: uuid.UUID | str | None = None,
+    conn: Connection,
+    type: str,
+    payload: dict[str, Any],
+    *,
+    idempotency_key: str,
+    queue: str = "cpu",
+    priority: int = 0,
+    max_attempts: int = 3,
+    run_after: datetime | None = None,
+    video_id: uuid.UUID | str | None = None,
 ) -> uuid.UUID | None:
     r = conn.execute(
         _ENQUEUE_SQL,
@@ -152,8 +172,7 @@ def fail(conn: Connection, job: dict[str, Any], error: str, *, retryable: bool =
         delay = backoff_delay(job["attempts"])
         conn.execute(
             _RETRY_SQL,
-            {"id": job["id"], "error": error,
-             "run_after": datetime.now(UTC) + timedelta(seconds=delay)},
+            {"id": job["id"], "error": error, "run_after": datetime.now(UTC) + timedelta(seconds=delay)},
         )
         JOB_RETRIES.labels(type=job["type"]).inc()
         JOBS_TOTAL.labels(type=job["type"], status="retried").inc()

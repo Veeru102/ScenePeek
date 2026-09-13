@@ -21,12 +21,16 @@ class Segment(Base):
         Index("ix_segments_text_tsv", "text_tsv", postgresql_using="gin"),
         Index("ix_segments_ocr_tsv", "ocr_tsv", postgresql_using="gin"),
         Index(
-            "ix_segments_ocr_trgm", "ocr_text",
-            postgresql_using="gin", postgresql_ops={"ocr_text": "gin_trgm_ops"},
+            "ix_segments_ocr_trgm",
+            "ocr_text",
+            postgresql_using="gin",
+            postgresql_ops={"ocr_text": "gin_trgm_ops"},
         ),
         Index(
-            "ix_segments_text_embedding", "text_embedding",
-            postgresql_using="hnsw", postgresql_ops={"text_embedding": "vector_cosine_ops"},
+            "ix_segments_text_embedding",
+            "text_embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"text_embedding": "vector_cosine_ops"},
         ),
     )
 

@@ -19,8 +19,10 @@ class Frame(Base):
     __table_args__ = (
         Index("ix_frames_video_t", "video_id", "t_s"),
         Index(
-            "ix_frames_visual_embedding", "visual_embedding",
-            postgresql_using="hnsw", postgresql_ops={"visual_embedding": "vector_cosine_ops"},
+            "ix_frames_visual_embedding",
+            "visual_embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"visual_embedding": "vector_cosine_ops"},
         ),
     )
 

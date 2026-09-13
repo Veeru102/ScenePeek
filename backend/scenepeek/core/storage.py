@@ -47,6 +47,7 @@ def ensure_bucket() -> None:
 
 # ---- key layout -------------------------------------------------------------
 
+
 def original_key(video_id: str, ext: str) -> str:
     return f"videos/{video_id}/original{ext}"
 
@@ -68,6 +69,7 @@ def frame_key(video_id: str, chunk_index: int, t_ms: int) -> str:
 
 
 # ---- operations -------------------------------------------------------------
+
 
 def presigned_put(key: str, content_type: str, expires: int = 3600) -> str:
     return public_client().generate_presigned_url(
