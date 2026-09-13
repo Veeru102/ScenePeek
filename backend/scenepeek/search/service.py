@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from scenepeek.core.config import get_settings
 from scenepeek.core.db import get_sessionmaker
-from scenepeek.core.metrics import SEARCH_LATENCY
+from scenepeek.core.metrics import SEARCH_LATENCY, record_sample
 from scenepeek.models import Segment, Video
 from scenepeek.search import candidates as cand
 from scenepeek.search.dedup import Hit, suppress
@@ -189,6 +189,7 @@ def _finish(timings: dict[str, float], t_all: float) -> dict[str, float]:
     timings["total"] = (time.perf_counter() - t_all) * 1000
     for stage, ms in timings.items():
         SEARCH_LATENCY.labels(stage=stage).observe(ms / 1000)
+    record_sample("search.total", timings["total"])
     return {k: round(v, 1) for k, v in timings.items()}
 
 

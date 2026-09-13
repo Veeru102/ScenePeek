@@ -106,14 +106,41 @@ export interface Job {
   created_at: string
 }
 
+export interface Pct {
+  p50_ms?: number | null
+  p95_ms?: number | null
+  p50?: number | null
+  p95?: number | null
+  n: number
+}
+
 export interface MetricsSummary {
-  jobs: Record<string, number>
+  window_min: number
+  jobs: { by_status: Record<string, number>; by_queue_status: Record<string, number>; retries_total: number }
   videos: Record<string, number>
-  throughput: { indexed_video_seconds_last_10m: number; wall_seconds_last_10m: number; speedup: number | null }
-  time_to_first_searchable_s: { p50: number | null; p95: number | null; n: number }
-  index_wall_s: { p50: number | null; p95: number | null; n: number; per_hour_s: number | null }
-  search: { p50_ms: number | null; p95_ms: number | null; n: number }
-  inference: Record<string, { p50_ms: number; p95_ms: number; n: number }>
-  workers: { id: string; last_seen: string; jobs: number }[]
-  recent_failures: Job[]
+  throughput: {
+    indexed_video_seconds: number
+    chunks: number
+    worker_busy_seconds: number
+    realtime_factor: number | null
+    wall_seconds: number | null
+    seconds_to_index_one_hour: number | null
+  }
+  time_to_first_searchable_s: Pct
+  index_wall_s: Pct & { per_hour_s: number | null }
+  search: Pct
+  inference: Record<string, Pct>
+  job_latency: Record<string, Pct>
+  workers: { id: string; last_seen: string; jobs: number; running: number }[]
+  recent_failures: {
+    id: string
+    type: string
+    status: string
+    attempts: number
+    max_attempts: number
+    video_id: string | null
+    last_error: string | null
+    created_at: string
+    finished_at: string | null
+  }[]
 }

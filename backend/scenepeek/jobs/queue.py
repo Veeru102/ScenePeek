@@ -49,9 +49,8 @@ _LEASE_SQL = text(
 
 _HEARTBEAT_SQL = text("UPDATE jobs SET heartbeat_at = now() WHERE id = :id AND status = 'running'")
 
-_COMPLETE_SQL = text(
-    "UPDATE jobs SET status = 'succeeded', finished_at = now(), locked_by = NULL WHERE id = :id"
-)
+# locked_by is kept on success so the System page can attribute work to workers
+_COMPLETE_SQL = text("UPDATE jobs SET status = 'succeeded', finished_at = now() WHERE id = :id")
 
 _RETRY_SQL = text(
     """

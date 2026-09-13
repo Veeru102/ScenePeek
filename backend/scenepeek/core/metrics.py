@@ -1,4 +1,6 @@
-"""Prometheus metrics shared by API and worker."""
+"""Prometheus metrics shared by API and worker, plus DB-backed timing samples."""
+
+import threading as _threading
 
 from prometheus_client import Counter, Gauge, Histogram
 
@@ -36,3 +38,49 @@ SEARCH_LATENCY = Histogram(
     ["stage"],
     buckets=(0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1, 2, 5),
 )
+
+
+# ---- DB-backed samples (exact percentiles for the in-app System page) ------------------
+
+_SAMPLES: list[tuple[str, float]] = []
+_SAMPLES_LOCK = _threading.Lock()
+
+
+def record_sample(name: str, value: float) -> None:
+    """Buffer a sample in-process; the owner flushes with `drain_samples()`."""
+    with _SAMPLES_LOCK:
+        _SAMPLES.append((name, value))
+        if len(_SAMPLES) > 10_000:
+            del _SAMPLES[:5000]
+
+
+def drain_samples() -> list[tuple[str, float]]:
+    with _SAMPLES_LOCK:
+        out = list(_SAMPLES)
+        _SAMPLES.clear()
+    return out
+
+
+def flush_samples_sync(conn, source: str) -> int:
+    from sqlalchemy import text
+
+    rows = drain_samples()
+    if rows:
+        conn.execute(
+            text("INSERT INTO metric_samples (name, value, source) VALUES (:n, :v, :s)"),
+            [{"n": n, "v": v, "s": source} for n, v in rows],
+        )
+    return len(rows)
+
+
+async def flush_samples_async(session, source: str) -> int:
+    from sqlalchemy import text
+
+    rows = drain_samples()
+    if rows:
+        await session.execute(
+            text("INSERT INTO metric_samples (name, value, source) VALUES (:n, :v, :s)"),
+            [{"n": n, "v": v, "s": source} for n, v in rows],
+        )
+        await session.commit()
+    return len(rows)

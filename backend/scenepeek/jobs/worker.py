@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 
 from scenepeek.core.config import get_settings
 from scenepeek.core.logging import get_logger
-from scenepeek.core.metrics import JOB_DURATION, QUEUE_DEPTH
+from scenepeek.core.metrics import JOB_DURATION, QUEUE_DEPTH, flush_samples_sync, record_sample
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext, get_spec, load_handlers
 
@@ -108,7 +108,14 @@ class Worker:
             jlog.info("job done", seconds=round(time.perf_counter() - t0, 2))
         finally:
             hb_stop.set()
-            JOB_DURATION.labels(type=job["type"]).observe(time.perf_counter() - t0)
+            dt = time.perf_counter() - t0
+            JOB_DURATION.labels(type=job["type"]).observe(dt)
+            record_sample(f"job.{job['type']}", dt * 1000)
+            try:
+                with self.engine.begin() as conn:
+                    flush_samples_sync(conn, self.worker_id)
+            except Exception as e:  # metrics must never fail a job
+                log.warning("metric flush failed", error=str(e))
 
 
 def run_worker(queues: list[str] | None = None, once: bool = False) -> None:

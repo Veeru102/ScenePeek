@@ -1,3 +1,4 @@
+import threading
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -20,7 +21,22 @@ async def lifespan(app: FastAPI):
         ensure_bucket()
     except Exception as e:  # storage may be starting up; don't block boot
         log.warning("bucket check failed", error=str(e))
+    threading.Thread(target=_warm_models, daemon=True).start()
     yield
+
+
+def _warm_models() -> None:
+    """Load the query-side encoders in the background so the first search isn't a cold start."""
+    try:
+        from scenepeek.ml import reranker, siglip, text_embed
+
+        text_embed.embed_query("warm up")
+        siglip.embed_text("warm up")
+        if get_settings().rerank_enabled:
+            reranker.rerank_scores("warm up", ["warm up"])
+        log.info("query encoders warm")
+    except Exception as e:
+        log.warning("model warmup failed", error=str(e))
 
 
 app = FastAPI(title="ScenePeek API", version=__version__, lifespan=lifespan)

@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 
 from scenepeek.core.logging import get_logger
-from scenepeek.core.metrics import MODEL_INFERENCE
+from scenepeek.core.metrics import MODEL_INFERENCE, record_sample
 
 log = get_logger("ml")
 
@@ -44,4 +44,6 @@ def timed(model: str):
     try:
         yield
     finally:
-        MODEL_INFERENCE.labels(model=model).observe(time.perf_counter() - t0)
+        dt = time.perf_counter() - t0
+        MODEL_INFERENCE.labels(model=model).observe(dt)
+        record_sample(f"infer.{model}", dt * 1000)
