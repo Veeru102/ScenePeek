@@ -32,7 +32,10 @@ ml = [
     "pillow>=10.4",
     "imagehash>=4.3",
     "scikit-learn>=1.5",
+    "sentencepiece>=0.2",
+    "protobuf>=4",
     "opencv-python-headless>=4.10",
+    "wordninja>=2.0",
 ]
 dev = [
     "pytest>=8.3",
