@@ -27,7 +27,9 @@ def ocr_image(path: str, min_conf: float = 0.5) -> list[OcrLine]:
     for box, text, conf in result or []:
         if float(conf) >= min_conf and len(text.strip()) >= 2:
             lines.append(
-                OcrLine(text=text.strip(), conf=float(conf), box=[[float(x), float(y)] for x, y in box])
+                OcrLine(
+                    text=respace(text.strip()), conf=float(conf), box=[[float(x), float(y)] for x, y in box]
+                )
             )
     return lines
 
@@ -37,7 +39,7 @@ def lines_to_text(lines: list[OcrLine]) -> str:
     if not lines:
         return ""
     lines = sorted(lines, key=lambda ln: (round(ln.box[0][1] / 12), ln.box[0][0]))
-    return "\n".join(respace(ln.text) for ln in lines)
+    return "\n".join(ln.text for ln in lines)
 
 
 _ALPHA_RUN = re.compile(r"[A-Za-z]{7,}")
