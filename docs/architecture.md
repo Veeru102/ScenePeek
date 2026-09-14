@@ -48,18 +48,23 @@ query ─► planner ─► {speech_q, visual_q, ocr_q, terms, phrases, weights}
              │
              ├─ bge(speech_q)     ⟶ segments.text_embedding   (HNSW)      ┐
              ├─ websearch_to_tsquery(terms OR …) ⟶ text_tsv (ts_rank_cd)  │ parallel,
-             ├─ SigLIP-text(visual_q) ⟶ frames.visual_embedding, max/segment │ own sessions
-             └─ ocr FTS ∪ word_similarity(ocr_q, ocr_text)                ┘
+             ├─ SigLIP-text(visual_q) ⟶ frames.visual_embedding, max/segment │ own sessions;
+             ├─ bge(visual_q)      ⟶ segments.caption_embedding (HNSW)    │ a lane with
+             └─ ocr FTS ∪ word_similarity(ocr_q, ocr_text)                ┘ weight 0 is skipped
                          ▼
             weighted RRF  (score = Σ w_m / (60 + rank_m))   or min-max weighted sum
                          ▼
-            cross-encoder rerank of top-30 on "transcript + [on screen] ocr"
-            final = 0.5·rerank + 0.3·fused/max + 0.2·visual_norm
+            cross-encoder rerank of top-30 on "transcript + [on screen] ocr + [visual] caption"
+            final = 0.5·rerank + 0.3·fused/max + 0.2·w_visual·visual_norm
                          ▼
             temporal NMS (±12 s per video, ≤3 hits/video) ─► hits + per-modality signals
 ```
 
-Planner cues: leading "find/show me where…" is stripped; "the professor explains X" isolates X as the speech query; "X while showing Y" splits speech/visual; visual nouns, "slide/diagram/on screen" and quoted phrases bump the visual, OCR and lexical weights respectively. With `OLLAMA_ENABLED=true` a local LLM performs the decomposition instead; the heuristics remain the fallback.
+**Captions** — every distinct keyframe (phash-deduplicated) is captioned with BLIP-base at index time; a segment's captions are merged and embedded with the *text* model, so a silent scene has a natural-language representation that the query can match directly ("a rabbit sniffing a flower"). This exists because zero-shot SigLIP retrieval on homogeneous footage collapses onto a few "hub" frames — see the README's ablations. Captions are a separate column and lane (not folded into `context_text`) so they can be switched off cleanly (`weight_caption: 0`) for measurement.
+
+Planner cues: leading "find/show me where…" is stripped; "the professor explains X" isolates X as the speech query; "X while showing Y" splits speech/visual; visual nouns, "slide/diagram/on screen" and quoted phrases bump the visual, OCR and lexical weights respectively. A local Ollama server is auto-detected (`ollama_auto`, one health ping per process) and, when present, performs the decomposition instead; every failure mode (down, model not pulled, timeout, malformed JSON) falls back to the heuristics.
+
+**Debug mode** — `SearchOptions(debug=True)` returns each lane's ranked list alongside the fused hits; the eval harness uses it to attribute every correct answer to the lane(s) that found it, without re-running the lanes.
 
 ## Why these choices
 
@@ -67,7 +72,8 @@ Planner cues: leading "find/show me where…" is stripped; "the professor explai
 - **Hybrid runtime** — Docker can't reach the Apple GPU, so infra runs in Compose and the worker runs natively with MPS (5–10× faster Whisper/SigLIP). The same package has a CPU Dockerfile target for Linux/GPU hosts.
 - **API loads only text-side encoders** — bge, SigLIP's text tower and the reranker (≈1.5 GB) are enough to encode queries; all audio/image inference stays in workers, so the API is horizontally cheap and the heavy models are separable.
 - **RRF over score fusion by default** — modality scores live on incompatible scales (SigLIP logits, ts_rank, cosine); rank fusion is robust without calibration. Weighted min-max fusion is implemented for the eval harness to compare.
-- **Chunks as the unit of work** — independent, idempotent, retryable, and small enough that a crash loses at most ~20 s of compute.
+- **Chunks as the unit of work** — independent, idempotent, retryable, and small enough that a crash loses at most ~20 s of compute. Within a chunk the Whisper transcript is checkpointed to object storage (tagged with the model name), so a retry after an embedding/OCR/caption failure skips ASR entirely.
+- **Clocks come from Postgres** — `run_after`, leases and backoff all use the database's `now()`. Mixing the worker's clock with the DB's produced a subtle flake: a job enqueued and leased within the clock skew was invisible to `lease()`.
 
 ## Metrics
 
