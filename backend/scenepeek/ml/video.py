@@ -35,19 +35,30 @@ class XClipEncoder:
         self.key = name.rstrip("/").split("/")[-1]
         self.dim = 512
 
-    def _load(self):
+    def _load_model(self):
         import torch
-        from transformers import XCLIPModel, XCLIPProcessor
+        from transformers import XCLIPModel
 
-        m = XCLIPModel.from_pretrained(self.name, dtype=torch.float32).to(device()).eval()
-        return m, XCLIPProcessor.from_pretrained(self.name)
+        return XCLIPModel.from_pretrained(self.name, dtype=torch.float32).to(device()).eval()
+
+    def _load_tokenizer(self):
+        from transformers import AutoTokenizer
+
+        return AutoTokenizer.from_pretrained(self.name)
+
+    def _load_processor(self):
+        # needs pillow/torchvision: only the worker (embed_clips) ever loads it
+        from transformers import XCLIPProcessor
+
+        return XCLIPProcessor.from_pretrained(self.name)
 
     def embed_clips(self, clips: list[list], batch_size: int = 4) -> np.ndarray:
         import torch
 
         if not clips:
             return np.zeros((0, self.dim), dtype=np.float32)
-        model, proc = singleton(f"video:{self.key}", self._load)
+        model = singleton(f"video:{self.key}", self._load_model)
+        proc = singleton(f"video:{self.key}:processor", self._load_processor)
         out = []
         with timed("xclip_video"), torch.inference_mode():
             for i in range(0, len(clips), batch_size):
@@ -61,9 +72,10 @@ class XClipEncoder:
     def embed_text(self, text: str) -> np.ndarray:
         import torch
 
-        model, proc = singleton(f"video:{self.key}", self._load)
+        model = singleton(f"video:{self.key}", self._load_model)
+        tokenizer = singleton(f"video:{self.key}:tokenizer", self._load_tokenizer)
         with timed("xclip_text"), torch.inference_mode():
-            tok = proc(text=[text], return_tensors="pt", padding=True, truncation=True, max_length=77)
+            tok = tokenizer([text], return_tensors="pt", padding=True, truncation=True, max_length=77)
             feats = _tensor(
                 model.get_text_features(
                     input_ids=tok["input_ids"].to(device()), attention_mask=tok["attention_mask"].to(device())

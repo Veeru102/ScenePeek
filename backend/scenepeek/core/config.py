@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     worker_poll_interval_s: float = 1.0
     worker_heartbeat_s: float = 10.0
     worker_lease_timeout_s: float = 90.0
+    # workload isolation: a worker with min_priority >= 0 never takes benchmark/backfill jobs;
+    # offline_max_running caps how many offline (priority < 0) jobs may run at once, cluster-wide
+    worker_min_priority: int = -(2**31)
+    offline_max_running: int = 0  # 0 = unlimited
     media_cache_dir: Path = Path("~/.cache/scenepeek")
     models_dir: Path = Path("../models")  # trained routers / fine-tuned rerankers (gitignored)
 

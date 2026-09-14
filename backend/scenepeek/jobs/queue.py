@@ -31,6 +31,10 @@ _ENQUEUE_SQL = text(
     """
 )
 
+# Offline work (priority < 0: benchmark imports, backfills) is leased only while fewer than
+# :offline_budget offline jobs are running cluster-wide, so a bulk import cannot occupy every
+# worker when an interactive upload arrives. :min_priority lets a worker refuse offline work
+# entirely (a reserved interactive worker).
 _LEASE_SQL = text(
     """
     UPDATE jobs SET status = 'running', locked_by = :worker, locked_at = now(),
@@ -39,11 +43,15 @@ _LEASE_SQL = text(
     WHERE id = (
         SELECT id FROM jobs
         WHERE status = 'queued' AND queue = ANY(:queues) AND run_after <= now()
+          AND priority >= :min_priority
+          AND (priority >= 0 OR CAST(:offline_budget AS integer) IS NULL
+               OR (SELECT count(*) FROM jobs WHERE status = 'running' AND priority < 0)
+                  < CAST(:offline_budget AS integer))
         ORDER BY priority DESC, created_at
         FOR UPDATE SKIP LOCKED
         LIMIT 1
     )
-    RETURNING id, type, queue, payload, attempts, max_attempts, video_id
+    RETURNING id, type, queue, payload, attempts, max_attempts, video_id, priority
     """
 )
 
@@ -148,8 +156,27 @@ def enqueue_sync(
     return row[0] if row else None
 
 
-def lease(conn: Connection, worker_id: str, queues: list[str]) -> dict[str, Any] | None:
-    row = conn.execute(_LEASE_SQL, {"worker": worker_id, "queues": queues}).mappings().first()
+def lease(
+    conn: Connection,
+    worker_id: str,
+    queues: list[str],
+    *,
+    min_priority: int = -(2**31),
+    offline_budget: int | None = None,
+) -> dict[str, Any] | None:
+    row = (
+        conn.execute(
+            _LEASE_SQL,
+            {
+                "worker": worker_id,
+                "queues": queues,
+                "min_priority": min_priority,
+                "offline_budget": offline_budget,
+            },
+        )
+        .mappings()
+        .first()
+    )
     return dict(row) if row else None
 
 

@@ -33,13 +33,14 @@ def migrate():
 
 @app.command()
 def worker(
-    queues: str = typer.Option(None, help="Comma-separated queues, e.g. cpu,ml"),
+    queues: str = typer.Option(None, help="Comma-separated queues, e.g. cpu,ml,vision"),
     once: bool = typer.Option(False, help="Process one job and exit"),
+    min_priority: int = typer.Option(None, help="Refuse jobs below this priority (0 = interactive only)"),
 ):
     """Run a background worker that leases and executes jobs."""
     from scenepeek.jobs.worker import run_worker
 
-    run_worker(queues=queues.split(",") if queues else None, once=once)
+    run_worker(queues=queues.split(",") if queues else None, once=once, min_priority=min_priority)
 
 
 @app.command("reindex-captions")

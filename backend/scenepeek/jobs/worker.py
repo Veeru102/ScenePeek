@@ -21,9 +21,15 @@ log = get_logger("worker")
 
 
 class Worker:
-    def __init__(self, queues: list[str] | None = None, worker_id: str | None = None):
+    def __init__(
+        self,
+        queues: list[str] | None = None,
+        worker_id: str | None = None,
+        min_priority: int | None = None,
+    ):
         self.settings = get_settings()
         self.queues = queues or self.settings.queue_list
+        self.min_priority = self.settings.worker_min_priority if min_priority is None else min_priority
         self.worker_id = worker_id or f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex[:6]}"
         self.engine = create_engine(self.settings.sync_database_url, pool_pre_ping=True)
         self._stop = threading.Event()
@@ -39,7 +45,13 @@ class Worker:
         load_handlers()
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
-        log.info("worker started", worker=self.worker_id, queues=self.queues)
+        log.info(
+            "worker started",
+            worker=self.worker_id,
+            queues=self.queues,
+            min_priority=self.min_priority,
+            offline_budget=self.settings.offline_max_running,
+        )
         while not self._stop.is_set():
             self._maybe_reap()
             job = self._lease()
@@ -57,7 +69,13 @@ class Worker:
 
     def _lease(self):
         with self.engine.begin() as conn:
-            return q.lease(conn, self.worker_id, self.queues)
+            return q.lease(
+                conn,
+                self.worker_id,
+                self.queues,
+                min_priority=self.min_priority,
+                offline_budget=self.settings.offline_max_running or None,
+            )
 
     def _maybe_reap(self):
         now = time.monotonic()
@@ -122,7 +140,7 @@ class Worker:
                 log.warning("metric flush failed", error=str(e))
 
 
-def run_worker(queues: list[str] | None = None, once: bool = False) -> None:
+def run_worker(queues: list[str] | None = None, once: bool = False, min_priority: int | None = None) -> None:
     settings = get_settings()
     port = settings.worker_metrics_port
     for _ in range(10):  # multiple workers on one host: take the next free port
@@ -132,4 +150,4 @@ def run_worker(queues: list[str] | None = None, once: bool = False) -> None:
         except OSError:
             port += 1
     log.info("metrics listening", port=port)
-    Worker(queues=queues).run(once=once)
+    Worker(queues=queues, min_priority=min_priority).run(once=once)

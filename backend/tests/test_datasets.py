@@ -123,3 +123,22 @@ def test_interactive_chunks_lease_before_benchmark_chunks(engine):
         while (j := q.lease(conn, "w", ["cpu"])) is not None:
             order.append(j["payload"]["k"])
     assert order == ["user0", "user1", "user2", "bench0", "bench1", "bench2"]
+
+
+def test_reserved_worker_and_offline_budget(engine):
+    with engine.begin() as conn:
+        q.enqueue_sync(conn, "noop", {"k": "bench_a"}, idempotency_key="ba", priority=priority.BENCHMARK)
+        q.enqueue_sync(conn, "noop", {"k": "bench_b"}, idempotency_key="bb", priority=priority.BENCHMARK)
+        q.enqueue_sync(conn, "noop", {"k": "backfill"}, idempotency_key="bf", priority=priority.BACKFILL)
+    with engine.begin() as conn:
+        # a reserved interactive worker sees nothing to do
+        assert q.lease(conn, "reserved", ["cpu"], min_priority=0) is None
+        # with a budget of one offline job, the second offline lease waits until the first finishes
+        first = q.lease(conn, "w1", ["cpu"], offline_budget=1)
+        assert first["payload"]["k"] == "bench_a"
+        assert q.lease(conn, "w2", ["cpu"], offline_budget=1) is None
+        q.enqueue_sync(conn, "noop", {"k": "user"}, idempotency_key="u", priority=priority.INTERACTIVE)
+        # interactive work is never held back by the offline budget
+        assert q.lease(conn, "w2", ["cpu"], offline_budget=1)["payload"]["k"] == "user"
+        q.complete(conn, first)
+        assert q.lease(conn, "w2", ["cpu"], offline_budget=1)["payload"]["k"] == "bench_b"
