@@ -70,6 +70,10 @@ class Worker:
                 log.warning("reaped stale job", job=str(r["id"]), type=r["type"], now=r["status"])
             for (queue, status), n in q.stats(conn).items():
                 QUEUE_DEPTH.labels(queue=queue, status=status).set(n)
+        if any(r["status"] == "dead" for r in reaped):
+            from scenepeek.pipeline.index import fail_dead_chunk_jobs
+
+            fail_dead_chunk_jobs(self.engine, reaped)
 
     def _heartbeat_loop(self, job_id: uuid.UUID, stop: threading.Event):
         while not stop.wait(self.settings.worker_heartbeat_s):

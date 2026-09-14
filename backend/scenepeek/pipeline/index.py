@@ -5,10 +5,12 @@ from pathlib import Path
 
 from PIL import Image
 from sqlalchemy import delete, func, select
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from scenepeek.core import storage
 from scenepeek.core.config import get_settings
+from scenepeek.core.logging import get_logger
 from scenepeek.core.metrics import INDEXED_VIDEO_SECONDS, TIME_TO_FIRST_SEARCHABLE, VIDEO_INDEX_WALL
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
@@ -22,6 +24,7 @@ from scenepeek.pipeline.extract import manifest_key
 from scenepeek.pipeline.frames import FrameRef, load_manifest, pick_distinct
 from scenepeek.pipeline.segment import plan_segments
 
+log = get_logger("index")
 AUDIO_PAD_S = 1.0
 
 
@@ -240,16 +243,52 @@ def finalize_if_complete(s: Session, video: Video) -> None:
         )
 
 
+def fail_chunk(s: Session, chunk: VideoChunk, error: str) -> None:
+    """Terminal failure: mark the chunk FAILED and let the video finalize if nothing is left."""
+    chunk.error = error[:2000]
+    chunk.status = ChunkStatus.FAILED
+    video = s.get(Video, chunk.video_id)
+    s.commit()
+    finalize_if_complete(s, video)
+    s.commit()
+
+
 def record_chunk_error(ctx: JobContext, chunk_id, e: Exception) -> None:
     """Persist the error on the chunk; mark it failed only when the job has no retries left."""
     job = ctx.job
     final = isinstance(e, q.NonRetryableError) or job["attempts"] >= job["max_attempts"]
     with ctx.session() as s:
         c = s.get(VideoChunk, chunk_id)
-        c.error = f"{type(e).__name__}: {e}"[:2000]
-        c.status = ChunkStatus.FAILED if final else ChunkStatus.PENDING
         if final:
-            video = s.get(Video, c.video_id)
-            s.commit()
-            finalize_if_complete(s, video)
+            fail_chunk(s, c, f"{type(e).__name__}: {e}")
+            return
+        c.error = f"{type(e).__name__}: {e}"[:2000]
+        c.status = ChunkStatus.PENDING
         s.commit()
+
+
+_CHUNK_JOB_TYPES = ("extract_chunk", "index_chunk")
+
+
+def fail_dead_chunk_jobs(engine: Engine, reaped: list[dict]) -> None:
+    """After the reaper kills a chunk job for good, fail its chunk so the video can finalize.
+
+    Without this a video whose worker died on its last attempt stays `processing` forever.
+    """
+    for row in reaped:
+        if row.get("status") != "dead" or row.get("type") not in _CHUNK_JOB_TYPES:
+            continue
+        payload = row.get("payload") or {}
+        try:
+            with Session(engine) as s:
+                chunk = s.scalar(
+                    select(VideoChunk).where(
+                        VideoChunk.video_id == payload["video_id"],
+                        VideoChunk.index == int(payload["chunk_index"]),
+                    )
+                )
+                if chunk is None or chunk.status == ChunkStatus.DONE:
+                    continue
+                fail_chunk(s, chunk, row.get("last_error") or "job reaped as dead")
+        except Exception:
+            log.exception("failed to mark reaped chunk as failed", job=str(row.get("id")))

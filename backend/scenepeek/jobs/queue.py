@@ -73,7 +73,7 @@ _REAP_SQL = text(
                     last_error = 'lease expired: worker ' || COALESCE(locked_by, '?') || ' went silent',
                     locked_by = NULL, locked_at = NULL, heartbeat_at = NULL
     WHERE status = 'running' AND heartbeat_at < now() - make_interval(secs => :timeout)
-    RETURNING id, type, status
+    RETURNING id, type, status, payload, video_id, last_error
     """
 )
 

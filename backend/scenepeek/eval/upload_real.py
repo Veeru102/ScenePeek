@@ -1,7 +1,6 @@
 """Upload eval/real/sources.yaml videos into the running ScenePeek library via the API."""
 
 import mimetypes
-from pathlib import Path
 
 import httpx
 

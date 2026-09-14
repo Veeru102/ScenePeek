@@ -48,7 +48,7 @@ def _ocr_fragment(text: str) -> str | None:
 
 
 def _window_key(candidate_id: str) -> str:
-    """"mit_streams.w0.ocr" -> "mit_streams.w0" — groups candidates from the same window."""
+    """ "mit_streams.w0.ocr" -> "mit_streams.w0" — groups candidates from the same window."""
     return ".".join(candidate_id.split(".")[:-1])
 
 

@@ -2,7 +2,6 @@
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from scenepeek.eval.real import CANDIDATES_PATH, REPO_ROOT, SOURCES_PATH, load_sources
@@ -23,6 +22,7 @@ class EditRequest(BaseModel):
     text: str | None = None
     start_s: float | None = None
     end_s: float | None = None
+
 
 DATASET_PATH = REPO_ROOT / "eval/real/dataset.yaml"
 

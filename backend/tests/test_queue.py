@@ -108,3 +108,52 @@ def test_run_after_in_future_is_not_leased(engine):
     _enqueue(engine, "later", run_after=datetime.now(UTC) + timedelta(hours=1))
     with engine.begin() as conn:
         assert q.lease(conn, "w", ["cpu"]) is None
+
+
+def test_reaper_dead_chunk_job_fails_chunk_and_video(engine):
+    from sqlalchemy.orm import Session
+
+    from scenepeek.models import Video, VideoChunk
+    from scenepeek.models.chunk import ChunkStatus
+    from scenepeek.models.video import VideoStatus
+    from scenepeek.pipeline.index import fail_dead_chunk_jobs
+
+    with Session(engine) as s:
+        video = Video(title="v", original_key="k", status=VideoStatus.PROCESSING, chunk_count=1)
+        s.add(video)
+        s.flush()
+        s.add(VideoChunk(video_id=video.id, index=0, start_s=0, end_s=60, status=ChunkStatus.RUNNING))
+        s.commit()
+        video_id = video.id
+
+    with engine.begin() as conn:
+        q.enqueue_sync(
+            conn,
+            "index_chunk",
+            {"video_id": str(video_id), "chunk_index": 0},
+            idempotency_key=f"index:{video_id}:0",
+            queue="ml",
+            max_attempts=1,
+            video_id=video_id,
+        )
+    with engine.begin() as conn:
+        j = q.lease(conn, "crashed", ["ml"])
+        assert j is not None
+        conn.execute(
+            text("update jobs set heartbeat_at = now() - interval '10 minutes' where id = :id"),
+            {"id": j["id"]},
+        )
+    with engine.begin() as conn:
+        reaped = q.reap(conn, timeout_s=90)
+    assert reaped[0]["status"] == "dead"
+    assert reaped[0]["payload"]["chunk_index"] == 0
+
+    fail_dead_chunk_jobs(engine, reaped)
+
+    with Session(engine) as s:
+        sql = text("select status, error from video_chunks where video_id = :v")
+        row = s.execute(sql, {"v": video_id}).one()
+        assert row.status == ChunkStatus.FAILED
+        assert "lease expired" in row.error
+        assert s.get(Video, video_id).status == VideoStatus.FAILED
+        assert s.execute(text("select count(*) from jobs where type = 'build_timeline'")).scalar() == 0
