@@ -101,5 +101,13 @@ def eval_real_auto_review():
     auto_review()
 
 
+@eval_app.command("real-upload")
+def eval_real_upload():
+    """Upload eval/real/sources.yaml videos into the running library for indexing."""
+    from scenepeek.eval.upload_real import upload_all
+
+    upload_all()
+
+
 if __name__ == "__main__":
     app()
