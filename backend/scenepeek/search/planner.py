@@ -200,10 +200,10 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
         weights=w,
         cues=cues,
     )
-    if s.ollama_enabled:
-        from scenepeek.ml.llm import decompose
+    from scenepeek.ml import llm as llm_mod
 
-        llm = decompose(query)
+    if llm_mod.enabled():
+        llm = llm_mod.decompose(query)
         if llm:
             p.speech_q = llm.get("speech") or p.speech_q
             p.visual_q = llm.get("visual") or p.visual_q

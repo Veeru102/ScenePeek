@@ -15,6 +15,39 @@ Transcript excerpt: {excerpt}
 Answer with only the title."""
 
 
+_available: bool | None = None
+
+
+def is_available() -> bool:
+    """One cheap health ping per process: is an Ollama server answering, and is the model pulled?"""
+    global _available
+    if _available is not None:
+        return _available
+    s = get_settings()
+    try:
+        r = httpx.get(f"{s.ollama_url}/api/tags", timeout=1.0)
+        r.raise_for_status()
+        names = {m.get("name", "") for m in r.json().get("models", [])}
+        want = s.ollama_model
+        _available = any(n == want or n.split(":")[0] == want.split(":")[0] for n in names)
+    except Exception:
+        _available = False
+    return _available
+
+
+def enabled() -> bool:
+    """LLM features run when explicitly enabled, or when `ollama_auto` finds a live server."""
+    s = get_settings()
+    if s.ollama_enabled:
+        return True
+    return bool(s.ollama_auto and is_available())
+
+
+def reset_cache() -> None:
+    global _available
+    _available = None
+
+
 def _chat(prompt: str, json_mode: bool = False, timeout: float = 8.0) -> str | None:
     s = get_settings()
     try:

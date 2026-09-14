@@ -57,7 +57,8 @@ class Settings(BaseSettings):
     caption_in_rerank_passage: bool = True
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:3b"
-    ollama_enabled: bool = False
+    ollama_enabled: bool = False  # force LLM query decomposition / topic titles on
+    ollama_auto: bool = True  # ...or use them automatically when a local Ollama server is running
 
     # Search
     search_candidates: int = 200

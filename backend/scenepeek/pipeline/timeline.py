@@ -5,7 +5,6 @@ from dataclasses import dataclass
 import numpy as np
 from sqlalchemy import delete, select
 
-from scenepeek.core.config import get_settings
 from scenepeek.jobs.registry import JobContext
 from scenepeek.ml import keyphrases, text_embed
 from scenepeek.models import Frame, Segment, Topic
@@ -120,7 +119,6 @@ def _box_h(box: list) -> float:
 
 
 def build_timeline(ctx: JobContext, payload: dict) -> None:
-    settings = get_settings()
     video_id = payload["video_id"]
     with ctx.session() as s:
         segs = list(
@@ -156,7 +154,9 @@ def build_timeline(ctx: JobContext, payload: dict) -> None:
         forced=heading_cuts(headings),
     )
     topics = []
-    use_llm = settings.ollama_enabled
+    from scenepeek.ml import llm as llm_mod
+
+    use_llm = llm_mod.enabled()
     for i, sp in enumerate(spans):
         body = " ".join(texts[sp.start_i : sp.end_i])
         screen = " ".join(dict.fromkeys(" ".join(ocrs[sp.start_i : sp.end_i]).split("\n")))
