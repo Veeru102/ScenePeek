@@ -76,3 +76,34 @@ def test_suppress_drops_neighbours_and_caps_per_video():
 def test_highlight_escapes_and_marks():
     out = highlight("B+ trees <are> balanced", ["b+", "balanced"])
     assert "<mark>B+</mark>" in out and "&lt;are&gt;" in out and "<mark>balanced</mark>" in out
+
+
+def _fused(fused: float, visual: float | None = None):
+    from scenepeek.search.fusion import Fused
+
+    f = Fused(uuid.uuid4(), fused)
+    if visual is not None:
+        f.signals["visual"] = visual
+    return f
+
+
+def _plan_with(visual_weight: float):
+    from scenepeek.search.planner import QueryPlan
+
+    return QueryPlan(raw="q", speech_q="q", visual_q="q", ocr_q="q", weights={"visual": visual_weight})
+
+
+def test_final_scores_visual_term_respects_weight():
+    from scenepeek.search.service import _final_scores
+
+    a = _fused(1.0)  # best fused score, no visual signal
+    b = _fused(0.9, visual=0.99)  # slightly worse fused, strong visual signal
+    c = _fused(0.5, visual=0.1)  # gives the visual min-max some spread
+
+    # text-only ablation: visual weight 0 -> the visual signal must not be able to reorder a and b
+    zero = _final_scores([a, b, c], {}, _plan_with(0.0), use_rerank=False, top_k=10)
+    assert zero[a.segment_id] > zero[b.segment_id]
+
+    # default weights: the visual term is allowed to lift b over a
+    full = _final_scores([a, b, c], {}, _plan_with(1.0), use_rerank=False, top_k=10)
+    assert full[b.segment_id] > full[a.segment_id]

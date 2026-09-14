@@ -54,10 +54,16 @@ async def _own(fn, *args):
         return await fn(cs, *args)
 
 
-def _encode(p: QueryPlan) -> tuple[np.ndarray, np.ndarray]:
+def _encode(p: QueryPlan, need_text: bool, need_visual: bool) -> tuple[np.ndarray | None, np.ndarray | None]:
     from scenepeek.ml import siglip, text_embed
 
-    return text_embed.embed_query(p.speech_q), siglip.embed_text(p.visual_q)
+    q_text = text_embed.embed_query(p.speech_q) if need_text else None
+    q_vis = siglip.embed_text(p.visual_q) if need_visual else None
+    return q_text, q_vis
+
+
+async def _empty():
+    return []
 
 
 async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None) -> SearchResult:
@@ -70,19 +76,22 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
     p = plan(query, opts.weights)
     timings["plan"] = (time.perf_counter() - t0) * 1000
 
+    # a lane with weight 0 is skipped entirely: no encode, no query, no signal leaking into rerank
+    on = {m: p.weights.get(m, 0.0) > 0 for m in ("text", "visual", "lexical", "ocr")}
+
     t0 = time.perf_counter()
-    q_text, q_vis = await asyncio.to_thread(_encode, p)
+    q_text, q_vis = await asyncio.to_thread(_encode, p, on["text"], on["visual"])
     timings["encode"] = (time.perf_counter() - t0) * 1000
 
     k = opts.candidates or settings.search_candidates
     vids = opts.video_ids
     t0 = time.perf_counter()
-    # each lane gets its own session so the four queries truly run in parallel
+    # each lane gets its own session so the queries truly run in parallel
     text_c, vis_c, lex_c, ocr_c = await asyncio.gather(
-        _own(cand.by_text_vector, q_text, k, vids),
-        _own(cand.by_visual_vector, q_vis, k, vids),
-        _own(cand.by_lexical, p.lexical_terms, p.exact_phrases, k, vids),
-        _own(cand.by_ocr, p.ocr_q, p.lexical_terms, p.exact_phrases, k, vids),
+        _own(cand.by_text_vector, q_text, k, vids) if on["text"] else _empty(),
+        _own(cand.by_visual_vector, q_vis, k, vids) if on["visual"] else _empty(),
+        _own(cand.by_lexical, p.lexical_terms, p.exact_phrases, k, vids) if on["lexical"] else _empty(),
+        _own(cand.by_ocr, p.ocr_q, p.lexical_terms, p.exact_phrases, k, vids) if on["ocr"] else _empty(),
     )
     timings["candidates"] = (time.perf_counter() - t0) * 1000
     lists = {"text": text_c, "visual": vis_c, "lexical": lex_c, "ocr": ocr_c}
@@ -144,8 +153,14 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
 
 
 def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, use_rerank: bool, top_k: int) -> dict:
-    """final = 0.5*rerank + 0.3*fused_norm + 0.2*visual_norm (rerank only for the top_k)."""
+    """final = 0.5*rerank + 0.3*fused_norm + 0.2*w_visual*visual_norm (rerank only for the top_k).
+
+    The visual term is scaled by the plan's visual weight so a weight of 0 (e.g. a
+    text-only ablation) contributes nothing; otherwise a "text only" run would still
+    be quietly ranked by SigLIP.
+    """
     max_f = max(f.fused for f in head) or 1.0
+    vis_coef = 0.2 * min(1.0, max(0.0, p.weights.get("visual", 0.0)))
     vis = [f.signals.get("visual") for f in head if "visual" in f.signals]
     v_lo, v_hi = (min(vis), max(vis)) if vis else (0.0, 1.0)
 
@@ -169,7 +184,7 @@ def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, use_rerank: bool,
             f.signals["_rerank"] = float(r)
         ms = (time.perf_counter() - t0) * 1000
     for f in head:
-        base = 0.3 * (f.fused / max_f) + 0.2 * vnorm(f)
+        base = 0.3 * (f.fused / max_f) + vis_coef * vnorm(f)
         if f.segment_id in rr:
             scores[f.segment_id] = 0.5 * rr[f.segment_id] + base
         else:
