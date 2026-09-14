@@ -38,6 +38,7 @@ class VideoChunk(Base):
     transcribed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     embedded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     ocr_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    captioned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = created_at_col()
 

@@ -56,12 +56,21 @@ async def _own(fn, *args):
         return await fn(cs, *args)
 
 
-def _encode(p: QueryPlan, need_text: bool, need_visual: bool) -> tuple[np.ndarray | None, np.ndarray | None]:
+def _encode(p: QueryPlan, on: dict[str, bool]) -> dict[str, np.ndarray]:
     from scenepeek.ml import siglip, text_embed
 
-    q_text = text_embed.embed_query(p.speech_q) if need_text else None
-    q_vis = siglip.embed_text(p.visual_q) if need_visual else None
-    return q_text, q_vis
+    vecs: dict[str, np.ndarray] = {}
+    if on["text"]:
+        vecs["text"] = text_embed.embed_query(p.speech_q)
+    if on["visual"]:
+        vecs["visual"] = siglip.embed_text(p.visual_q)
+    if on["caption"]:
+        # captions are indexed with the text model, so the caption query uses it too
+        if p.visual_q == p.speech_q and "text" in vecs:
+            vecs["caption"] = vecs["text"]
+        else:
+            vecs["caption"] = text_embed.embed_query(p.visual_q)
+    return vecs
 
 
 async def _empty():
@@ -79,24 +88,25 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
     timings["plan"] = (time.perf_counter() - t0) * 1000
 
     # a lane with weight 0 is skipped entirely: no encode, no query, no signal leaking into rerank
-    on = {m: p.weights.get(m, 0.0) > 0 for m in ("text", "visual", "lexical", "ocr")}
+    on = {m: p.weights.get(m, 0.0) > 0 for m in ("text", "visual", "lexical", "ocr", "caption")}
 
     t0 = time.perf_counter()
-    q_text, q_vis = await asyncio.to_thread(_encode, p, on["text"], on["visual"])
+    qv = await asyncio.to_thread(_encode, p, on)
     timings["encode"] = (time.perf_counter() - t0) * 1000
 
     k = opts.candidates or settings.search_candidates
     vids = opts.video_ids
     t0 = time.perf_counter()
     # each lane gets its own session so the queries truly run in parallel
-    text_c, vis_c, lex_c, ocr_c = await asyncio.gather(
-        _own(cand.by_text_vector, q_text, k, vids) if on["text"] else _empty(),
-        _own(cand.by_visual_vector, q_vis, k, vids) if on["visual"] else _empty(),
+    text_c, vis_c, lex_c, ocr_c, cap_c = await asyncio.gather(
+        _own(cand.by_text_vector, qv["text"], k, vids) if on["text"] else _empty(),
+        _own(cand.by_visual_vector, qv["visual"], k, vids) if on["visual"] else _empty(),
         _own(cand.by_lexical, p.lexical_terms, p.exact_phrases, k, vids) if on["lexical"] else _empty(),
         _own(cand.by_ocr, p.ocr_q, p.lexical_terms, p.exact_phrases, k, vids) if on["ocr"] else _empty(),
+        _own(cand.by_caption, qv["caption"], k, vids) if on["caption"] else _empty(),
     )
     timings["candidates"] = (time.perf_counter() - t0) * 1000
-    lists = {"text": text_c, "visual": vis_c, "lexical": lex_c, "ocr": ocr_c}
+    lists = {"text": text_c, "visual": vis_c, "lexical": lex_c, "ocr": ocr_c, "caption": cap_c}
 
     t0 = time.perf_counter()
     fused = fuse(lists, p.weights, opts.fusion or settings.fusion_method, settings.rrf_k)
@@ -218,6 +228,8 @@ def _passage(seg: Segment) -> str:
     t = seg.text or ""
     if seg.ocr_text:
         t += "\n[on screen] " + seg.ocr_text.replace("\n", " ")
+    if seg.caption_text and get_settings().caption_in_rerank_passage:
+        t += "\n[visual] " + seg.caption_text
     return t[:1500]
 
 

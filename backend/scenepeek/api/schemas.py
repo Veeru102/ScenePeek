@@ -72,6 +72,7 @@ class SearchWeights(BaseModel):
     lexical: float | None = None
     visual: float | None = None
     ocr: float | None = None
+    caption: float | None = None
 
 
 class SearchRequest(BaseModel):

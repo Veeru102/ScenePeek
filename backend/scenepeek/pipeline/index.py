@@ -15,8 +15,8 @@ from scenepeek.core.logging import get_logger
 from scenepeek.core.metrics import INDEXED_VIDEO_SECONDS, TIME_TO_FIRST_SEARCHABLE, VIDEO_INDEX_WALL
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
+from scenepeek.ml import captioner, siglip, text_embed, whisper
 from scenepeek.ml import ocr as ocr_mod
-from scenepeek.ml import siglip, text_embed, whisper
 from scenepeek.ml.whisper import UtteranceOut, Word
 from scenepeek.models import Frame, Segment, Utterance, Video, VideoChunk
 from scenepeek.models.chunk import ChunkStatus
@@ -148,6 +148,28 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
         paths.append(p)
         images.append(Image.open(p).convert("RGB"))
     vis_vecs = siglip.embed_images(images) if images else []
+
+    # 3b. captions: one per distinct keyframe, merged per segment, embedded with bge
+    frame_caps: list[str] = [""] * len(flat)
+    caption_texts = [""] * len(drafts)
+    cap_vecs = None
+    if settings.captions_enabled and flat:
+        _set_stage(ctx, chunk_id, "caption")
+        uniq: dict[str, int] = {}  # phash -> position of the first image with that hash
+        todo = []
+        for k, (_, f) in enumerate(flat):
+            if f.phash not in uniq:
+                uniq[f.phash] = len(todo)
+                todo.append(images[k])
+        caps = captioner.caption_images(todo)
+        for k, (_, f) in enumerate(flat):
+            frame_caps[k] = caps[uniq[f.phash]]
+        for si in range(len(drafts)):
+            caption_texts[si] = captioner.merge_captions(
+                [frame_caps[k] for k, (sj, _) in enumerate(flat) if sj == si]
+            )
+        if any(caption_texts):
+            cap_vecs = text_embed.embed_passages([t if t else " " for t in caption_texts])
     for im in images:
         im.close()
 
@@ -197,6 +219,10 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
                 ocr_text=ocr_text,
                 text_embedding=text_vecs[si].tolist() if has_text else None,
                 embedding_model=settings.text_embed_model if has_text else None,
+                caption_text=caption_texts[si],
+                caption_embedding=cap_vecs[si].tolist()
+                if (cap_vecs is not None and caption_texts[si])
+                else None,
                 keyframe_key=seg_frames[si][0].key if seg_frames[si] else None,
             )
             s.add(seg)
@@ -211,6 +237,7 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
                     image_key=f.key,
                     visual_embedding=vis_vecs[k].tolist(),
                     ocr_text=frame_ocr[k],
+                    caption=frame_caps[k],
                     ocr_boxes=frame_boxes[k],
                     phash=f.phash,
                 )
@@ -220,6 +247,7 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
         c.status, c.stage, c.error, c.done_at = ChunkStatus.DONE, None, None, now
         c.embedded_at = now
         c.ocr_at = now if settings.ocr_enabled else None
+        c.captioned_at = now if settings.captions_enabled else None
         video = s.get(Video, video_id)
         if video.first_searchable_at is None:
             video.first_searchable_at = now

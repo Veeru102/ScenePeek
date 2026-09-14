@@ -42,6 +42,17 @@ def worker(
     run_worker(queues=queues.split(",") if queues else None, once=once)
 
 
+@app.command("reindex-captions")
+def reindex_captions(
+    video_id: str = typer.Option(None, help="Only this video (default: all)"),
+    force: bool = typer.Option(False, help="Re-caption segments that already have captions"),
+):
+    """Backfill keyframe captions for already-indexed videos without a full reindex."""
+    from scenepeek.pipeline.captions import backfill
+
+    backfill(video_id=video_id, force=force)
+
+
 eval_app = typer.Typer(help="Search quality evaluation")
 app.add_typer(eval_app, name="eval")
 

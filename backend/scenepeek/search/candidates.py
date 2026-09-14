@@ -36,6 +36,21 @@ async def by_text_vector(s: AsyncSession, q: np.ndarray, k: int, video_ids=None)
     return [Cand(r[0], float(r[1])) for r in rows]
 
 
+async def by_caption(s: AsyncSession, q: np.ndarray, k: int, video_ids=None) -> list[Cand]:
+    """Keyframe captions embedded with the text model: natural-language access to silent scenes."""
+    sql = text(
+        f"""
+        SELECT s.id, 1 - (s.caption_embedding <=> CAST(:q AS vector)) AS score
+        FROM segments s
+        WHERE s.caption_embedding IS NOT NULL {_filter(video_ids, "s")}
+        ORDER BY s.caption_embedding <=> CAST(:q AS vector)
+        LIMIT :k
+        """
+    )
+    rows = await s.execute(sql, {"q": _vec(q), "k": k, "vids": video_ids})
+    return [Cand(r[0], float(r[1])) for r in rows]
+
+
 async def by_visual_vector(s: AsyncSession, q: np.ndarray, k: int, video_ids=None) -> list[Cand]:
     """Nearest frames, max-pooled to their segment."""
     sql = text(

@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     visual_embed_dim: int = 768
     reranker_model: str = "BAAI/bge-reranker-base"
     ocr_enabled: bool = True
+    captions_enabled: bool = True
+    caption_model: str = "Salesforce/blip-image-captioning-base"
+    caption_max_tokens: int = 30
+    caption_in_rerank_passage: bool = True
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:3b"
     ollama_enabled: bool = False
@@ -63,6 +67,7 @@ class Settings(BaseSettings):
     weight_lexical: float = 0.8
     weight_visual: float = 0.8
     weight_ocr: float = 0.6
+    weight_caption: float = 0.7
     dedup_window_s: float = 12.0
     max_hits_per_video: int = 3
 

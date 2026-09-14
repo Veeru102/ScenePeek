@@ -32,6 +32,12 @@ class Segment(Base):
             postgresql_using="hnsw",
             postgresql_ops={"text_embedding": "vector_cosine_ops"},
         ),
+        Index(
+            "ix_segments_caption_embedding",
+            "caption_embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"caption_embedding": "vector_cosine_ops"},
+        ),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -48,6 +54,8 @@ class Segment(Base):
     context_text: Mapped[str] = mapped_column(Text, server_default="", nullable=False)
     ocr_text: Mapped[str] = mapped_column(Text, server_default="", nullable=False)
     text_embedding = mapped_column(Vector(_TEXT_DIM))
+    caption_text: Mapped[str] = mapped_column(Text, server_default="", nullable=False)
+    caption_embedding = mapped_column(Vector(_TEXT_DIM))  # bge embedding of the keyframe captions
     embedding_model: Mapped[str | None] = mapped_column(String(128))
     keyframe_key: Mapped[str | None] = mapped_column(String(1024))
     text_tsv = mapped_column(TSVECTOR, Computed("to_tsvector('english', text)", persisted=True))

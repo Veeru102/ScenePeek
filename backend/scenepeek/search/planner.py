@@ -137,6 +137,7 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
         "lexical": s.weight_lexical,
         "visual": s.weight_visual,
         "ocr": s.weight_ocr,
+        "caption": s.weight_caption,
     }
     exact = _QUOTED.findall(query)
     cleaned = _clean(query)
@@ -163,15 +164,19 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
         cues.append("exact")
 
     w = dict(base)
+    # captions describe what is on screen, so they follow the visual lane's cue multipliers
     if "split" in cues:
         w["visual"] *= 1.4
+        w["caption"] *= 1.4
         w["ocr"] *= 1.3
     elif "visual" in cues and "speech" not in cues:
         w["visual"] *= 1.5
+        w["caption"] *= 1.5
     if "speech" in cues and "visual" not in cues:
         w["text"] *= 1.2
         w["lexical"] *= 1.1
         w["visual"] *= 0.6
+        w["caption"] *= 0.6
     if "ocr" in cues:
         w["ocr"] *= 1.6
     if exact:

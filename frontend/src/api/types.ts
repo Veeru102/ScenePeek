@@ -56,6 +56,7 @@ export interface SearchWeights {
   lexical?: number
   visual?: number
   ocr?: number
+  caption?: number
 }
 
 export interface SearchRequest {
