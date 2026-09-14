@@ -1,0 +1,59 @@
+# Real-world eval videos, collected manually (no web lookups — titles/categories are inferred
+# from local filenames only; verify license text yourself before relying on it for anything
+# beyond local testing).
+videos:
+  - key: bigbuckbunny
+    title: "Big Buck Bunny"
+    file: eval/videos/real/Big Buck Bunny.mp4
+    category: animation
+    license: "unverified — Blender Foundation open movie, verify before reuse"
+  - key: spring
+    title: "Spring"
+    file: eval/videos/real/Spring - Blender Open Movie.mp4
+    category: animation
+    license: "unverified — Blender Foundation open movie, verify before reuse"
+  - key: tears_of_steel
+    title: "Tears of Steel"
+    file: eval/videos/real/Tears of Steel - Blender VFX Open Movie (1).mp4
+    category: animation
+    license: "unverified — Blender Foundation open movie, verify before reuse"
+  - key: mit_asymptotic
+    title: "Lecture 2: Asymptotic Notation"
+    file: eval/videos/real/Lecture-2-Asymptotic-Notation.mp4
+    category: lecture
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: mit_streams
+    title: "Lecture 6: Streams"
+    file: eval/videos/real/Lecture6-Streams.mp4
+    category: lecture
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: mit_redblack
+    title: "Lecture 10: Red-Black Trees"
+    file: eval/videos/real/Lecture-10-Red-black-Trees.mp4
+    category: lecture
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: mit_amortized
+    title: "Lecture 13: Amortized Algorithms"
+    file: eval/videos/real/Lecture-13-Amortized-Algorithms.mp4
+    category: lecture
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: mit_neural_nets
+    title: "Lecture 26: Structure of Neural Nets"
+    file: eval/videos/real/Lecture26-Structure-of-Neural-Nets.mp4
+    category: lecture
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: mit_imagenet_cnn
+    title: "Lecture 32: ImageNet and CNNs"
+    file: eval/videos/real/Lecture32-ImageNet-CNN.mp4
+    category: lecture
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: underactuated_robotics
+    title: "MIT Underactuated Robotics"
+    file: eval/videos/real/MIT-Underactuated-Robotics.mp4
+    category: robotics
+    license: "unverified — MIT OpenCourseWare style lecture, verify before reuse"
+  - key: tool_grab_only
+    title: "Tool Grab Only"
+    file: eval/videos/real/ToolGrabOnly.mp4
+    category: robotics
+    license: "unverified — robotics demo clip, verify before reuse"

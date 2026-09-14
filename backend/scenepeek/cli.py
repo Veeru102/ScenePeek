@@ -63,5 +63,24 @@ def eval_compare(reports: list[str]):
     compare_reports(reports)
 
 
+@eval_app.command("real-scan")
+def eval_real_scan(
+    videos: str = typer.Option(None, help="Comma-separated video keys to (re)scan; default: all unscanned"),
+    force: bool = typer.Option(False, help="Regenerate candidates for the given videos, dropping old ones"),
+):
+    """Analyze eval/real/sources.yaml videos and propose candidate queries."""
+    from scenepeek.eval.real import scan_videos
+
+    scan_videos(video_keys=videos.split(",") if videos else None, force=force)
+
+
+@eval_app.command("real-review")
+def eval_real_review(type: str = typer.Option(None, "--type", help="Only review this candidate type")):
+    """Interactively approve/reject/edit candidates into eval/real/dataset.yaml."""
+    from scenepeek.eval.review import review
+
+    review(type_filter=type)
+
+
 if __name__ == "__main__":
     app()
