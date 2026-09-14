@@ -123,16 +123,21 @@ Every dataset goes through one abstraction (`scenepeek/datasets/`: videos, queri
 <!-- eval-tables:begin -->
 **Hand-written queries (41, the headline number)**
 
-| configuration | MRR | R@1 | R@5 | R@10 | ΔMRR vs default [95% CI] |
+| configuration | MRR | R@1 | R@5 | R@10 | Δmrr vs default [95% CI] |
 |---|---|---|---|---|---|
-| **default** (weighted fusion of text + keyword + visual + OCR, reranked) | **0.506** | 0.415 | 0.634 | 0.658 | — |
-| dense text only (no fusion, no rerank) | 0.305 | 0.268 | 0.342 | 0.342 | -0.201 [-0.321, -0.087] **\*** |
-| − cross-encoder rerank | 0.492 | 0.390 | 0.634 | 0.658 | -0.013 [-0.065, +0.043] |
-| − keyword (FTS) lane | 0.495 | 0.415 | 0.610 | 0.634 | -0.010 [-0.061, +0.039] |
-| − visual (SigLIP) lane | 0.323 | 0.268 | 0.390 | 0.390 | -0.182 [-0.310, -0.070] **\*** |
-| − OCR lane | 0.527 | 0.439 | 0.658 | 0.683 | +0.022 [-0.020, +0.063] |
-| RRF fusion instead of weighted | 0.485 | 0.415 | 0.585 | 0.585 | -0.021 [-0.060, +0.025] |
-| + BLIP caption lane (w=0.7) | 0.478 | 0.390 | 0.585 | 0.610 | -0.028 [-0.150, +0.070] |
+| **default** (heuristic routing, weighted fusion of text + keyword + visual + OCR, reranked) | **0.506** | 0.415 | 0.634 | 0.658 | — |
+| dense text only (no fusion, no rerank) | 0.305 | 0.268 | 0.342 | 0.342 | -0.201 [-0.317, -0.090] **\*** |
+| − cross-encoder rerank | 0.492 | 0.390 | 0.634 | 0.658 | -0.013 [-0.067, +0.039] |
+| − keyword (FTS) lane | 0.495 | 0.415 | 0.610 | 0.634 | -0.010 [-0.061, +0.038] |
+| − visual (SigLIP) lane | 0.323 | 0.268 | 0.390 | 0.390 | -0.182 [-0.304, -0.072] **\*** |
+| − OCR lane | 0.527 | 0.439 | 0.658 | 0.683 | +0.022 [-0.017, +0.064] |
+| RRF fusion instead of weighted | 0.485 | 0.415 | 0.585 | 0.585 | -0.021 [-0.065, +0.022] |
+| + BLIP caption lane (w=0.7) | 0.478 | 0.390 | 0.585 | 0.610 | -0.028 [-0.136, +0.074] |
+| + temporal lane (X-CLIP, w=0.8) | 0.486 | 0.415 | 0.585 | 0.585 | -0.020 [-0.116, +0.074] |
+| temporal lane instead of SigLIP frames | 0.464 | 0.415 | 0.537 | 0.537 | -0.041 [-0.159, +0.071] |
+| + temporal lane, window spans | 0.506 | 0.415 | 0.634 | 0.634 | +0.001 [-0.081, +0.091] |
+| fixed weights (no cue heuristics) | 0.503 | 0.415 | 0.634 | 0.634 | -0.003 [-0.008, +0.000] |
+| learned router | 0.514 | 0.439 | 0.634 | 0.634 | +0.008 [-0.015, +0.039] |
 
 | modality | n | MRR | R@5 | strongest single lane (hit@10 alone) |
 |---|---|---|---|---|
@@ -148,20 +153,21 @@ Every dataset goes through one abstraction (`scenepeek/datasets/`: videos, queri
 | text | 0.41 | 0 |
 | ocr | 0.29 | 0 |
 | caption | 0.00 | 0 |
+| temporal | 0.00 | 0 |
 | **any lane (ceiling)** | **0.80** | fused system: 0.66 |
 
 **Auto-generated queries (119)**
 
-| configuration | MRR | R@1 | R@5 | R@10 | ΔMRR vs default [95% CI] |
+| configuration | MRR | R@1 | R@5 | R@10 | Δmrr vs default [95% CI] |
 |---|---|---|---|---|---|
-| **default** (weighted fusion of text + keyword + visual + OCR, reranked) | **0.626** | 0.538 | 0.723 | 0.756 | — |
-| dense text only (no fusion, no rerank) | 0.596 | 0.496 | 0.740 | 0.748 | -0.030 [-0.106, +0.043] |
-| − cross-encoder rerank | 0.417 | 0.261 | 0.622 | 0.689 | -0.209 [-0.265, -0.146] **\*** |
-| − keyword (FTS) lane | 0.514 | 0.403 | 0.647 | 0.706 | -0.112 [-0.159, -0.067] **\*** |
-| − visual (SigLIP) lane | 0.723 | 0.630 | 0.840 | 0.857 | +0.097 [+0.041, +0.151] **\*** |
-| − OCR lane | 0.612 | 0.521 | 0.723 | 0.748 | -0.014 [-0.043, +0.012] |
-| RRF fusion instead of weighted | 0.614 | 0.504 | 0.748 | 0.773 | -0.012 [-0.051, +0.022] |
-| + BLIP caption lane (w=0.7) | 0.644 | 0.563 | 0.740 | 0.773 | +0.018 [-0.013, +0.053] |
+| **default** (heuristic routing, weighted fusion of text + keyword + visual + OCR, reranked) | **0.626** | 0.538 | 0.723 | 0.756 | — |
+| dense text only (no fusion, no rerank) | 0.596 | 0.496 | 0.740 | 0.748 | -0.030 [-0.109, +0.050] |
+| − cross-encoder rerank | 0.417 | 0.261 | 0.622 | 0.689 | -0.209 [-0.274, -0.149] **\*** |
+| − keyword (FTS) lane | 0.514 | 0.403 | 0.647 | 0.706 | -0.112 [-0.157, -0.068] **\*** |
+| − visual (SigLIP) lane | 0.723 | 0.630 | 0.840 | 0.857 | +0.097 [+0.041, +0.153] **\*** |
+| − OCR lane | 0.612 | 0.521 | 0.723 | 0.748 | -0.014 [-0.044, +0.010] |
+| RRF fusion instead of weighted | 0.614 | 0.504 | 0.748 | 0.773 | -0.012 [-0.048, +0.022] |
+| + BLIP caption lane (w=0.7) | 0.644 | 0.563 | 0.740 | 0.773 | +0.018 [-0.019, +0.055] |
 
 | modality | n | MRR | R@5 | strongest single lane (hit@10 alone) |
 |---|---|---|---|---|
@@ -178,6 +184,7 @@ Every dataset goes through one abstraction (`scenepeek/datasets/`: videos, queri
 | ocr | 0.44 | 3 |
 | visual | 0.26 | 3 |
 | caption | 0.00 | 0 |
+| temporal | 0.00 | 0 |
 | **any lane (ceiling)** | **0.94** | fused system: 0.76 |
 <!-- eval-tables:end -->
 
@@ -215,6 +222,16 @@ Run the same script on a free Kaggle/Colab T4 to fill in the GPU column; `WHISPE
 | 2 | **7.6** | 15, flat |
 
 Two workers out-index three: CTranslate2 already multithreads inside each process, so a third worker only adds contention. Horizontal scaling is for more machines (or GPU workers via `--queues ml`), not for oversubscribing one CPU.
+
+**Workload isolation** ([`docs/benchmarks/isolation_m3pro.json`](docs/benchmarks/isolation_m3pro.json), `scripts/bench_isolation.sh`) — a 2-minute upload arrives while ~1 400 offline backfill jobs (temporal re-encoding of the whole library, priority −200) are queued, 2 workers:
+
+| layout | time to first searchable | time to ready |
+|---|---|---|
+| 2 shared workers, priority order only | 24.5 s | 24.6 s |
+| 2 shared workers + `OFFLINE_MAX_RUNNING=1` | 30.1 s | 30.3 s |
+| 1 shared + 1 reserved (`--min-priority 0`) | 25.2 s | 26.7 s |
+
+With ~1 s offline jobs, strict priority ordering alone already keeps the interactive upload at the unloaded ~20–25 s; the budget and reserved-worker knobs are for offline jobs that hold a worker for minutes (benchmark ASR of a 150 s clip), which is what the QVHighlights import is — the table gets re-measured under that load.
 
 | metric | value |
 |---|---|
