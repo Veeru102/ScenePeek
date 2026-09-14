@@ -14,7 +14,7 @@ from scenepeek.core.config import get_settings
 from scenepeek.core.db import get_sessionmaker
 from scenepeek.core.logging import get_logger
 from scenepeek.eval.dataset import Dataset, load_dataset
-from scenepeek.eval.metrics import Range, hit_at, mrr, ndcg_at, recall_at, relevance
+from scenepeek.eval.metrics import Range, hit_at, lane_attribution, mrr, ndcg_at, recall_at, relevance
 from scenepeek.models import Video
 from scenepeek.search.service import SearchOptions, search
 
@@ -23,13 +23,26 @@ KS = (1, 5, 10)
 
 
 def apply_overrides(overrides: dict) -> dict:
-    """Mutate the settings singleton for this process; returns the previous values."""
+    """Mutate the settings singleton for this process; returns the previous values.
+
+    Values are coerced to the type of the existing setting so a config typo (e.g. "0.5" or
+    `weight_ocr: null`) fails loudly instead of silently changing what the run measures."""
     s = get_settings()
     prev = {}
     for k, v in (overrides or {}).items():
         if not hasattr(s, k):
             raise KeyError(f"unknown setting {k!r}")
-        prev[k] = getattr(s, k)
+        cur = getattr(s, k)
+        if v is None:
+            raise ValueError(f"override {k!r} must not be null")
+        if cur is not None and not isinstance(v, type(cur)):
+            if isinstance(cur, bool) or isinstance(v, bool):
+                raise TypeError(f"override {k!r}: expected {type(cur).__name__}, got {type(v).__name__}")
+            try:
+                v = type(cur)(v)
+            except (TypeError, ValueError) as e:
+                raise TypeError(f"override {k!r}: expected {type(cur).__name__}, got {v!r}") from e
+        prev[k] = cur
         setattr(s, k, v)
     return prev
 
@@ -66,6 +79,7 @@ async def _run(ds: Dataset, limit: int, tolerance_s: float, restrict: bool) -> d
             opts = SearchOptions(
                 limit=limit,
                 video_ids=[__import__("uuid").UUID(v) for v in vids.values()] if restrict else None,
+                debug=True,
             )
             t0 = time.perf_counter()
             res = await search(s, q.text, opts)
@@ -75,12 +89,23 @@ async def _run(ds: Dataset, limit: int, tolerance_s: float, restrict: bool) -> d
             ]
             rels = relevance(hits, relevant, tolerance_s)
             n = len(relevant)
+            lane_ranges = {
+                lane: [Range(id_to_key.get(str(h.video_id), str(h.video_id)), h.start_s, h.end_s) for h in hs]
+                for lane, hs in (res.lanes or {}).items()
+            }
+            attribution = lane_attribution(lane_ranges, relevant, tolerance_s, k=10)
             row = {
                 "id": q.id,
                 "text": q.text,
                 "modality": q.modality,
+                "author": q.author,
+                "notes": q.notes,
                 "n_relevant": n,
                 "latency_ms": round(ms, 1),
+                "cues": res.plan.cues,
+                "lanes": attribution["lanes"],
+                "lane_ceiling": attribution["ceiling"],
+                "unique_lane": attribution["unique"],
                 "mrr": mrr(rels),
                 "first_hit_rank": (rels.index(1) + 1) if 1 in rels else None,
                 **{f"recall@{k}": recall_at(rels, n, k) for k in KS},
@@ -93,6 +118,10 @@ async def _run(ds: Dataset, limit: int, tolerance_s: float, restrict: bool) -> d
     return {"queries": per_query, "videos": vids}
 
 
+def _lane_hit(row: dict, lane: str) -> float:
+    return (row.get("lanes") or {}).get(lane, {}).get("hit@10", 0.0)
+
+
 def _aggregate(rows: list[dict]) -> dict:
     if not rows:
         return {}
@@ -102,6 +131,18 @@ def _aggregate(rows: list[dict]) -> dict:
     agg["latency_p50_ms"] = round(lat[len(lat) // 2], 1)
     agg["latency_p95_ms"] = round(lat[min(len(lat) - 1, int(len(lat) * 0.95))], 1)
     agg["n"] = len(rows)
+    lane_names = sorted({lane for r in rows for lane in (r.get("lanes") or {})})
+    if lane_names:
+        agg["lanes"] = {
+            lane: {
+                "hit@10": round(
+                    statistics.mean(r["lanes"].get(lane, {}).get("hit@10", 0.0) for r in rows), 4
+                ),
+                "unique": sum(1 for r in rows if r.get("unique_lane") == lane),
+            }
+            for lane in lane_names
+        }
+        agg["lane_ceiling"] = round(statistics.mean(1.0 if r.get("lane_ceiling") else 0.0 for r in rows), 4)
     return agg
 
 

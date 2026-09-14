@@ -1,0 +1,7 @@
+name: real_human_no_rerank
+dataset: ../real/human.yaml
+limit: 10
+tolerance_s: 3
+restrict_to_dataset: true
+overrides:
+  rerank_enabled: false

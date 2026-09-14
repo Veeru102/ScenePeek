@@ -55,3 +55,21 @@ def ndcg_at(rels: list[int], n_relevant: int, k: int) -> float:
     dcg = sum(r / math.log2(i + 1) for i, r in enumerate(rels[:k], start=1))
     ideal = sum(1.0 / math.log2(i + 1) for i in range(1, min(n_relevant, k) + 1))
     return dcg / ideal if ideal else 0.0
+
+
+def lane_attribution(
+    lanes: dict[str, list[Range]], relevant: list[Range], tolerance_s: float = 3.0, k: int = 10
+) -> dict:
+    """Which candidate lanes surfaced a relevant span, and how deep. Explains *why* fusion helps:
+    a query found only by the OCR lane is evidence the lane earns its keep."""
+    per_lane: dict[str, dict] = {}
+    for lane, hits in lanes.items():
+        rels = relevance(hits[:k], relevant, tolerance_s)
+        first = next((i for i, r in enumerate(rels, start=1) if r), None)
+        per_lane[lane] = {"first_rank": first, f"hit@{k}": 1.0 if first else 0.0}
+    found = [lane for lane, v in per_lane.items() if v["first_rank"]]
+    return {
+        "lanes": per_lane,
+        "ceiling": bool(found),  # some lane had it in its top-k, so fusion *could* have surfaced it
+        "unique": found[0] if len(found) == 1 else None,
+    }

@@ -29,6 +29,7 @@ class SearchOptions:
     rerank: bool | None = None
     fusion: str | None = None
     candidates: int | None = None
+    debug: bool = False  # also return each lane's ranked list (used by the eval harness)
 
 
 @dataclass
@@ -47,6 +48,7 @@ class SearchResult:
     hits: list[ResultHit]
     timings_ms: dict[str, float]
     total_candidates: int
+    lanes: dict[str, list[Hit]] | None = None  # per-lane ranked candidates, only when debug=True
 
 
 async def _own(fn, *args):
@@ -149,7 +151,26 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         signals = {m.lstrip("_"): round(v, 4) for m, v in f.signals.items()}
         signals["fused"] = round(f.fused, 4)
         out.append(ResultHit(seg, videos[seg.video_id], h.start_s, h.end_s, round(h.score, 4), signals))
-    return SearchResult(p, out, _finish(timings, t_all), total)
+    lanes = await _lane_lists(s, fused, lists.keys()) if opts.debug else None
+    return SearchResult(p, out, _finish(timings, t_all), total, lanes)
+
+
+async def _lane_lists(s: AsyncSession, fused: list, lane_names) -> dict[str, list[Hit]]:
+    """Per-lane ranked Hit lists rebuilt from the ranks fusion already recorded (no lane re-runs)."""
+    ids = [f.segment_id for f in fused]
+    rows = await s.execute(
+        select(Segment.id, Segment.video_id, Segment.start_s, Segment.end_s).where(Segment.id.in_(ids))
+    )
+    span = {r.id: (r.video_id, r.start_s, r.end_s) for r in rows}
+    lanes: dict[str, list[Hit]] = {}
+    for lane in lane_names:
+        ranked = sorted((f for f in fused if lane in f.ranks), key=lambda f: f.ranks[lane])
+        lanes[lane] = [
+            Hit(f.segment_id, *span[f.segment_id], f.signals.get(lane, 0.0))
+            for f in ranked
+            if f.segment_id in span
+        ]
+    return lanes
 
 
 def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, use_rerank: bool, top_k: int) -> dict:

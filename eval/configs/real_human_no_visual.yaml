@@ -1,0 +1,7 @@
+name: real_human_no_visual
+dataset: ../real/human.yaml
+limit: 10
+tolerance_s: 3
+restrict_to_dataset: true
+overrides:
+  weight_visual: 0.0

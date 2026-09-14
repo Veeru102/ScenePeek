@@ -24,6 +24,7 @@ class DatasetQuery:
     relevant: list[Range]
     modality: str = "speech"
     notes: str | None = None
+    author: str | None = None  # "human" for hand-written queries, "auto" for generated ones
 
 
 @dataclass
@@ -51,6 +52,7 @@ def load_dataset(path: str | Path) -> Dataset:
                 relevant=rel,
                 modality=q.get("modality", "speech"),
                 notes=q.get("notes"),
+                author=q.get("author"),
             )
         )
     return ds

@@ -1,0 +1,7 @@
+name: real_human_no_ocr
+dataset: ../real/human.yaml
+limit: 10
+tolerance_s: 3
+restrict_to_dataset: true
+overrides:
+  weight_ocr: 0.0

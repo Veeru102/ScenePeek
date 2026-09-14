@@ -1,0 +1,7 @@
+name: real_no_lexical
+dataset: ../real/dataset.yaml
+limit: 10
+tolerance_s: 3
+restrict_to_dataset: true
+overrides:
+  weight_lexical: 0.0

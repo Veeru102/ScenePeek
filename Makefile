@@ -1,4 +1,4 @@
-.PHONY: up down logs migrate api-dev worker web-dev install test lint eval seed
+.PHONY: up down logs migrate api-dev worker web-dev install test lint eval eval-real seed
 
 N ?= 1
 
@@ -35,6 +35,14 @@ lint:
 
 eval:
 	cd backend && uv run scenepeek eval run -c ../eval/configs/default.yaml
+
+# Real-video ablations: every lane on/off + rerank + fusion method, then a paired-bootstrap comparison.
+REAL_SET ?= real
+REAL_VARIANTS = text_only no_visual no_ocr no_lexical no_rerank weighted
+eval-real:
+	cd backend && uv run scenepeek eval run -c ../eval/configs/$(REAL_SET).yaml
+	cd backend && for v in $(REAL_VARIANTS); do uv run scenepeek eval run -c ../eval/configs/$(REAL_SET)_$$v.yaml; done
+	cd backend && uv run scenepeek eval compare ../eval/reports/$(REAL_SET).json $(foreach v,$(REAL_VARIANTS),../eval/reports/$(REAL_SET)_$(v).json)
 
 observability:
 	docker compose --profile observability up -d prometheus grafana

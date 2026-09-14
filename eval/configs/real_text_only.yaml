@@ -1,0 +1,10 @@
+name: real_text_only
+dataset: ../real/dataset.yaml
+limit: 10
+tolerance_s: 3
+restrict_to_dataset: true
+overrides:
+  rerank_enabled: false
+  weight_visual: 0.0
+  weight_ocr: 0.0
+  weight_lexical: 0.0
