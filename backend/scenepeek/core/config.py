@@ -41,8 +41,9 @@ class Settings(BaseSettings):
 
     # Models
     whisper_model: str = "small.en"
-    whisper_backend: str = "faster_whisper"
-    whisper_compute_type: str = "int8"
+    whisper_backend: str = "faster_whisper"  # faster_whisper | mlx_whisper (Apple, optional extra)
+    whisper_device: str = "auto"  # auto | cpu | cuda  (CTranslate2 has no MPS backend)
+    whisper_compute_type: str = "int8"  # CPU default; auto-promoted to float16 on CUDA
     text_embed_model: str = "BAAI/bge-small-en-v1.5"
     text_embed_dim: int = 384
     visual_embed_model: str = "google/siglip-base-patch16-224"

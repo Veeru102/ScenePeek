@@ -1,0 +1,42 @@
+{
+  "hardware": {
+    "platform": "macOS-14.4-arm64-arm-64bit",
+    "machine": "arm64",
+    "torch_device": "mps",
+    "whisper_device": "cpu",
+    "python": "3.12.5",
+    "torch": "2.14.0"
+  },
+  "stages": {
+    "whisper": {
+      "model": "small.en",
+      "seconds": 6.801568042021245,
+      "realtime_x": 8.821495224235028
+    },
+    "siglip_image": {
+      "model": "google/siglip-base-patch16-224",
+      "seconds": 1.1547997079323977,
+      "ms_per_image": 19.246661798873294
+    },
+    "bge_passages": {
+      "model": "BAAI/bge-small-en-v1.5",
+      "seconds": 0.008898541098460555,
+      "ms_per_text": 0.7415450915383796
+    },
+    "rapidocr": {
+      "model": "rapidocr-onnx",
+      "seconds": 1.2782085831277072,
+      "ms_per_image": 127.82085831277072
+    },
+    "blip_caption": {
+      "model": "Salesforce/blip-image-captioning-base",
+      "seconds": 3.3436126250308007,
+      "ms_per_image": 334.36126250308007
+    },
+    "reranker_top30": {
+      "model": "BAAI/bge-reranker-base",
+      "seconds": 0.03879537503235042,
+      "ms": 38.79537503235042
+    }
+  }
+}

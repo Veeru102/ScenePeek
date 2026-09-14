@@ -22,11 +22,27 @@ class UtteranceOut:
     words: list[Word] = field(default_factory=list)
 
 
+def whisper_device() -> str:
+    """CTranslate2 runs on CPU or CUDA only (no MPS), so this is independent of registry.device()."""
+    s = get_settings()
+    if s.whisper_device != "auto":
+        return s.whisper_device
+    try:
+        import ctranslate2
+
+        return "cuda" if ctranslate2.get_cuda_device_count() > 0 else "cpu"
+    except Exception:
+        return "cpu"
+
+
 def _load_faster_whisper():
     from faster_whisper import WhisperModel
 
     s = get_settings()
-    return WhisperModel(s.whisper_model, device="cpu", compute_type=s.whisper_compute_type)
+    dev = whisper_device()
+    # int8 is the CPU default; on a GPU float16 is both faster and more accurate
+    compute = s.whisper_compute_type if (dev == "cpu" or s.whisper_compute_type != "int8") else "float16"
+    return WhisperModel(s.whisper_model, device=dev, compute_type=compute)
 
 
 def transcribe(audio_path: Path, offset_s: float = 0.0) -> list[UtteranceOut]:
