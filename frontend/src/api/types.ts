@@ -78,6 +78,7 @@ export interface SearchHit {
   text: string
   snippet_html: string
   ocr_text: string
+  caption_text?: string
   keyframe_url: string | null
 }
 

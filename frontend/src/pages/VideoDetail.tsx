@@ -17,7 +17,7 @@ export function VideoDetailPage() {
   const { id } = useParams()
   const [params] = useSearchParams()
   const startAt = params.get('t') ? Number(params.get('t')) : null
-  const { data: video } = useVideo(id)
+  const { data: video, error: videoError } = useVideo(id)
   const processing = video?.status === 'processing' || video?.status === 'uploaded'
   const { data: transcript } = useTranscript(id, true)
   const { data: topics } = useTimeline(id, processing || (video?.status === 'ready' && video.topic_count === 0))
@@ -41,7 +41,15 @@ export function VideoDetailPage() {
     void refetchTranscript()
   }
 
-  if (!video) return <div className="aspect-video max-w-4xl rounded-xl shimmer" />
+  if (videoError)
+    return (
+      <div role="alert" className="max-w-xl space-y-3 rounded-xl border border-err/40 bg-err/10 p-5 text-sm">
+        <div className="font-medium">Couldn't load this video</div>
+        <div className="text-fg-muted">{(videoError as Error).message}</div>
+        <Link to="/" className="inline-flex items-center gap-1 text-fg-muted hover:text-fg"><ArrowLeft size={15} /> Back to library</Link>
+      </div>
+    )
+  if (!video) return <div className="aspect-video max-w-4xl rounded-xl shimmer" aria-busy="true" aria-label="Loading video" />
 
   return (
     <div className="space-y-4">

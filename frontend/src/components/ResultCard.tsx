@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ExternalLink, Play, ScanText } from 'lucide-react'
+import { ExternalLink, HelpCircle, Play, ScanText } from 'lucide-react'
 import type { SearchHit } from '@/api/types'
 import { SignalChips } from '@/components/SignalChips'
+import { WhyPanel } from '@/components/WhyPanel'
 import { cn, fmtTime } from '@/lib/utils'
 
 export function ResultCard({
@@ -18,6 +20,7 @@ export function ResultCard({
   onPlay: (hit: SearchHit) => void
   showVideo?: boolean
 }) {
+  const [why, setWhy] = useState(false)
   return (
     <motion.article
       initial={{ opacity: 0, y: 6 }}
@@ -32,6 +35,7 @@ export function ResultCard({
         onClick={() => onPlay(hit)}
         className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-bg-elev sm:w-48"
         title="Play from this moment"
+        aria-label={`Play ${hit.video.title} from ${fmtTime(hit.start_s)}`}
       >
         {hit.keyframe_url ? (
           <img src={hit.keyframe_url} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -57,7 +61,7 @@ export function ResultCard({
               {hit.video.title}
             </Link>
             <span className="font-mono">{fmtTime(hit.start_s)}–{fmtTime(hit.end_s)}</span>
-            <Link to={`/videos/${hit.video.id}?t=${Math.floor(hit.start_s)}`} className="ml-auto text-fg-dim hover:text-fg" title="Open video">
+            <Link to={`/videos/${hit.video.id}?t=${Math.floor(hit.start_s)}`} className="ml-auto text-fg-dim hover:text-fg" title="Open video" aria-label="Open video page">
               <ExternalLink size={13} />
             </Link>
           </div>
@@ -72,7 +76,18 @@ export function ResultCard({
             <span className="truncate">{hit.ocr_text.replace(/\n/g, ' · ')}</span>
           </p>
         )}
-        <SignalChips signals={hit.signals} />
+        <div className="flex items-center gap-2">
+          <SignalChips signals={hit.signals} />
+          <button
+            onClick={() => setWhy((w) => !w)}
+            className="ml-auto inline-flex items-center gap-1 text-[11px] text-fg-dim hover:text-fg"
+            aria-expanded={why}
+            aria-label="Explain why this result ranked here"
+          >
+            <HelpCircle size={12} /> why?
+          </button>
+        </div>
+        {why && <WhyPanel hit={hit} />}
       </div>
     </motion.article>
   )

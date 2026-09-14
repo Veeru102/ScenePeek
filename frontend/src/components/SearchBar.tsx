@@ -40,6 +40,8 @@ export function SearchBar({
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder={placeholder}
+        aria-label="Search query"
+        data-search-input=""
         className={cn('w-full bg-transparent outline-none placeholder:text-fg-dim', size === 'lg' ? 'h-12 text-base' : 'h-9 text-sm')}
       />
       <button

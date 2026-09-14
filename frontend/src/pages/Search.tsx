@@ -17,24 +17,56 @@ const EXAMPLES = [
   'slide titled "Transactions"',
 ]
 
+const LANES = ['text', 'lexical', 'visual', 'caption', 'ocr'] as const
+
+function readControls(params: URLSearchParams) {
+  const weights: SearchWeights = {}
+  for (const k of LANES) {
+    const v = params.get(`w.${k}`)
+    if (v != null && !Number.isNaN(Number(v))) weights[k] = Number(v)
+  }
+  return {
+    weights,
+    rerank: params.get('rerank') !== '0',
+    fusion: (params.get('fusion') === 'weighted' ? 'weighted' : 'rrf') as 'rrf' | 'weighted',
+  }
+}
+
 export function SearchPage() {
   const [params, setParams] = useSearchParams()
   const q = params.get('q') ?? ''
   const search = useSearch()
-  const [advanced, setAdvanced] = useState(false)
-  const [weights, setWeights] = useState<SearchWeights>({})
-  const [rerank, setRerank] = useState(true)
-  const [fusion, setFusion] = useState<'rrf' | 'weighted'>('rrf')
+  const initial = readControls(params)
+  const [advanced, setAdvanced] = useState(Object.keys(initial.weights).length > 0 || !initial.rerank || initial.fusion !== 'rrf')
+  const [weights, setWeights] = useState<SearchWeights>(initial.weights)
+  const [rerank, setRerank] = useState(initial.rerank)
+  const [fusion, setFusion] = useState<'rrf' | 'weighted'>(initial.fusion)
   const [playing, setPlaying] = useState<SearchHit | null>(null)
   const player = useRef<PlayerHandle>(null)
 
   const run = (query: string) => {
-    setParams({ q: query })
+    // ranking controls live in the URL so a tuned search is shareable / survives reload
+    const next: Record<string, string> = { q: query }
+    for (const k of LANES) if (weights[k] != null) next[`w.${k}`] = String(weights[k])
+    if (!rerank) next.rerank = '0'
+    if (fusion !== 'rrf') next.fusion = fusion
+    setParams(next)
     search.mutate({ q: query, limit: 20, weights, rerank, fusion })
   }
   useEffect(() => {
     if (q) search.mutate({ q, limit: 20, weights, rerank, fusion })
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (e.key === '/' && t?.tagName !== 'INPUT' && t?.tagName !== 'TEXTAREA') {
+        e.preventDefault()
+        document.querySelector<HTMLInputElement>('input[data-search-input]')?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   const res = search.data
@@ -119,6 +151,28 @@ export function SearchPage() {
         )}
       </div>
 
+      {search.isError && (
+        <div role="alert" className="mx-auto max-w-3xl rounded-xl border border-err/40 bg-err/10 p-4 text-sm">
+          <div className="font-medium">Search failed</div>
+          <div className="mt-1 text-fg-muted">{(search.error as Error)?.message ?? 'The API did not respond.'}</div>
+          <button onClick={() => q && run(q)} className="mt-3 rounded-md border border-border px-3 py-1 text-xs hover:border-accent/60">Retry</button>
+        </div>
+      )}
+      {search.isPending && !res && (
+        <div className="mx-auto max-w-3xl space-y-3" aria-busy="true" aria-label="Searching">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex animate-pulse gap-3 rounded-xl border border-border bg-bg-card p-3">
+              <div className="aspect-video w-40 rounded-lg bg-bg-elev sm:w-48" />
+              <div className="flex-1 space-y-2 py-1">
+                <div className="h-3 w-1/3 rounded bg-bg-elev" />
+                <div className="h-3 w-full rounded bg-bg-elev" />
+                <div className="h-3 w-5/6 rounded bg-bg-elev" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {res && (
         <div className={cn('grid gap-6', playing ? 'lg:grid-cols-[minmax(0,1fr)_420px]' : '')}>
           <div className="min-w-0 space-y-3">
@@ -149,7 +203,7 @@ export function SearchPage() {
                   <div className="space-y-1 p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="text-sm font-medium leading-snug">{playing.video.title}</div>
-                      <button onClick={() => setPlaying(null)} className="text-fg-dim hover:text-fg"><X size={15} /></button>
+                      <button onClick={() => setPlaying(null)} className="text-fg-dim hover:text-fg" aria-label="Close player"><X size={15} /></button>
                     </div>
                     <div className="font-mono text-xs text-fg-muted">
                       playing from {fmtTime(playing.start_s)} · segment {fmtTime(playing.start_s)}–{fmtTime(playing.end_s)}

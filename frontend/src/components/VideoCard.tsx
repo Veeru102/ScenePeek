@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Clock, Film, Layers, RotateCcw, Trash2 } from 'lucide-react'
@@ -11,6 +12,8 @@ import { fmtBytes, fmtDuration, fmtTime } from '@/lib/utils'
 export function VideoCard({ video, index = 0 }: { video: Video; index?: number }) {
   const del = useDeleteVideo()
   const retry = useRetryVideo()
+  const [confirm, setConfirm] = useState(false)
+  const failure = (del.error ?? retry.error) as Error | null
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -49,15 +52,38 @@ export function VideoCard({ video, index = 0 }: { video: Video; index?: number }
           {video.width && <span>{video.width}×{video.height}</span>}
         </div>
         {video.error && <div className="rounded bg-err/10 px-2 py-1 text-xs text-err">{video.error}</div>}
-        <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        {failure && (
+          <div role="alert" className="rounded bg-err/10 px-2 py-1 text-xs text-err">
+            {del.error ? 'Delete failed' : 'Retry failed'}: {failure.message}
+          </div>
+        )}
+        {/* always visible on touch/narrow screens; hover-revealed once a pointer exists */}
+        <div className="flex items-center justify-end gap-1 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100">
           {(video.status === 'failed' || video.chunks_failed > 0) && (
-            <Button variant="ghost" size="sm" onClick={() => retry.mutate(video.id)}>
+            <Button variant="ghost" size="sm" onClick={() => retry.mutate(video.id)} disabled={retry.isPending} aria-label={`Retry indexing ${video.title}`}>
               <RotateCcw size={13} /> Retry
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="text-err" onClick={() => del.mutate(video.id)}>
-            <Trash2 size={13} /> Delete
-          </Button>
+          {confirm ? (
+            <>
+              <span className="text-xs text-fg-muted">Delete this video?</span>
+              <Button variant="ghost" size="sm" onClick={() => setConfirm(false)} aria-label="Cancel delete">Cancel</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-err"
+                disabled={del.isPending}
+                onClick={() => del.mutate(video.id, { onSettled: () => setConfirm(false) })}
+                aria-label={`Confirm delete ${video.title}`}
+              >
+                <Trash2 size={13} /> {del.isPending ? 'Deleting…' : 'Delete'}
+              </Button>
+            </>
+          ) : (
+            <Button variant="ghost" size="sm" className="text-err" onClick={() => setConfirm(true)} aria-label={`Delete ${video.title}`}>
+              <Trash2 size={13} /> Delete
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>

@@ -102,6 +102,7 @@ class SearchHit(BaseModel):
     text: str
     snippet_html: str
     ocr_text: str
+    caption_text: str = ""
     keyframe_url: str | None
 
 

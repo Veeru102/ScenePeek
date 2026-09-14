@@ -40,6 +40,7 @@ async def search_endpoint(body: SearchRequest, s: AsyncSession = Depends(get_ses
                 text=h.segment.text,
                 snippet_html=highlight(h.segment.text, terms),
                 ocr_text=h.segment.ocr_text,
+                caption_text=h.segment.caption_text or "",
                 keyframe_url=storage.presigned_get(h.segment.keyframe_key)
                 if h.segment.keyframe_key
                 else None,
