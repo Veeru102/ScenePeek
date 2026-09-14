@@ -23,5 +23,15 @@ done
 END=$(date +%s)
 pkill -9 -f "scenepeek worker"
 TOTAL=$(for id in $IDS; do curl -s localhost:8000/api/videos/$id | python3 -c "import sys,json;print(json.load(sys.stdin)['duration_s'])"; done | paste -sd+ - | bc)
-python3 -c "print(f'workers=$N videos=$(echo $IDS | wc -w | tr -d ' ') video_seconds=$TOTAL wall_seconds=$((END-START)) realtime_factor={$TOTAL/($END-START):.2f}')"
+NV=$(echo $IDS | wc -w | tr -d ' ')
+python3 -c "print(f'workers=$N videos=$NV video_seconds=$TOTAL wall_seconds=$((END-START)) realtime_factor={$TOTAL/($END-START):.2f}')"
+mkdir -p eval/reports
+python3 - <<PY
+import json, platform, os
+out = {"workers": $N, "videos": $NV, "video_seconds": $TOTAL, "wall_seconds": $((END-START)),
+       "realtime_factor": round($TOTAL/($((END-START)) or 1), 2), "cpus": os.cpu_count(),
+       "platform": platform.platform(), "load_avg_end": os.getloadavg()}
+json.dump(out, open("eval/reports/bench_workers_$N.json", "w"), indent=2)
+print("wrote eval/reports/bench_workers_$N.json")
+PY
 for id in $IDS; do curl -s -X DELETE localhost:8000/api/videos/$id -o /dev/null; done

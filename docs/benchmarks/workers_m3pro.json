@@ -1,0 +1,11 @@
+{
+  "machine": "MacBook Pro M3 Pro, 11 cores, 18 GB, macOS 14.4",
+  "workload": "7 lecture videos (MIT OCW, 47-84 min each) indexing concurrently: faster-whisper small.en int8 on CPU, SigLIP + bge on MPS, RapidOCR on CPU; 60 s chunks",
+  "method": "chunks completed per minute measured over an 18 min window (3 workers) and a 15 min window (2 workers) via GET /api/videos; load average from `uptime`",
+  "results": [
+    {"workers": 3, "chunks_per_min": 6.05, "load_avg_1m": 26.3, "note": "load climbing over the window; CPU ~890% across the three processes"},
+    {"workers": 2, "chunks_per_min": 7.6, "load_avg_1m": 14.9, "note": "load flat; each worker settles at ~350% CPU"}
+  ],
+  "finding": "On one machine, 2 workers out-index 3: CTranslate2 (Whisper) already multithreads inside each worker, so a third process only adds contention. Horizontal scaling is for separate machines / GPU workers, not for oversubscribing one CPU.",
+  "measured_on": "2026-09-13"
+}
