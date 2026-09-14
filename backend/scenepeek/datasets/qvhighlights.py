@@ -11,13 +11,7 @@ from pathlib import Path
 from scenepeek.datasets.base import QuerySpec, Unavailable, VideoSpec
 
 FILES = {"train": "highlight_train_release.jsonl", "val": "highlight_val_release.jsonl"}
-_UNAVAILABLE_MARKERS = (
-    "Video unavailable",
-    "Private video",
-    "has been removed",
-    "not available",
-    "This video is no longer",
-)
+_UNAVAILABLE_MARKERS = ("unavailable", "private video", "has been removed", "not available", "no longer")
 
 
 def parse_vid(vid: str) -> tuple[str, float, float]:
@@ -91,6 +85,6 @@ class QVHighlights:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
         if proc.returncode != 0 or not dest.exists():
             err = (proc.stderr or proc.stdout)[-2000:]
-            if any(m in err for m in _UNAVAILABLE_MARKERS):
+            if any(m in err.lower() for m in _UNAVAILABLE_MARKERS):
                 raise Unavailable(err)
             raise RuntimeError(f"yt-dlp failed: {err}")

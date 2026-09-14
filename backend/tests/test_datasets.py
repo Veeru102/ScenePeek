@@ -97,7 +97,7 @@ def test_fetch_enqueue_uses_benchmark_priority_and_links_existing_videos(engine,
         job = q.lease(conn, "w", ["cpu"])
         assert job["type"] == "fetch_dataset_video" and job["payload"]["dataset"] == "qvhighlights"
         pri = conn.execute(text("select priority from jobs where id=:id"), {"id": job["id"]}).scalar()
-        assert pri == priority.BENCHMARK
+        assert pri == priority.FETCH
 
 
 def test_interactive_chunks_lease_before_benchmark_chunks(engine):

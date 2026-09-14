@@ -139,7 +139,7 @@ def enqueue_fetches(s: Session, ds: Dataset, split: str | None = None, limit: in
             {"dataset": ds.name, "dataset_video_id": str(dv.id)},
             idempotency_key=f"fetch:{ds.name}:{dv.external_id}",
             queue="cpu",
-            priority=priority.BENCHMARK,
+            priority=priority.FETCH,
         ):
             n += 1
     s.commit()

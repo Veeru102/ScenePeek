@@ -4,6 +4,7 @@ always beats a benchmark import, and a model backfill only runs when nothing els
 INTERACTIVE = 100  # a person uploaded it and is waiting
 NORMAL = 0
 BENCHMARK = -100  # dataset imports: bulk, nobody is watching
+FETCH = BENCHMARK - 50  # downloading the next benchmark clip: below indexing the ones already here
 BACKFILL = -200  # re-encoding existing videos for a new model version
 
 FIRST_CHUNK_BONUS = 50
