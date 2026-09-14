@@ -53,6 +53,43 @@ def reindex_captions(
     backfill(video_id=video_id, force=force)
 
 
+@app.command("backfill")
+def backfill_cmd(
+    kind: str = typer.Argument(help="temporal"),
+    model: str = typer.Option(None, help="Encoder to backfill (default: the configured one)"),
+    video_id: str = typer.Option(None, help="Only this video"),
+    force: bool = typer.Option(False, help="Re-encode chunks that already have rows for this model"),
+):
+    """Enqueue low-priority jobs that add a model version's representations next to the existing ones."""
+    from sqlalchemy import create_engine
+
+    from scenepeek.core.config import get_settings
+    from scenepeek.pipeline import temporal
+
+    if kind != "temporal":
+        raise typer.BadParameter("only 'temporal' can be backfilled right now")
+    n = temporal.backfill(
+        create_engine(get_settings().sync_database_url), model=model, video_id=video_id, force=force
+    )
+    typer.echo(f"enqueued {n} encode_temporal jobs at backfill priority")
+
+
+@app.command("versions")
+def versions_cmd(retire: str = typer.Option(None, help="kind:model_key to retire")):
+    """List model/index versions (what the stored representations were produced by)."""
+    from sqlalchemy import create_engine
+
+    from scenepeek.core.config import get_settings
+    from scenepeek.pipeline import temporal
+
+    engine = create_engine(get_settings().sync_database_url)
+    if retire:
+        kind, key = retire.split(":", 1)
+        temporal.retire(engine, key)
+    for v in temporal.versions(engine):
+        typer.echo(f"{v.kind:<9} {v.model_key:<40} dim={v.dim or '-':<5} {v.status:<9} {v.index_name or ''}")
+
+
 eval_app = typer.Typer(help="Search quality evaluation")
 app.add_typer(eval_app, name="eval")
 

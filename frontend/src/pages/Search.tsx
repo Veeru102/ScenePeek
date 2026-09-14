@@ -17,7 +17,8 @@ const EXAMPLES = [
   'slide titled "Transactions"',
 ]
 
-const LANES = ['text', 'lexical', 'visual', 'caption', 'ocr'] as const
+const LANES = ['text', 'lexical', 'visual', 'temporal', 'caption', 'ocr'] as const
+const DEFAULT_WEIGHTS = { text: 1, lexical: 0.8, visual: 0.8, temporal: 0, caption: 0, ocr: 0.6 } as const
 
 function readControls(params: URLSearchParams) {
   const weights: SearchWeights = {}
@@ -109,16 +110,16 @@ export function SearchPage() {
         <AnimatePresence>
           {advanced && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-bg-card p-4 text-xs sm:grid-cols-5">
-                {(['text', 'lexical', 'visual', 'caption', 'ocr'] as const).map((k) => (
+              <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-bg-card p-4 text-xs sm:grid-cols-4 lg:grid-cols-6">
+                {LANES.map((k) => (
                   <label key={k} className="space-y-1">
                     <div className="flex justify-between capitalize text-fg-muted">
-                      <span>{k === 'text' ? 'speech' : k === 'ocr' ? 'on-screen' : k}</span>
-                      <span className="font-mono">{(weights[k] ?? { text: 1, lexical: 0.8, visual: 0.8, caption: 0, ocr: 0.6 }[k]).toFixed(1)}</span>
+                      <span>{k === 'text' ? 'speech' : k === 'ocr' ? 'on-screen' : k === 'temporal' ? 'motion' : k}</span>
+                      <span className="font-mono">{(weights[k] ?? DEFAULT_WEIGHTS[k]).toFixed(1)}</span>
                     </div>
                     <input
                       type="range" min={0} max={2} step={0.1}
-                      value={weights[k] ?? { text: 1, lexical: 0.8, visual: 0.8, caption: 0, ocr: 0.6 }[k]}
+                      value={weights[k] ?? DEFAULT_WEIGHTS[k]}
                       onChange={(e) => setWeights((w) => ({ ...w, [k]: Number(e.target.value) }))}
                       className="w-full accent-[var(--color-accent)]"
                     />

@@ -14,6 +14,7 @@ from scenepeek.core.config import get_settings
 class Cand:
     segment_id: uuid.UUID
     score: float
+    span: tuple[float, float] | None = None  # the best-matching window inside the segment, if known
 
 
 def _vec(v: np.ndarray) -> str:
@@ -130,3 +131,30 @@ async def by_ocr(
         },
     )
     return [Cand(r[0], float(r[1])) for r in rows]
+
+
+async def by_temporal(s: AsyncSession, q: np.ndarray, k: int, model_key: str, video_ids=None) -> list[Cand]:
+    """Nearest multi-frame windows for this encoder version, max-pooled to their segment. The cast
+    matches the partial expression index so the planner can use it."""
+    dim = int(q.shape[0])
+    sql = text(
+        f"""
+        SELECT w.segment_id, MAX(w.score) AS score,
+               (ARRAY_AGG(w.start_s ORDER BY w.score DESC))[1] AS start_s,
+               (ARRAY_AGG(w.end_s ORDER BY w.score DESC))[1] AS end_s
+        FROM (
+            SELECT segment_id, start_s, end_s,
+                   1 - (embedding::vector({dim}) <=> CAST(:q AS vector({dim}))) AS score
+            FROM embeddings
+            WHERE kind = 'temporal' AND model_key = :model AND segment_id IS NOT NULL
+                  {_filter(video_ids, "embeddings")}
+            ORDER BY embedding::vector({dim}) <=> CAST(:q AS vector({dim}))
+            LIMIT :kw
+        ) w
+        GROUP BY w.segment_id
+        ORDER BY score DESC
+        LIMIT :k
+        """
+    )
+    rows = await s.execute(sql, {"q": _vec(q), "k": k, "kw": k * 3, "model": model_key, "vids": video_ids})
+    return [Cand(r[0], float(r[1]), (float(r[2]), float(r[3]))) for r in rows]

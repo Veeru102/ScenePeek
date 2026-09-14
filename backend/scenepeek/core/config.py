@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
 
     # Worker
-    worker_queues: str = "cpu,ml"
+    worker_queues: str = "cpu,ml,vision"
     worker_metrics_port: int = 9101
     worker_poll_interval_s: float = 1.0
     worker_heartbeat_s: float = 10.0
@@ -74,7 +74,8 @@ class Settings(BaseSettings):
     # captions are indexed (filmstrip / explain panel) but 0 here: BLIP-base captions measured
     # slightly negative for ranking on hand-written queries; raise once a stronger captioner lands
     weight_caption: float = 0.0
-    # temporal (multi-frame) lane: off until the encoder has been backfilled and measured
+    # temporal (multi-frame) lane: indexed for every chunk, but 0 in ranking until measured
+    temporal_enabled: bool = True
     weight_temporal: float = 0.0
     temporal_model: str = "microsoft/xclip-base-patch32"
     temporal_window_s: float = 8.0

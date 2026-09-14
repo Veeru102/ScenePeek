@@ -1,5 +1,6 @@
 from scenepeek.models.chunk import VideoChunk
 from scenepeek.models.dataset import Dataset, DatasetQuery, DatasetVideo
+from scenepeek.models.embedding import Embedding
 from scenepeek.models.experiment import Experiment, ExperimentResult
 from scenepeek.models.frame import Frame
 from scenepeek.models.index_version import IndexVersion
@@ -25,4 +26,5 @@ __all__ = [
     "Experiment",
     "ExperimentResult",
     "IndexVersion",
+    "Embedding",
 ]

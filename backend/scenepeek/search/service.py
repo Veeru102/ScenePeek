@@ -73,7 +73,7 @@ async def _own(fn, *args):
         return await fn(cs, *args)
 
 
-def _encode(p: QueryPlan, on: dict[str, bool]) -> dict[str, np.ndarray]:
+def _encode(p: QueryPlan, on: dict[str, bool], temporal_model: str | None = None) -> dict[str, np.ndarray]:
     from scenepeek.ml import siglip, text_embed
 
     vecs: dict[str, np.ndarray] = {}
@@ -81,6 +81,10 @@ def _encode(p: QueryPlan, on: dict[str, bool]) -> dict[str, np.ndarray]:
         vecs["text"] = text_embed.embed_query(p.speech_q)
     if on["visual"]:
         vecs["visual"] = siglip.embed_text(p.visual_q)
+    if on.get("temporal"):
+        from scenepeek.ml.video import get_encoder
+
+        vecs["temporal"] = get_encoder(temporal_model).embed_text(p.visual_q)
     if on["caption"]:
         # captions are indexed with the text model, so the caption query uses it too
         if p.visual_q == p.speech_q and "text" in vecs:
@@ -105,17 +109,20 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
     timings["plan"] = (time.perf_counter() - t0) * 1000
 
     # a lane with weight 0 is skipped entirely: no encode, no query, no signal leaking into rerank
-    on = {m: p.weights.get(m, 0.0) > 0 for m in ("text", "visual", "lexical", "ocr", "caption")}
+    on = {m: p.weights.get(m, 0.0) > 0 for m in ("text", "visual", "lexical", "ocr", "caption", "temporal")}
 
     t0 = time.perf_counter()
-    qv = await asyncio.to_thread(_encode, p, on)
+    qv = await asyncio.to_thread(_encode, p, on, cfg.models.get("temporal"))
     timings["encode"] = (time.perf_counter() - t0) * 1000
 
     k = cfg.candidates
     vids = opts.video_ids
     t0 = time.perf_counter()
     # each lane gets its own session so the queries truly run in parallel
-    text_c, vis_c, lex_c, ocr_c, cap_c = await asyncio.gather(
+    from scenepeek.ml.versions import short
+
+    temporal_key = short(cfg.models.get("temporal", ""))
+    text_c, vis_c, lex_c, ocr_c, cap_c, tmp_c = await asyncio.gather(
         _own(cand.by_text_vector, qv["text"], k, vids) if on["text"] else _empty(),
         _own(cand.by_visual_vector, qv["visual"], k, vids) if on["visual"] else _empty(),
         _own(cand.by_lexical, p.lexical_terms, p.exact_phrases, k, vids) if on["lexical"] else _empty(),
@@ -123,9 +130,17 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         if on["ocr"]
         else _empty(),
         _own(cand.by_caption, qv["caption"], k, vids) if on["caption"] else _empty(),
+        _own(cand.by_temporal, qv["temporal"], k, temporal_key, vids) if on["temporal"] else _empty(),
     )
     timings["candidates"] = (time.perf_counter() - t0) * 1000
-    lists = {"text": text_c, "visual": vis_c, "lexical": lex_c, "ocr": ocr_c, "caption": cap_c}
+    lists = {
+        "text": text_c,
+        "visual": vis_c,
+        "lexical": lex_c,
+        "ocr": ocr_c,
+        "caption": cap_c,
+        "temporal": tmp_c,
+    }
     lanes_run = [m for m, flag in on.items() if flag]
 
     t0 = time.perf_counter()
@@ -157,17 +172,15 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         scored.pop("_ms", None)
 
     t0 = time.perf_counter()
-    hits = [
-        Hit(
-            f.segment_id,
-            seg_rows[f.segment_id].video_id,
-            seg_rows[f.segment_id].start_s,
-            seg_rows[f.segment_id].end_s,
-            scored[f.segment_id],
-        )
-        for f in head
-        if f.segment_id in seg_rows
-    ]
+    hits = []
+    for f in head:
+        if f.segment_id not in seg_rows:
+            continue
+        seg = seg_rows[f.segment_id]
+        span = (seg.start_s, seg.end_s)
+        if cfg.span_mode == "window" and "temporal" in f.spans:
+            span = f.spans["temporal"]
+        hits.append(Hit(f.segment_id, seg.video_id, span[0], span[1], scored[f.segment_id]))
     hits.sort(key=lambda h: h.score, reverse=True)
     cap = None if (vids and len(vids) == 1) else cfg.max_hits_per_video
     kept = suppress(hits, cfg.dedup_window_s, cap)[: opts.limit]
@@ -213,15 +226,25 @@ def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, cfg: SearchConfig
     """
     use_rerank, top_k, mix = cfg.rerank, cfg.rerank_top_k, cfg.final_mix
     max_f = max(f.fused for f in head) or 1.0
-    vis_coef = mix["visual"] * min(1.0, max(0.0, p.weights.get("visual", 0.0)))
-    vis = [f.signals.get("visual") for f in head if "visual" in f.signals]
-    v_lo, v_hi = (min(vis), max(vis)) if vis else (0.0, 1.0)
+    w_vis = max(p.weights.get("visual", 0.0), p.weights.get("temporal", 0.0))
+    vis_coef = mix["visual"] * min(1.0, max(0.0, w_vis))
+    norms = {}
+    for lane in ("visual", "temporal"):
+        if p.weights.get(lane, 0.0) <= 0:
+            continue
+        vals = [f.signals[lane] for f in head if lane in f.signals]
+        if vals:
+            norms[lane] = (min(vals), max(vals))
 
     def vnorm(f: Fused) -> float:
-        v = f.signals.get("visual")
-        if v is None:
-            return 0.0
-        return (v - v_lo) / (v_hi - v_lo) if v_hi > v_lo else 1.0
+        """Best min-max-normalised visual evidence across the frame and temporal lanes."""
+        best = 0.0
+        for lane, (lo, hi) in norms.items():
+            v = f.signals.get(lane)
+            if v is None:
+                continue
+            best = max(best, (v - lo) / (hi - lo) if hi > lo else 1.0)
+        return best
 
     scores: dict = {}
     ms = 0.0

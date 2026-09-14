@@ -5,6 +5,7 @@ const LANES: { key: string; label: string; color: string; hint: string }[] = [
   { key: 'text', label: 'Speech (dense)', color: 'var(--color-speech)', hint: 'cosine similarity of the transcript embedding' },
   { key: 'lexical', label: 'Keyword (FTS)', color: 'var(--color-lexical)', hint: 'Postgres full-text rank on the transcript' },
   { key: 'visual', label: 'Visual (SigLIP)', color: 'var(--color-visual)', hint: 'image–text similarity of the best keyframe' },
+  { key: 'temporal', label: 'Motion (X-CLIP)', color: 'var(--color-visual)', hint: 'text–video similarity of the best 8-second window' },
   { key: 'caption', label: 'Caption', color: 'var(--color-visual)', hint: 'similarity to the keyframe caption' },
   { key: 'ocr', label: 'On-screen text', color: 'var(--color-ocr)', hint: 'full-text / trigram match on OCR text' },
 ]

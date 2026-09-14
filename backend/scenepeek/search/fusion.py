@@ -12,6 +12,7 @@ class Fused:
     fused: float
     signals: dict[str, float] = field(default_factory=dict)  # raw modality scores (for display)
     ranks: dict[str, int] = field(default_factory=dict)
+    spans: dict[str, tuple[float, float]] = field(default_factory=dict)  # lane -> best window
 
 
 def _minmax(cands: list[Cand]) -> dict[uuid.UUID, float]:
@@ -34,6 +35,8 @@ def fuse(
             f = out.setdefault(c.segment_id, Fused(c.segment_id, 0.0))
             f.signals[mod] = c.score
             f.ranks[mod] = rank
+            if c.span is not None:
+                f.spans[mod] = c.span
             if method == "weighted":
                 f.fused += w * normed[c.segment_id]
             else:

@@ -36,6 +36,7 @@ def engine(test_db_url):
     with eng.begin() as conn:
         for t in (
             "jobs",
+            "embeddings",
             "topics",
             "frames",
             "segments",

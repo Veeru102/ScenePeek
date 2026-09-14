@@ -262,6 +262,10 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
         INDEXED_VIDEO_SECONDS.inc(end - start)
         s.commit()
         finalize_if_complete(s, video)
+        if settings.temporal_enabled:
+            from scenepeek.pipeline.temporal import enqueue_for_chunk
+
+            enqueue_for_chunk(s.connection(), video_id, idx, video.priority_band)
         s.commit()
     ctx.log.info("chunk indexed", segments=len(drafts), frames=len(flat))
 

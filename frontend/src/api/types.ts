@@ -63,6 +63,7 @@ export interface SearchWeights {
   visual?: number
   ocr?: number
   caption?: number
+  temporal?: number
 }
 
 export interface SearchRequest {
