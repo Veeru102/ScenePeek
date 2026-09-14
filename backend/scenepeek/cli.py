@@ -90,6 +90,26 @@ def versions_cmd(retire: str = typer.Option(None, help="kind:model_key to retire
         typer.echo(f"{v.kind:<9} {v.model_key:<40} dim={v.dim or '-':<5} {v.status:<9} {v.index_name or ''}")
 
 
+@app.command("mine-negatives")
+def mine_negatives(
+    experiment: str = typer.Argument(help="Experiment name or id (its recorded hits are mined)"),
+    max_iou: float = typer.Option(0.1, help="A hit overlapping the truth more than this is not a negative"),
+    per_query: int = typer.Option(5),
+    out: str = typer.Option(None, help="JSONL export path (default data/negatives/<experiment>.jsonl)"),
+):
+    """Persist (query, positive, hard negative) triples from retrieval failures for reranker training."""
+    from pathlib import Path
+
+    from scenepeek.eval.negatives import mine
+
+    path = Path(out) if out else Path("../data/negatives") / f"{experiment}.jsonl"
+    m = mine(experiment, max_iou=max_iou, per_query=per_query, out=path)
+    typer.echo(
+        f"{m.queries} queries -> {m.positives} positives, {m.negatives} hard negatives "
+        f"({m.skipped_no_positive} skipped: no indexed segment overlaps the truth); wrote {path}"
+    )
+
+
 router_app = typer.Typer(help="Learned query routing")
 app.add_typer(router_app, name="router")
 

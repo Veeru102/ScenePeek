@@ -39,13 +39,17 @@ def _fake_search(video_ids_by_key):
         v1, v2 = video_ids_by_key["v1"], video_ids_by_key["v2"]
         vid = SimpleNamespace(id=v1)
         vid2 = SimpleNamespace(id=v2)
+
+        def hit(video, a, b):
+            seg = SimpleNamespace(id=uuid.uuid4())
+            return SimpleNamespace(
+                video=video, segment=seg, start_s=a, end_s=b, score=0.5, signals={"text": 0.5}
+            )
+
         if query == "first thing":
-            hits = [SimpleNamespace(video=vid, start_s=10.0, end_s=20.0)]
+            hits = [hit(vid, 10.0, 20.0)]
         elif query == "second thing":
-            hits = [
-                SimpleNamespace(video=vid, start_s=0.0, end_s=10.0),
-                SimpleNamespace(video=vid2, start_s=98.0, end_s=112.0),
-            ]
+            hits = [hit(vid, 0.0, 10.0), hit(vid2, 98.0, 112.0)]
         else:
             hits = []
         lanes = {"text": [Hit(uuid.uuid4(), v2, 98.0, 112.0, 0.9)], "visual": []}
@@ -105,3 +109,4 @@ def test_run_records_experiment_and_results(engine, tmp_path, monkeypatch):
         assert {r.query_key for r in rows} == {"q1", "q2"}
         assert all(r.dataset_query_id is not None for r in rows)
         assert rows[0].lanes["run"] == ["text", "visual"]
+        assert all("segment_id" in h and "score" in h for r in rows for h in r.hits)

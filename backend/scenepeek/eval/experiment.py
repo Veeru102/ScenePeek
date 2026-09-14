@@ -181,6 +181,17 @@ async def _evaluate(
                 "ndcg@10": ndcg_at(rels, n, 10),
                 **temporal_metrics(hits, q.relevant),
                 "top": [{"video": h.video, "start_s": h.start_s, "end_s": h.end_s} for h in hits[:3]],
+                "hits": [
+                    {
+                        "segment_id": str(h.segment.id),
+                        "video": key_of.get(str(h.video.id), str(h.video.id)),
+                        "start_s": h.start_s,
+                        "end_s": h.end_s,
+                        "score": h.score,
+                        "signals": h.signals,
+                    }
+                    for h in res.hits
+                ],
             }
             rows.append(row)
             log.info("query", id=q.key, mrr=round(row["mrr"], 3), r1_iou=row["r1@0.5"], ms=row["latency_ms"])
@@ -269,7 +280,7 @@ def run(spec: ExperimentSpec, output: str | None = None, reports_dir: Path | Non
                 query_key=r["id"],
                 metrics={k: r[k] for k in OVERLAP_KEYS + TEMPORAL_KEYS},
                 lanes={"attribution": r["lanes"], "run": r["lanes_run"], "unique": r["unique_lane"]},
-                hits=r["top"],
+                hits=r["hits"],
                 latency_ms=r["latency_ms"],
             )
             for r in rows

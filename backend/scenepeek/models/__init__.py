@@ -8,6 +8,7 @@ from scenepeek.models.job import Job
 from scenepeek.models.metric import MetricSample
 from scenepeek.models.segment import Segment
 from scenepeek.models.topic import Topic
+from scenepeek.models.training_example import TrainingExample
 from scenepeek.models.utterance import Utterance
 from scenepeek.models.video import Video
 
@@ -27,4 +28,5 @@ __all__ = [
     "ExperimentResult",
     "IndexVersion",
     "Embedding",
+    "TrainingExample",
 ]

@@ -43,6 +43,7 @@ def engine(test_db_url):
             "utterances",
             "video_chunks",
             "videos",
+            "training_examples",
             "experiment_results",
             "experiments",
             "dataset_queries",

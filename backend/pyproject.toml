@@ -42,9 +42,11 @@ ml = [
     "opencv-python-headless>=4.10",
     "wordninja>=2.0",
 ]
-# benchmark ingestion (YouTube-hosted datasets such as QVHighlights)
+# benchmark ingestion (YouTube-hosted datasets such as QVHighlights) + reranker fine-tuning
 bench = [
     "yt-dlp>=2024.8",
+    "datasets>=3.0",
+    "accelerate>=1.0",
 ]
 # Apple-silicon ASR via MLX (optional; select with WHISPER_BACKEND=mlx_whisper)
 mlx = [
