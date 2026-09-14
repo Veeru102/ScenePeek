@@ -46,10 +46,12 @@ eval-suite:
 	cd backend && uv run scenepeek eval compare ../eval/reports/$(SET).json $(foreach v,$(VARIANTS),../eval/reports/$(SET)_$(v).json)
 
 # QVHighlights: annotations go in data/qvhighlights/ (moment_detr release), videos come via yt-dlp.
-QVH_LIMIT ?= 300
+# The subsets are fixed and persisted (eval/subsets/*.txt) so every experiment sees the same clips.
 qvh-import:
-	cd backend && uv run scenepeek dataset import qvhighlights --dir ../data/qvhighlights --split val --limit $(QVH_LIMIT)
+	cd backend && uv run scenepeek dataset import qvhighlights --dir ../data/qvhighlights --split val --ids-file ../eval/subsets/qvh_val_150.txt
+	cd backend && uv run scenepeek dataset import qvhighlights --dir ../data/qvhighlights --split train --ids-file ../eval/subsets/qvh_train_250.txt
 	cd backend && uv run scenepeek dataset fetch qvhighlights --split val
+	cd backend && uv run scenepeek dataset fetch qvhighlights --split train
 
 observability:
 	docker compose --profile observability up -d prometheus grafana

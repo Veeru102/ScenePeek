@@ -267,6 +267,7 @@ def dataset_import(
     split: str = typer.Option("val"),
     limit: int = typer.Option(None, help="Seeded random subset of videos (all their queries come along)"),
     seed: int = typer.Option(0),
+    ids_file: str = typer.Option(None, help="Persisted subset: one video id per line (eval/subsets/*.txt)"),
 ):
     """Register a dataset's videos + queries in Postgres (idempotent). Fetching is a separate step."""
     from pathlib import Path
@@ -275,8 +276,9 @@ def dataset_import(
     from scenepeek.datasets.registry import get_adapter
 
     adapter = get_adapter(name)
+    ids = [ln.strip() for ln in Path(ids_file).read_text().splitlines() if ln.strip()] if ids_file else None
     with _sync_session() as s:
-        r = import_split(s, adapter, Path(dir), split, limit=limit, seed=seed)
+        r = import_split(s, adapter, Path(dir), split, limit=limit, seed=seed, ids=ids)
     typer.echo(f"{name}/{split}: {r.videos} videos, {r.queries} queries, {r.linked} already in the library")
 
 

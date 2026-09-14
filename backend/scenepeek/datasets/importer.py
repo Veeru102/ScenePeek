@@ -39,12 +39,17 @@ def import_split(
     *,
     limit: int | None = None,
     seed: int = 0,
+    ids: list[str] | None = None,
 ) -> ImportSummary:
-    """Idempotent: re-importing adds nothing; `limit` picks a seeded random subset of *videos* so
-    every query of a selected video comes along (queries are never split across the subset line)."""
+    """Idempotent: re-importing adds nothing. The subset is either an explicit, persisted list of
+    video ids (`ids`, the reproducible path: eval/subsets/*.txt) or a seeded random sample of
+    `limit` videos; either way every query of a selected video comes along."""
     ds = get_or_create_dataset(s, adapter)
     videos = list(adapter.iter_videos(root, split))
-    if limit is not None and limit < len(videos):
+    if ids is not None:
+        want = set(ids)
+        videos = [v for v in videos if v.external_id in want]
+    elif limit is not None and limit < len(videos):
         videos = random.Random(seed).sample(videos, limit)
     keep = {v.external_id for v in videos}
     for v in videos:
