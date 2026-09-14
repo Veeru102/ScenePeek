@@ -59,6 +59,12 @@ class UtteranceOut(BaseModel):
     words: list | None = None
 
 
+class FrameOut(BaseModel):
+    t_s: float
+    url: str
+    caption: str = ""
+
+
 class TopicOut(BaseModel):
     index: int
     start_s: float

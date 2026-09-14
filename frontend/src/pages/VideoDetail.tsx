@@ -2,8 +2,9 @@ import { useMemo, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Clock, Layers, RotateCcw } from 'lucide-react'
 import { useSearchQuery } from '@/api/search'
-import { useRetryVideo, useTimeline, useTranscript, useVideo } from '@/api/videos'
+import { useFrames, useRetryVideo, useTimeline, useTranscript, useVideo } from '@/api/videos'
 import { ChunkStrip } from '@/components/ChunkStrip'
+import { Filmstrip } from '@/components/Filmstrip'
 import { ResultCard } from '@/components/ResultCard'
 import { SearchBar } from '@/components/SearchBar'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -21,6 +22,7 @@ export function VideoDetailPage() {
   const processing = video?.status === 'processing' || video?.status === 'uploaded'
   const { data: transcript } = useTranscript(id, true)
   const { data: topics } = useTimeline(id, processing || (video?.status === 'ready' && video.topic_count === 0))
+  const { data: frames } = useFrames(id, processing)
   const retry = useRetryVideo()
   const player = useRef<PlayerHandle>(null)
   const [current, setCurrent] = useState(0)
@@ -82,6 +84,7 @@ export function VideoDetailPage() {
             <ChunkStrip chunks={video.chunks} onSeek={seek} className="h-2" />
           </div>
           <TopicTimeline topics={topics ?? []} duration={video.duration_s ?? 0} current={current} markers={markers} onSeek={seek} />
+          <Filmstrip frames={frames ?? []} current={current} onSeek={seek} />
 
           <div className="space-y-3 pt-2">
             <SearchBar size="md" placeholder="Search inside this video…" loading={search.isFetching} onSubmit={setQ} initial={q} />

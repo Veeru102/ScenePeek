@@ -43,6 +43,12 @@ export interface Utterance {
   words: { w: string; s: number; e: number }[] | null
 }
 
+export interface KeyFrame {
+  t_s: number
+  url: string
+  caption: string
+}
+
 export interface Topic {
   index: number
   start_s: number

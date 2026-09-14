@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { Topic, Utterance, Video, VideoDetail } from './types'
+import type { KeyFrame, Topic, Utterance, Video, VideoDetail } from './types'
 
 const isActive = (v: Video) => v.status === 'processing' || v.status === 'uploaded' || v.status === 'uploading'
 
@@ -35,6 +35,16 @@ export function useTimeline(id: string | undefined, refetch = false) {
     queryFn: () => api<Topic[]>(`/api/videos/${id}/timeline`),
     enabled: !!id,
     refetchInterval: refetch ? 4000 : false,
+  })
+}
+
+export function useFrames(id: string | undefined, refetch = false) {
+  return useQuery({
+    queryKey: ['frames', id],
+    queryFn: () => api<KeyFrame[]>(`/api/videos/${id}/frames`),
+    enabled: !!id,
+    refetchInterval: refetch ? 8000 : false,
+    staleTime: 5 * 60 * 1000,
   })
 }
 

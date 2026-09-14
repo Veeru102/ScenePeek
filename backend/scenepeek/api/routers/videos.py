@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from scenepeek.api.schemas import (
     ChunkOut,
+    FrameOut,
     TopicOut,
     UploadTarget,
     UtteranceOut,
@@ -18,7 +19,7 @@ from scenepeek.api.schemas import (
 from scenepeek.core import storage
 from scenepeek.core.db import get_session
 from scenepeek.jobs import queue as q
-from scenepeek.models import Topic, Utterance, Video, VideoChunk
+from scenepeek.models import Frame, Topic, Utterance, Video, VideoChunk
 from scenepeek.models.chunk import ChunkStatus
 from scenepeek.models.video import VideoStatus
 
@@ -150,6 +151,24 @@ async def get_transcript(video_id: uuid.UUID, s: AsyncSession = Depends(get_sess
         select(Utterance).where(Utterance.video_id == video_id).order_by(Utterance.start_s)
     )
     return [UtteranceOut(start_s=u.start_s, end_s=u.end_s, text=u.text, words=u.words) for u in rows]
+
+
+@router.get("/{video_id}/frames", response_model=list[FrameOut])
+async def get_frames(video_id: uuid.UUID, limit: int = 80, s: AsyncSession = Depends(get_session)):
+    """Evenly spaced keyframes across the video for the filmstrip (presigned thumbnail URLs)."""
+    rows = list(
+        await s.execute(
+            select(Frame.t_s, Frame.image_key, Frame.caption)
+            .where(Frame.video_id == video_id)
+            .order_by(Frame.t_s)
+        )
+    )
+    if len(rows) > limit:
+        step = len(rows) / limit
+        rows = [rows[int(i * step)] for i in range(limit)]
+    return [
+        FrameOut(t_s=r.t_s, url=storage.presigned_get(r.image_key), caption=r.caption or "") for r in rows
+    ]
 
 
 @router.get("/{video_id}/timeline", response_model=list[TopicOut])
