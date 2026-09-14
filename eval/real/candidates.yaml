@@ -5,117 +5,122 @@ candidates:
   type: visual
   start_s: 29.83
   end_s: 89.83
-  text: '[edit] describe what is shown on screen'
+  text: Big Buck Bunny wakes up, yawns, leaves home, scratches himself, walks over a flower and sniffs
+    it in enjoyment. His tail wags
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: approved
 - id: bigbuckbunny.w1.visual
   video: bigbuckbunny
   type: visual
   start_s: 164.06
   end_s: 224.06
-  text: '[edit] describe what is shown on screen'
+  text: Big Buck Bunny first dodges acorn thrown at him. Afterwards he gets repetitively hit by attacks
+    by squirrels and smaller creatures. The smaller creatures then kill a butterfly and mock Big Buck
+    Bunny, making him sad
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: approved
 - id: bigbuckbunny.w2.visual
   video: bigbuckbunny
   type: visual
   start_s: 298.28
   end_s: 358.28
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: bigbuckbunny.w3.visual
   video: bigbuckbunny
   type: visual
   start_s: 432.51
   end_s: 492.51
-  text: '[edit] describe what is shown on screen'
+  text: Flying squirrel is flying then falls and narrowly avoids spikes. He then flies directly into Big
+    Bucky Bunnies hands. Big Buck Bunny grabs and chokes him
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: approved
 - id: spring.w0.visual
   video: spring
   type: visual
   start_s: 23.21
   end_s: 83.21
-  text: '[edit] describe what is shown on screen'
+  text: First scene is a camera pan of scenic mountains, little dog grabs branch thrown to him by owner
+    and fetches it. His owner then gives him treat. Then they begin walking down mountain range together
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: approved
 - id: spring.w1.visual
   video: spring
   type: visual
   start_s: 127.65
   end_s: 187.65
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: spring.w2.visual
   video: spring
   type: visual
   start_s: 232.08
   end_s: 292.08
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: spring.w3.visual
   video: spring
   type: visual
   start_s: 336.52
   end_s: 396.52
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: tears_of_steel.w0.speech
   video: tears_of_steel
   type: speech
   start_s: 36.71
   end_s: 96.71
-  text: '[edit] talks about i''m freaked out'
+  text: Talks about i'm freaked out
   context: 'transcript: Alright, fine. I''m freaked out. I''m having nightmares that I''m being chased
     by these giant robotic claws and- Oh! Whatever! We''re done! We''re done! Robot''s memory synced and
     locked. This is pretty fre'
-  status: pending
+  status: approved
 - id: tears_of_steel.w0.ocr
   video: tears_of_steel
   type: ocr
   start_s: 36.71
   end_s: 96.71
-  text: '[edit] on-screen text mentions LMULATIONL'
+  text: On-screen text mentions LMULATIONL
   context: 'ocr: LMULATIONL'
-  status: pending
+  status: rejected
 - id: tears_of_steel.w0.multi
   video: tears_of_steel
   type: multi
   start_s: 36.71
   end_s: 96.71
-  text: '[edit] explains i''m freaked out while showing LMULATIONL'
+  text: Explains i'm freaked out while showing LMULATIONL
   context: 'transcript: Alright, fine. I''m freaked out. I''m having nightmares that I''m being chased
     by these giant robotic claws and- Oh! Whatev | ocr: LMULATIONL'
-  status: pending
+  status: approved
 - id: tears_of_steel.w1.speech
   video: tears_of_steel
   type: speech
   start_s: 201.91
   end_s: 261.91
-  text: '[edit] talks about perfect we''re'
+  text: Talks about perfect we're
   context: 'transcript: Well, that''s perfect. We''re only one! All systems go! Yeah, you go! Go! That''s
     nice. Nothing to worry about. Tom! She''s your passion. Be tender to her. Be honest. Be tender. Remind
     her what love is.'
-  status: pending
+  status: approved
 - id: tears_of_steel.w2.speech
   video: tears_of_steel
   type: speech
   start_s: 367.11
   end_s: 427.11
-  text: '[edit] talks about crush you i''m'
+  text: Talks about crush you i'm
   context: 'transcript: We already tried that one! You broke my heart! You forgot me on Earth! I should
     just crush you! I''m sorry. Good ad-lib. I might fall! This time.'
-  status: pending
+  status: approved
 - id: tears_of_steel.w2.ocr
   video: tears_of_steel
   type: ocr
   start_s: 367.11
   end_s: 427.11
-  text: '[edit] on-screen text mentions gahg-'
+  text: On-screen text mentions gahg-
   context: 'ocr: gahg-
 
     prany
@@ -133,13 +138,13 @@ candidates:
     YNKAVC
 
     pie(s）'
-  status: pending
+  status: rejected
 - id: tears_of_steel.w2.multi
   video: tears_of_steel
   type: multi
   start_s: 367.11
   end_s: 427.11
-  text: '[edit] explains crush you i''m while showing gahg-'
+  text: Explains crush you i'm while showing gahg-
   context: 'transcript: We already tried that one! You broke my heart! You forgot me on Earth! I should
     just crush you! I''m sorry. Good ad-lib.  | ocr: gahg-
 
@@ -158,48 +163,48 @@ candidates:
     YNKAVC
 
     pie(s）'
-  status: pending
+  status: approved
 - id: tears_of_steel.w3.speech
   video: tears_of_steel
   type: speech
   start_s: 532.31
   end_s: 592.31
-  text: '[edit] talks about memory override'
+  text: Talks about memory override
   context: 'transcript: Maybe we can too. Memory override complete! There''s a lesson to be learned from
     this. Could''ve gone worse.'
-  status: pending
+  status: approved
 - id: tears_of_steel.wsemantic0.semantic
   video: tears_of_steel
   type: semantic
   start_s: 36.71
   end_s: 427.11
-  text: '[edit] the section about i''m freaked out'
+  text: The section about i'm freaked out
   context: 'combined keyphrases: i''m freaked out, good ad-lib'
-  status: pending
+  status: approved
 - id: tears_of_steel.wsemantic1.semantic
   video: tears_of_steel
   type: semantic
   start_s: 367.11
   end_s: 592.31
-  text: '[edit] the section about sorry good ad-lib'
+  text: The section about sorry good ad-lib
   context: 'combined keyphrases: sorry good ad-lib, could''ve gone'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w0.speech
   video: mit_asymptotic
   type: speech
   start_s: 211.7
   end_s: 271.7
-  text: '[edit] talks about bizarre notation'
+  text: Talks about bizarre notation
   context: 'transcript: So, we''ll see exactly what that means in a second. But, before we get there,
     so this is a bit bizarre notation, and you should always think about what it really means. Another
     way to think about what '
-  status: pending
+  status: approved
 - id: mit_asymptotic.w0.ocr
   video: mit_asymptotic
   type: ocr
   start_s: 211.7
   end_s: 271.7
-  text: '[edit] on-screen text mentions （6)0=（'
+  text: On-screen text mentions （6)0=（
   context: 'ocr: （6)0=（
 
     reorc
@@ -209,13 +214,13 @@ candidates:
     kets
 
     ck+hot'
-  status: pending
+  status: rejected
 - id: mit_asymptotic.w0.multi
   video: mit_asymptotic
   type: multi
   start_s: 211.7
   end_s: 271.7
-  text: '[edit] explains bizarre notation while showing （6)0=（'
+  text: Explains bizarre notation while showing （6)0=（
   context: 'transcript: So, we''ll see exactly what that means in a second. But, before we get there,
     so this is a bit bizarre notation, and you  | ocr: （6)0=（
 
@@ -226,58 +231,58 @@ candidates:
     kets
 
     ck+hot'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w2.speech
   video: mit_asymptotic
   type: speech
   start_s: 973.82
   end_s: 1033.82
-  text: '[edit] talks about solved some recurrences'
+  text: Talks about solved some recurrences
   context: 'transcript: So, there are some messy behaviors, as you''ll see in your problem set. So, any
     questions about asymptotic notation? That is the quick rundown. Now, we''re going to use it to solve
     some recurrences, alt'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w2.ocr
   video: mit_asymptotic
   type: ocr
   start_s: 973.82
   end_s: 1033.82
-  text: '[edit] on-screen text mentions Ex23=063'
+  text: On-screen text mentions Ex23=063
   context: 'ocr: Ex23=063
 
     =（n
 
     #（n司'
-  status: pending
+  status: rejected
 - id: mit_asymptotic.w2.multi
   video: mit_asymptotic
   type: multi
   start_s: 973.82
   end_s: 1033.82
-  text: '[edit] explains solved some recurrences while showing Ex23=063'
+  text: Explains solved some recurrences while showing Ex23=063
   context: 'transcript: So, there are some messy behaviors, as you''ll see in your problem set. So, any
     questions about asymptotic notation? That | ocr: Ex23=063
 
     =（n
 
     #（n司'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w4.speech
   video: mit_asymptotic
   type: speech
   start_s: 1735.94
   end_s: 1795.94
-  text: '[edit] talks about squared minus negative'
+  text: Talks about squared minus negative
   context: 'transcript: I''m going to do the same thing, and I''ll write a bit faster because this is
     basically copying. Except now, instead of 3, I have 2. So, then I have T of n is 4 times T of n over
     2 plus n. I expand this'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w4.ocr
   video: mit_asymptotic
   type: ocr
   start_s: 1735.94
   end_s: 1795.94
-  text: '[edit] on-screen text mentions ）0=（2L'
+  text: On-screen text mentions ）0=（2L
   context: 'ocr: ）0=（2L
 
     ly
@@ -289,13 +294,13 @@ candidates:
     =4（）+n
 
     ≤4c（+h'
-  status: pending
+  status: rejected
 - id: mit_asymptotic.w4.multi
   video: mit_asymptotic
   type: multi
   start_s: 1735.94
   end_s: 1795.94
-  text: '[edit] explains squared minus negative while showing ）0=（2L'
+  text: Explains squared minus negative while showing ）0=（2L
   context: 'transcript: I''m going to do the same thing, and I''ll write a bit faster because this is
     basically copying. Except now, instead of 3, | ocr: ）0=（2L
 
@@ -308,54 +313,54 @@ candidates:
     =4（）+n
 
     ≤4c（+h'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w5.speech
   video: mit_asymptotic
   type: speech
   start_s: 2117.01
   end_s: 2177.01
-  text: '[edit] talks about larger than positive'
+  text: Talks about larger than positive
   context: 'transcript: We have to be a little more careful if C1 does actually have to be sufficiently
     large. Any particular reason why? C1 better not be negative. Indeed, C1 has to be positive for this
     to work, but it even'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w5.ocr
   video: mit_asymptotic
   type: ocr
   start_s: 2117.01
   end_s: 2177.01
-  text: '[edit] on-screen text mentions C=1'
+  text: On-screen text mentions C=1
   context: 'ocr: C=1
 
     <cn=Snf1'
-  status: pending
+  status: rejected
 - id: mit_asymptotic.w5.multi
   video: mit_asymptotic
   type: multi
   start_s: 2117.01
   end_s: 2177.01
-  text: '[edit] explains larger than positive while showing C=1'
+  text: Explains larger than positive while showing C=1
   context: 'transcript: We have to be a little more careful if C1 does actually have to be sufficiently
     large. Any particular reason why? C1 bet | ocr: C=1
 
     <cn=Snf1'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w7.speech
   video: mit_asymptotic
   type: speech
   start_s: 2879.13
   end_s: 2939.13
-  text: '[edit] talks about recursion trees there''s'
+  text: Talks about recursion trees there's
   context: 'transcript: And we have it within a factor of two, which is pretty good. You actually get
     a better factor here. So, that is recursion tree method. It is a little shaky here because we have
     these dot, dot, dots, a'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w7.ocr
   video: mit_asymptotic
   type: ocr
   start_s: 2879.13
   end_s: 2939.13
-  text: '[edit] on-screen text mentions method'
+  text: On-screen text mentions method
   context: 'ocr: method
 
     ESn"
@@ -363,13 +368,13 @@ candidates:
     0-
 
     T0=00'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w7.multi
   video: mit_asymptotic
   type: multi
   start_s: 2879.13
   end_s: 2939.13
-  text: '[edit] explains recursion trees there''s while showing method'
+  text: Explains recursion trees there's while showing method
   context: 'transcript: And we have it within a factor of two, which is pretty good. You actually get
     a better factor here. So, that is recursio | ocr: method
 
@@ -378,144 +383,144 @@ candidates:
     0-
 
     T0=00'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w9.speech
   video: mit_asymptotic
   type: speech
   start_s: 3641.25
   end_s: 3701.25
-  text: '[edit] talks about using recursion trees'
+  text: Talks about using recursion trees
   context: 'transcript: This is something you would have to solve probably with a recursion tree would
     be a good way to do this one. And you need to know some properties of logs to know how that goes.
     But here the master met'
-  status: pending
+  status: approved
 - id: mit_asymptotic.w9.ocr
   video: mit_asymptotic
   type: ocr
   start_s: 3641.25
   end_s: 3701.25
-  text: '[edit] on-screen text mentions G=12'
+  text: On-screen text mentions G=12
   context: 'ocr: G=12
 
     ET)-4T(）
 
     ee)'
-  status: pending
+  status: rejected
 - id: mit_asymptotic.w9.multi
   video: mit_asymptotic
   type: multi
   start_s: 3641.25
   end_s: 3701.25
-  text: '[edit] explains using recursion trees while showing G=12'
+  text: Explains using recursion trees while showing G=12
   context: 'transcript: This is something you would have to solve probably with a recursion tree would
     be a good way to do this one. And you nee | ocr: G=12
 
     ET)-4T(）
 
     ee)'
-  status: pending
+  status: approved
 - id: mit_asymptotic.wsemantic0.semantic
   video: mit_asymptotic
   type: semantic
   start_s: 211.7
   end_s: 2177.01
-  text: '[edit] the section about big omega notation'
+  text: The section about big omega notation
   context: 'combined keyphrases: big omega notation, analyzing recursive algorithms'
-  status: pending
+  status: approved
 - id: mit_asymptotic.wsemantic1.semantic
   video: mit_asymptotic
   type: semantic
   start_s: 2117.01
   end_s: 3701.25
-  text: '[edit] the section about recursion trees there''s'
+  text: The section about recursion trees there's
   context: 'combined keyphrases: recursion trees there''s, larger than positive'
-  status: pending
+  status: approved
 - id: mit_streams.w0.speech
   video: mit_streams
   type: speech
   start_s: 189.02
   end_s: 249.02
-  text: '[edit] talks about onto the integers'
+  text: Talks about onto the integers
   context: 'transcript: onto the integers from one more. All right, so there are the integers. Then I
     could say, let''s get all the integers. Define the stream of the integers to be the integers starting
     with one. Now, if I s'
-  status: pending
+  status: approved
 - id: mit_streams.w0.ocr
   video: mit_streams
   type: ocr
   start_s: 189.02
   end_s: 249.02
-  text: '[edit] on-screen text mentions OEFINE <INTEGERS-FROM N)'
+  text: On-screen text mentions OEFINE <INTEGERS-FROM N)
   context: 'ocr: OEFINE <INTEGERS-FROM N)
 
     (CONS-STREAM
 
     o-Edwin:Editor'
-  status: pending
+  status: approved
 - id: mit_streams.w0.multi
   video: mit_streams
   type: multi
   start_s: 189.02
   end_s: 249.02
-  text: '[edit] explains onto the integers while showing OEFINE <INTEGERS-FROM N)'
+  text: Explains onto the integers while showing OEFINE <INTEGERS-FROM N)
   context: 'transcript: onto the integers from one more. All right, so there are the integers. Then I
     could say, let''s get all the integers. Def | ocr: OEFINE <INTEGERS-FROM N)
 
     (CONS-STREAM
 
     o-Edwin:Editor'
-  status: pending
+  status: approved
 - id: mit_streams.w2.speech
   video: mit_streams
   type: speech
   start_s: 869.51
   end_s: 929.51
-  text: '[edit] talks about process the streams'
+  text: Talks about process the streams
   context: 'transcript: at a couple of examples of stream programming. All the stream procedures that
     we''ve looked at so far have the same kind of character. We''ve been writing these recursive procedures
     that kind of generat'
-  status: pending
+  status: approved
 - id: mit_streams.w2.ocr
   video: mit_streams
   type: ocr
   start_s: 869.51
   end_s: 929.51
-  text: '[edit] on-screen text mentions HAROID ABELSON'
+  text: On-screen text mentions HAROID ABELSON
   context: 'ocr: HAROID ABELSON
 
     ASSOC.PrOT-EE& CS
 
     MLLT.'
-  status: pending
+  status: rejected
 - id: mit_streams.w2.multi
   video: mit_streams
   type: multi
   start_s: 869.51
   end_s: 929.51
-  text: '[edit] explains process the streams while showing HAROID ABELSON'
+  text: Explains process the streams while showing HAROID ABELSON
   context: 'transcript: at a couple of examples of stream programming. All the stream procedures that
     we''ve looked at so far have the same kind  | ocr: HAROID ABELSON
 
     ASSOC.PrOT-EE& CS
 
     MLLT.'
-  status: pending
+  status: approved
 - id: mit_streams.w4.speech
   video: mit_streams
   type: speech
   start_s: 1550.0
   end_s: 1610.0
-  text: '[edit] talks about recursive procedures'
+  text: Talks about recursive procedures
   context: 'transcript: difference, really, between procedures and data. In fact, in some sense, the underlying
     streams are our procedures sitting there, although we don''t think of them that way. So the fact that
     we have rec'
-  status: pending
+  status: approved
 - id: mit_streams.w4.ocr
   video: mit_streams
   type: ocr
   start_s: 1550.0
   end_s: 1610.0
-  text: '[edit] on-screen text mentions DGFNE FIBS'
+  text: On-screen text mentions DGFNE FIBS
   context: 'ocr: DGFNE FIBS
 
     CCONE-SRCM O
@@ -525,13 +530,13 @@ candidates:
     TAL FIOS
 
     F61023'
-  status: pending
+  status: rejected
 - id: mit_streams.w4.multi
   video: mit_streams
   type: multi
   start_s: 1550.0
   end_s: 1610.0
-  text: '[edit] explains recursive procedures while showing DGFNE FIBS'
+  text: Explains recursive procedures while showing DGFNE FIBS
   context: 'transcript: difference, really, between procedures and data. In fact, in some sense, the underlying
     streams are our procedures sitti | ocr: DGFNE FIBS
 
@@ -542,23 +547,23 @@ candidates:
     TAL FIOS
 
     F61023'
-  status: pending
+  status: approved
 - id: mit_streams.w5.speech
   video: mit_streams
   type: speech
   start_s: 1890.24
   end_s: 1950.24
-  text: '[edit] talks about actual delayed object'
+  text: Talks about actual delayed object
   context: 'transcript: there''s going to be a hidden delay inside here. Only inside of that const stream
     will I start looking at what the actual delayed object is. So my answer is, the first thing''s the
     initial value. If any'
-  status: pending
+  status: approved
 - id: mit_streams.w5.ocr
   video: mit_streams
   type: ocr
   start_s: 1890.24
   end_s: 1950.24
-  text: '[edit] on-screen text mentions (define'
+  text: On-screen text mentions (define
   context: 'ocr: (define
 
     (integral delayed-s
@@ -582,13 +587,13 @@ candidates:
     int))))
 
     int)'
-  status: pending
+  status: approved
 - id: mit_streams.w5.multi
   video: mit_streams
   type: multi
   start_s: 1890.24
   end_s: 1950.24
-  text: '[edit] explains actual delayed object while showing (define'
+  text: Explains actual delayed object while showing (define
   context: 'transcript: there''s going to be a hidden delay inside here. Only inside of that const stream
     will I start looking at what the actual | ocr: (define
 
@@ -607,23 +612,23 @@ candidates:
     (let ((s (force delayed-s)))
 
     (add-s'
-  status: pending
+  status: approved
 - id: mit_streams.w7.speech
   video: mit_streams
   type: speech
   start_s: 2570.73
   end_s: 2630.73
-  text: '[edit] talks about identity function'
+  text: Talks about identity function
   context: 'transcript: increment the identity function of 3. So y is going to be 4. Now I say, what''s
     x? Well, x should have been the value that was remembered last when I called the identity function.
     So you''d expect to sa'
-  status: pending
+  status: approved
 - id: mit_streams.w7.ocr
   video: mit_streams
   type: ocr
   start_s: 2570.73
   end_s: 2630.73
-  text: '[edit] on-screen text mentions (define）'
+  text: On-screen text mentions (define）
   context: 'ocr: (define）
 
     （inc （id 3））)
@@ -631,13 +636,13 @@ candidates:
     iii
 
     iii'
-  status: pending
+  status: approved
 - id: mit_streams.w7.multi
   video: mit_streams
   type: multi
   start_s: 2570.73
   end_s: 2630.73
-  text: '[edit] explains identity function while showing (define）'
+  text: Explains identity function while showing (define）
   context: 'transcript: increment the identity function of 3. So y is going to be 4. Now I say, what''s
     x? Well, x should have been the value tha | ocr: (define）
 
@@ -646,70 +651,70 @@ candidates:
     iii
 
     iii'
-  status: pending
+  status: approved
 - id: mit_streams.w9.speech
   video: mit_streams
   type: speech
   start_s: 3251.21
   end_s: 3311.21
-  text: '[edit] talks about computer science'
+  text: Talks about computer science
   context: 'transcript: the problems of assignment don''t sort of leak out all over the system, but are
     captured in some fairly well understood things. More generally, I think what you''re seeing is that
     we''re running across w'
-  status: pending
+  status: approved
 - id: mit_streams.w9.ocr
   video: mit_streams
   type: ocr
   start_s: 3251.21
   end_s: 3311.21
-  text: '[edit] on-screen text mentions OF'
+  text: On-screen text mentions OF
   context: 'ocr: OF
 
     ARtaL'
-  status: pending
+  status: rejected
 - id: mit_streams.w9.multi
   video: mit_streams
   type: multi
   start_s: 3251.21
   end_s: 3311.21
-  text: '[edit] explains computer science while showing OF'
+  text: Explains computer science while showing OF
   context: 'transcript: the problems of assignment don''t sort of leak out all over the system, but are
     captured in some fairly well understood t | ocr: OF
 
     ARtaL'
-  status: pending
+  status: approved
 - id: mit_streams.wsemantic0.semantic
   video: mit_streams
   type: semantic
   start_s: 189.02
   end_s: 1950.24
-  text: '[edit] the section about onto the integers'
+  text: The section about onto the integers
   context: 'combined keyphrases: onto the integers, define the stream'
-  status: pending
+  status: approved
 - id: mit_streams.wsemantic1.semantic
   video: mit_streams
   type: semantic
   start_s: 1890.24
   end_s: 3311.21
-  text: '[edit] the section about actual delayed object'
+  text: The section about actual delayed object
   context: 'combined keyphrases: actual delayed object, integral language'
-  status: pending
+  status: approved
 - id: mit_redblack.w0.speech
   video: mit_redblack
   type: speech
   start_s: 251.67
   end_s: 311.67
-  text: '[edit] talks about binary search tree'
+  text: Talks about binary search tree
   context: 'transcript: So, on Monday, we saw that if we just randomly built a binary search tree, it''s
     going to have log n height most of the time in expectation. So, treats are a way to make that dynamic.
     So, instead of ju'
-  status: pending
+  status: approved
 - id: mit_redblack.w0.ocr
   video: mit_redblack
   type: ocr
   start_s: 251.67
   end_s: 311.67
-  text: '[edit] on-screen text mentions xamples'
+  text: On-screen text mentions xamples
   context: 'ocr: xamples
 
     Avctrees
@@ -725,13 +730,13 @@ candidates:
     -hedeek
 
     Pse'
-  status: pending
+  status: rejected
 - id: mit_redblack.w0.multi
   video: mit_redblack
   type: multi
   start_s: 251.67
   end_s: 311.67
-  text: '[edit] explains binary search tree while showing xamples'
+  text: Explains binary search tree while showing xamples
   context: 'transcript: So, on Monday, we saw that if we just randomly built a binary search tree, it''s
     going to have log n height most of the t | ocr: xamples
 
@@ -748,23 +753,23 @@ candidates:
     -hedeek
 
     Pse'
-  status: pending
+  status: approved
 - id: mit_redblack.w2.speech
   video: mit_redblack
   type: speech
   start_s: 1157.68
   end_s: 1217.68
-  text: '[edit] talks about red node merge'
+  text: Talks about red node merge
   context: 'transcript: So, the first thing I''m going to do, this is sort of, I''m going to manipulate
     this tree until it looks like something that I know. The main change I''m going to make is to merge
     each red node into its '
-  status: pending
+  status: approved
 - id: mit_redblack.w2.ocr
   video: mit_redblack
   type: ocr
   start_s: 1157.68
   end_s: 1217.68
-  text: '[edit] on-screen text mentions Hegktfredblace'
+  text: On-screen text mentions Hegktfredblace
   context: 'ocr: Hegktfredblace
 
     tee
@@ -782,13 +787,13 @@ candidates:
     CLRS
 
     shred node'
-  status: pending
+  status: rejected
 - id: mit_redblack.w2.multi
   video: mit_redblack
   type: multi
   start_s: 1157.68
   end_s: 1217.68
-  text: '[edit] explains red node merge while showing Hegktfredblace'
+  text: Explains red node merge while showing Hegktfredblace
   context: 'transcript: So, the first thing I''m going to do, this is sort of, I''m going to manipulate
     this tree until it looks like something th | ocr: Hegktfredblace
 
@@ -807,23 +812,23 @@ candidates:
     CLRS
 
     shred node'
-  status: pending
+  status: approved
 - id: mit_redblack.w4.speech
   video: mit_redblack
   type: speech
   start_s: 2063.69
   end_s: 2123.69
-  text: '[edit] talks about binary search tree'
+  text: Talks about binary search tree
   context: 'transcript: Well, we have binary search tree insert, which we called tree insert. We have
     binary search tree delete. They will preserve the binary search tree property, but we know they don''t
     necessarily preserve'
-  status: pending
+  status: approved
 - id: mit_redblack.w4.ocr
   video: mit_redblack
   type: ocr
   start_s: 2063.69
   end_s: 2123.69
-  text: '[edit] on-screen text mentions t&eaes'
+  text: On-screen text mentions t&eaes
   context: 'ocr: t&eaes
 
     aikary
@@ -847,13 +852,13 @@ candidates:
     have Sahe
 
     499='
-  status: pending
+  status: rejected
 - id: mit_redblack.w4.multi
   video: mit_redblack
   type: multi
   start_s: 2063.69
   end_s: 2123.69
-  text: '[edit] explains binary search tree while showing t&eaes'
+  text: Explains binary search tree while showing t&eaes
   context: 'transcript: Well, we have binary search tree insert, which we called tree insert. We have
     binary search tree delete. They will prese | ocr: t&eaes
 
@@ -878,58 +883,58 @@ candidates:
     have Sahe
 
     499='
-  status: pending
+  status: approved
 - id: mit_redblack.w5.speech
   video: mit_redblack
   type: speech
   start_s: 2516.69
   end_s: 2576.69
-  text: '[edit] talks about red node'
+  text: Talks about red node
   context: 'transcript: And we will pick the color red. OK, why red? We definitely have to pick one of
     two colors. We could flip a coin. That might work, but it''s going to make our job even messier. So,
     we''re adding a new no'
-  status: pending
+  status: approved
 - id: mit_redblack.w5.ocr
   video: mit_redblack
   type: ocr
   start_s: 2516.69
   end_s: 2576.69
-  text: '[edit] on-screen text mentions BB-Insert（x)'
+  text: On-screen text mentions BB-Insert（x)
   context: 'ocr: BB-Insert（x)
 
     Idea:
 
     red'
-  status: pending
+  status: approved
 - id: mit_redblack.w5.multi
   video: mit_redblack
   type: multi
   start_s: 2516.69
   end_s: 2576.69
-  text: '[edit] explains red node while showing BB-Insert（x)'
+  text: Explains red node while showing BB-Insert（x)
   context: 'transcript: And we will pick the color red. OK, why red? We definitely have to pick one of
     two colors. We could flip a coin. That mi | ocr: BB-Insert（x)
 
     Idea:
 
     red'
-  status: pending
+  status: approved
 - id: mit_redblack.w7.speech
   video: mit_redblack
   type: speech
   start_s: 3422.7
   end_s: 3482.7
-  text: '[edit] talks about totally symmetric'
+  text: Talks about totally symmetric
   context: 'transcript: So, I want to know, does it look like this? OK, and I don''t know whether x is
     to the left or to the right of the parent. But, is parent of x the left child of p of p of x, or is
     it the right child? An'
-  status: pending
+  status: approved
 - id: mit_redblack.w7.ocr
   video: mit_redblack
   type: ocr
   start_s: 3422.7
   end_s: 3482.7
-  text: '[edit] on-screen text mentions sertT.x.'
+  text: On-screen text mentions sertT.x.
   context: 'ocr: sertT.x.
 
     -Iisert（T,x
@@ -937,13 +942,13 @@ candidates:
     网个酒
 
     RD'
-  status: pending
+  status: rejected
 - id: mit_redblack.w7.multi
   video: mit_redblack
   type: multi
   start_s: 3422.7
   end_s: 3482.7
-  text: '[edit] explains totally symmetric while showing sertT.x.'
+  text: Explains totally symmetric while showing sertT.x.
   context: 'transcript: So, I want to know, does it look like this? OK, and I don''t know whether x is
     to the left or to the right of the parent. | ocr: sertT.x.
 
@@ -952,70 +957,70 @@ candidates:
     网个酒
 
     RD'
-  status: pending
+  status: approved
 - id: mit_redblack.w9.speech
   video: mit_redblack
   type: speech
   start_s: 4328.72
   end_s: 4388.72
-  text: '[edit] talks about left child'
+  text: Talks about left child
   context: 'transcript: We have a black node C. We have a red left child from C. We have a red left grandchild,
     which is X. And then we have these black subtrees all of the same black height hanging off, which
     is exactly wha'
-  status: pending
+  status: approved
 - id: mit_redblack.w9.ocr
   video: mit_redblack
   type: ocr
   start_s: 4328.72
   end_s: 4388.72
-  text: '[edit] on-screen text mentions Case3'
+  text: On-screen text mentions Case3
   context: 'ocr: Case3
 
     recolbr'
-  status: pending
+  status: approved
 - id: mit_redblack.w9.multi
   video: mit_redblack
   type: multi
   start_s: 4328.72
   end_s: 4388.72
-  text: '[edit] explains left child while showing Case3'
+  text: Explains left child while showing Case3
   context: 'transcript: We have a black node C. We have a red left child from C. We have a red left grandchild,
     which is X. And then we have the | ocr: Case3
 
     recolbr'
-  status: pending
+  status: approved
 - id: mit_redblack.wsemantic0.semantic
   video: mit_redblack
   type: semantic
   start_s: 251.67
   end_s: 2576.69
-  text: '[edit] the section about binary search tree'
+  text: The section about binary search tree
   context: 'combined keyphrases: binary search tree, work but it''s'
-  status: pending
+  status: approved
 - id: mit_redblack.wsemantic1.semantic
   video: mit_redblack
   type: semantic
   start_s: 2516.69
   end_s: 4388.72
-  text: '[edit] the section about red node'
+  text: The section about red node
   context: 'combined keyphrases: red node, true because property'
-  status: pending
+  status: approved
 - id: mit_amortized.w0.speech
   video: mit_amortized
   type: speech
   start_s: 237.4
   end_s: 297.4
-  text: '[edit] talks about hash table'
+  text: Talks about hash table
   context: 'transcript: If I start out with a hash table, and I don''t know how many elements are going
     to be hashed into it, how big should I make it? OK, so what if we don''t know in advance? OK, what
     if we don''t know n? OK,'
-  status: pending
+  status: approved
 - id: mit_amortized.w0.ocr
   video: mit_amortized
   type: ocr
   start_s: 237.4
   end_s: 297.4
-  text: '[edit] on-screen text mentions A marti zed Analysis'
+  text: On-screen text mentions A marti zed Analysis
   context: 'ocr: A marti zed Analysis
 
     Hon luge should a hash table be
@@ -1037,13 +1042,13 @@ candidates:
     PsblenWhatfwedon+know
 
     ubnppui'
-  status: pending
+  status: approved
 - id: mit_amortized.w0.multi
   video: mit_amortized
   type: multi
   start_s: 237.4
   end_s: 297.4
-  text: '[edit] explains hash table while showing A marti zed Analysis'
+  text: Explains hash table while showing A marti zed Analysis
   context: 'transcript: If I start out with a hash table, and I don''t know how many elements are going
     to be hashed into it, how big should I ma | ocr: A marti zed Analysis
 
@@ -1062,23 +1067,23 @@ candidates:
     (space)
 
     On)forn'
-  status: pending
+  status: approved
 - id: mit_amortized.w2.speech
   video: mit_amortized
   type: speech
   start_s: 1092.05
   end_s: 1152.05
-  text: '[edit] talks about average cost'
+  text: Talks about average cost
   context: 'transcript: So, the average cost of an insert is order one, which is what we would like it
     to be, especially if we''re building a hash table. Even though sometimes we have to pay a big price,
     we''ve amortized that '
-  status: pending
+  status: approved
 - id: mit_amortized.w2.ocr
   video: mit_amortized
   type: ocr
   start_s: 1092.05
   end_s: 1152.05
-  text: '[edit] on-screen text mentions Llg(n-1)'
+  text: On-screen text mentions Llg(n-1)
   context: 'ocr: Llg(n-1)
 
     =n+
@@ -1088,13 +1093,13 @@ candidates:
     =(n
 
     ThisveaI'
-  status: pending
+  status: rejected
 - id: mit_amortized.w2.multi
   video: mit_amortized
   type: multi
   start_s: 1092.05
   end_s: 1152.05
-  text: '[edit] explains average cost while showing Llg(n-1)'
+  text: Explains average cost while showing Llg(n-1)
   context: 'transcript: So, the average cost of an insert is order one, which is what we would like it
     to be, especially if we''re building a has | ocr: Llg(n-1)
 
@@ -1105,54 +1110,54 @@ candidates:
     =(n
 
     ThisveaI'
-  status: pending
+  status: approved
 - id: mit_amortized.w4.speech
   video: mit_amortized
   type: speech
   start_s: 1946.71
   end_s: 2006.71
-  text: '[edit] talks about doubling the charges'
+  text: Talks about doubling the charges
   context: 'transcript: one of the ones that was inserted in the last round, and one of them pays for
     an old one. And so, I copy them in, and now none of those guys have any money. And the ninth guy comes
     in, he has $2 left '
-  status: pending
+  status: approved
 - id: mit_amortized.w4.ocr
   video: mit_amortized
   type: ocr
   start_s: 1946.71
   end_s: 2006.71
-  text: '[edit] on-screen text mentions 0/002222'
+  text: On-screen text mentions 0/002222
   context: 'ocr: 0/002222
 
     lol elo a poo'
-  status: pending
+  status: rejected
 - id: mit_amortized.w4.multi
   video: mit_amortized
   type: multi
   start_s: 1946.71
   end_s: 2006.71
-  text: '[edit] explains doubling the charges while showing 0/002222'
+  text: Explains doubling the charges while showing 0/002222
   context: 'transcript: one of the ones that was inserted in the last round, and one of them pays for
     an old one. And so, I copy them in, and no | ocr: 0/002222
 
     lol elo a poo'
-  status: pending
+  status: approved
 - id: mit_amortized.w5.speech
   video: mit_amortized
   type: speech
   start_s: 2374.03
   end_s: 2434.03
-  text: '[edit] talks about method the accounting'
+  text: Talks about method the accounting
   context: 'transcript: And the book has an analysis of the more general case. Any questions about the
     accounting method? The accounting method is really very cute. Very cute. And it is the one most students
     prefer to do. Th'
-  status: pending
+  status: approved
 - id: mit_amortized.w5.ocr
   video: mit_amortized
   type: ocr
   start_s: 2374.03
   end_s: 2434.03
-  text: '[edit] on-screen text mentions Llg(n-1)]'
+  text: On-screen text mentions Llg(n-1)]
   context: 'ocr: Llg(n-1)]
 
     <3n
@@ -1160,13 +1165,13 @@ candidates:
     n=0
 
     Thus,aver'
-  status: pending
+  status: rejected
 - id: mit_amortized.w5.multi
   video: mit_amortized
   type: multi
   start_s: 2374.03
   end_s: 2434.03
-  text: '[edit] explains method the accounting while showing Llg(n-1)]'
+  text: Explains method the accounting while showing Llg(n-1)]
   context: 'transcript: And the book has an analysis of the more general case. Any questions about the
     accounting method? The accounting method  | ocr: Llg(n-1)]
 
@@ -1175,23 +1180,23 @@ candidates:
     n=0
 
     Thus,aver'
-  status: pending
+  status: approved
 - id: mit_amortized.w7.speech
   video: mit_amortized
   type: speech
   start_s: 3228.68
   end_s: 3288.68
-  text: '[edit] talks about define our potential'
+  text: Talks about define our potential
   context: 'transcript: Let''s do table doubling over here. To analyze this, we have to define our potential.
     If anybody can guess this off the top of their head, they are better than I am. I struggled with this
     for probably '
-  status: pending
+  status: approved
 - id: mit_amortized.w7.ocr
   video: mit_amortized
   type: ocr
   start_s: 3228.68
   end_s: 3288.68
-  text: '[edit] on-screen text mentions A>O'
+  text: On-screen text mentions A>O
   context: 'ocr: A>O
 
     knda
@@ -1209,13 +1214,13 @@ candidates:
     Kedpu
 
     +（'
-  status: pending
+  status: rejected
 - id: mit_amortized.w7.multi
   video: mit_amortized
   type: multi
   start_s: 3228.68
   end_s: 3288.68
-  text: '[edit] explains define our potential while showing A>O'
+  text: Explains define our potential while showing A>O
   context: 'transcript: Let''s do table doubling over here. To analyze this, we have to define our potential.
     If anybody can guess this off the t | ocr: A>O
 
@@ -1234,23 +1239,23 @@ candidates:
     Kedpu
 
     +（'
-  status: pending
+  status: approved
 - id: mit_amortized.w9.speech
   video: mit_amortized
   type: speech
   start_s: 4083.33
   end_s: 4143.33
-  text: '[edit] talks about multiply this through'
+  text: Talks about multiply this through
   context: 'transcript: Or, it can reason it from first principles. This is going to be the log of I minus
     one plus one. And so then you can reduce it to this. So, you''ve got to think about those floors and
     ceilings, right? '
-  status: pending
+  status: approved
 - id: mit_amortized.w9.ocr
   video: mit_amortized
   type: ocr
   start_s: 4083.33
   end_s: 4143.33
-  text: '[edit] on-screen text mentions lse 1:L-isexactpouenof2'
+  text: On-screen text mentions lse 1:L-isexactpouenof2
   context: 'ocr: lse 1:L-isexactpouenof2
 
     C=+2-2942
@@ -1258,13 +1263,13 @@ candidates:
     lgll-1)7
 
     （+2-2（-1）+（0-1）3'
-  status: pending
+  status: rejected
 - id: mit_amortized.w9.multi
   video: mit_amortized
   type: multi
   start_s: 4083.33
   end_s: 4143.33
-  text: '[edit] explains multiply this through while showing lse 1:L-isexactpouenof2'
+  text: Explains multiply this through while showing lse 1:L-isexactpouenof2
   context: 'transcript: Or, it can reason it from first principles. This is going to be the log of I minus
     one plus one. And so then you can red | ocr: lse 1:L-isexactpouenof2
 
@@ -1273,39 +1278,39 @@ candidates:
     lgll-1)7
 
     （+2-2（-1）+（0-1）3'
-  status: pending
+  status: approved
 - id: mit_amortized.wsemantic0.semantic
   video: mit_amortized
   type: semantic
   start_s: 237.4
   end_s: 2434.03
-  text: '[edit] the section about hash table'
+  text: The section about hash table
   context: 'combined keyphrases: hash table, fee isn''t sufficient'
-  status: pending
+  status: approved
 - id: mit_amortized.wsemantic1.semantic
   video: mit_amortized
   type: semantic
   start_s: 2374.03
   end_s: 4143.33
-  text: '[edit] the section about method the accounting'
+  text: The section about method the accounting
   context: 'combined keyphrases: method the accounting, amazing good potential'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w0.speech
   video: mit_neural_nets
   type: speech
   start_s: 159.83
   end_s: 219.83
-  text: '[edit] talks about neural nets'
+  text: Talks about neural nets
   context: 'transcript: And I''ll probably reach that idea today. And you''ll see what it''s the chain
     rule, but how is it organized? OK, so what''s the structure? What''s the plan for deep neural nets?
     Good. Starting here. So wh'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w0.ocr
   video: mit_neural_nets
   type: ocr
   start_s: 159.83
   end_s: 219.83
-  text: '[edit] on-screen text mentions Deep neu adl nets(CNNg'
+  text: On-screen text mentions Deep neu adl nets(CNNg
   context: 'ocr: Deep neu adl nets(CNNg
 
     ContinuanspeeienerF
@@ -1319,13 +1324,13 @@ candidates:
     VR=9dF
 
     (chainmi)'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w0.multi
   video: mit_neural_nets
   type: multi
   start_s: 159.83
   end_s: 219.83
-  text: '[edit] explains neural nets while showing Deep neu adl nets(CNNg'
+  text: Explains neural nets while showing Deep neu adl nets(CNNg
   context: 'transcript: And I''ll probably reach that idea today. And you''ll see what it''s the chain
     rule, but how is it organized? OK, so what''s | ocr: Deep neu adl nets(CNNg
 
@@ -1340,23 +1345,23 @@ candidates:
     VR=9dF
 
     (chainmi)'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w2.speech
   video: mit_neural_nets
   type: speech
   start_s: 735.21
   end_s: 795.21
-  text: '[edit] talks about many epochs'
+  text: Talks about many epochs
   context: 'transcript: And inside, you have a spiral of blues. That was cooked up by a fiend. So the
     system is trying to find a function that''s positive on one spiral and negative on the other spiral.
     And that takes quite a'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w2.ocr
   video: mit_neural_nets
   type: ocr
   start_s: 735.21
   end_s: 795.21
-  text: '[edit] on-screen text mentions playgaun@enorflow.og'
+  text: On-screen text mentions playgaun@enorflow.og
   context: 'ocr: playgaun@enorflow.og
 
     Oang
@@ -1376,13 +1381,13 @@ candidates:
     F：S
 
     epach'
-  status: pending
+  status: rejected
 - id: mit_neural_nets.w2.multi
   video: mit_neural_nets
   type: multi
   start_s: 735.21
   end_s: 795.21
-  text: '[edit] explains many epochs while showing playgaun@enorflow.og'
+  text: Explains many epochs while showing playgaun@enorflow.og
   context: 'transcript: And inside, you have a spiral of blues. That was cooked up by a fiend. So the
     system is trying to find a function that''s | ocr: playgaun@enorflow.og
 
@@ -1403,23 +1408,23 @@ candidates:
     F：S
 
     epach'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w4.speech
   video: mit_neural_nets
   type: speech
   start_s: 1310.6
   end_s: 1370.6
-  text: '[edit] talks about layer one learns'
+  text: Talks about layer one learns
   context: 'transcript: close, it''s going to be a very shallow thing. So that will be just 1 by 6. So
     we''re just getting one output. So that''s just a vector at this final point. But of course, the whole
     idea of deep neural n'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w4.ocr
   video: mit_neural_nets
   type: ocr
   start_s: 1310.6
   end_s: 1370.6
-  text: '[edit] on-screen text mentions 1h0'
+  text: On-screen text mentions 1h0
   context: 'ocr: 1h0
 
     Lvec
@@ -1447,13 +1452,13 @@ candidates:
     11,=6
 
     neuons'
-  status: pending
+  status: rejected
 - id: mit_neural_nets.w4.multi
   video: mit_neural_nets
   type: multi
   start_s: 1310.6
   end_s: 1370.6
-  text: '[edit] explains layer one learns while showing 1h0'
+  text: Explains layer one learns while showing 1h0
   context: 'transcript: close, it''s going to be a very shallow thing. So that will be just 1 by 6. So
     we''re just getting one output. So that''s j | ocr: 1h0
 
@@ -1482,23 +1487,23 @@ candidates:
     11,=6
 
     neuons'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w5.speech
   video: mit_neural_nets
   type: speech
   start_s: 1598.29
   end_s: 1658.29
-  text: '[edit] talks about nonlinear function became'
+  text: Talks about nonlinear function became
   context: 'transcript: So the separate f''s are the f1 of a vector would be includes the relu part, the
     nonlinear part, of a1 x0 plus b1. So two parts. Once you do the linear or affine map on your feature
     vector, and then co'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w5.ocr
   video: mit_neural_nets
   type: ocr
   start_s: 1598.29
   end_s: 1658.29
-  text: '[edit] on-screen text mentions Leamingen'
+  text: On-screen text mentions Leamingen
   context: 'ocr: Leamingen
 
     CompositontxF.xF
@@ -1508,13 +1513,13 @@ candidates:
     depenkson)
 
     As5,6s'
-  status: pending
+  status: rejected
 - id: mit_neural_nets.w5.multi
   video: mit_neural_nets
   type: multi
   start_s: 1598.29
   end_s: 1658.29
-  text: '[edit] explains nonlinear function became while showing Leamingen'
+  text: Explains nonlinear function became while showing Leamingen
   context: 'transcript: So the separate f''s are the f1 of a vector would be includes the relu part, the
     nonlinear part, of a1 x0 plus b1. So two | ocr: Leamingen
 
@@ -1525,23 +1530,23 @@ candidates:
     depenkson)
 
     As5,6s'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w7.speech
   video: mit_neural_nets
   type: speech
   start_s: 2173.68
   end_s: 2233.68
-  text: '[edit] talks about fold lines'
+  text: Talks about fold lines
   context: 'transcript: part of computer science, right? So anyway, they and other people, too, have asked
     this same problem. Suppose you have, suppose I''m in two variables. And suppose, so what are you imagining
     now for the'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w7.ocr
   video: mit_neural_nets
   type: ocr
   start_s: 2173.68
   end_s: 2233.68
-  text: '[edit] on-screen text mentions 2-cls'
+  text: On-screen text mentions 2-cls
   context: 'ocr: 2-cls
 
     gerclny
@@ -1569,13 +1574,13 @@ candidates:
     As,bs
 
     Cks'
-  status: pending
+  status: rejected
 - id: mit_neural_nets.w7.multi
   video: mit_neural_nets
   type: multi
   start_s: 2173.68
   end_s: 2233.68
-  text: '[edit] explains fold lines while showing 2-cls'
+  text: Explains fold lines while showing 2-cls
   context: 'transcript: part of computer science, right? So anyway, they and other people, too, have asked
     this same problem. Suppose you have,  | ocr: 2-cls
 
@@ -1602,23 +1607,23 @@ candidates:
     F（）=F(5（F（x）))
 
     '
-  status: pending
+  status: approved
 - id: mit_neural_nets.w9.speech
   video: mit_neural_nets
   type: speech
   start_s: 2749.06
   end_s: 2809.06
-  text: '[edit] talks about here''s their formula'
+  text: Talks about here's their formula
   context: 'transcript: I think it went up by 4 to 11. So now we just have to guess a formula that matches
     those numbers. And then, of course, we really should guess it for any m and any n. And I''ll write
     down the formula th'
-  status: pending
+  status: approved
 - id: mit_neural_nets.w9.ocr
   video: mit_neural_nets
   type: ocr
   start_s: 2749.06
   end_s: 2809.06
-  text: '[edit] on-screen text mentions 0>（x'
+  text: On-screen text mentions 0>（x
   context: 'ocr: 0>（x
 
     hen
@@ -1646,13 +1651,13 @@ candidates:
     1-N
 
     nofxeK'
-  status: pending
+  status: rejected
 - id: mit_neural_nets.w9.multi
   video: mit_neural_nets
   type: multi
   start_s: 2749.06
   end_s: 2809.06
-  text: '[edit] explains here''s their formula while showing 0>（x'
+  text: Explains here's their formula while showing 0>（x
   context: 'transcript: I think it went up by 4 to 11. So now we just have to guess a formula that matches
     those numbers. And then, of course, w | ocr: 0>（x
 
@@ -1681,39 +1686,39 @@ candidates:
     1-N
 
     nofxeK'
-  status: pending
+  status: approved
 - id: mit_neural_nets.wsemantic0.semantic
   video: mit_neural_nets
   type: semantic
   start_s: 159.83
   end_s: 1658.29
-  text: '[edit] the section about tensorflow org'
+  text: The section about tensorflow org
   context: 'combined keyphrases: tensorflow org, it''s the chain'
-  status: pending
+  status: approved
 - id: mit_neural_nets.wsemantic1.semantic
   video: mit_neural_nets
   type: semantic
   start_s: 1598.29
   end_s: 2809.06
-  text: '[edit] the section about piecewise linear'
+  text: The section about piecewise linear
   context: 'combined keyphrases: piecewise linear, it''s like origami'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w0.speech
   video: mit_imagenet_cnn
   type: speech
   start_s: 141.91
   end_s: 201.91
-  text: '[edit] talks about deep net network'
+  text: Talks about deep net network
   context: 'transcript: is one of the historical papers in the history of deep learning. I''ll just read
     a couple of sentences. So this is the abstract. We trained a large, deep convolutional neural network.
     I''ll just say tha'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w0.ocr
   video: mit_imagenet_cnn
   type: ocr
   start_s: 141.91
   end_s: 201.91
-  text: '[edit] on-screen text mentions Cenvelutoh'
+  text: On-screen text mentions Cenvelutoh
   context: 'ocr: Cenvelutoh
 
     Funchiens
@@ -1727,13 +1732,13 @@ candidates:
     lhhanRuk-
 
     nchipy.Convolve'
-  status: pending
+  status: rejected
 - id: mit_imagenet_cnn.w0.multi
   video: mit_imagenet_cnn
   type: multi
   start_s: 141.91
   end_s: 201.91
-  text: '[edit] explains deep net network while showing Cenvelutoh'
+  text: Explains deep net network while showing Cenvelutoh
   context: 'transcript: is one of the historical papers in the history of deep learning. I''ll just read
     a couple of sentences. So this is the ab | ocr: Cenvelutoh
 
@@ -1748,23 +1753,23 @@ candidates:
     lhhanRuk-
 
     nchipy.Convolve'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w2.speech
   video: mit_imagenet_cnn
   type: speech
   start_s: 652.77
   end_s: 712.77
-  text: '[edit] talks about continuous variable'
+  text: Talks about continuous variable
   context: 'transcript: i''s, the index i is changing over to the continuous variable x. And now g, instead
     of dk minus i, what do I have here? So it''s the k minus i component. That will go to, let me just
     write it down, t mi'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w2.ocr
   video: mit_imagenet_cnn
   type: ocr
   start_s: 652.77
   end_s: 712.77
-  text: '[edit] on-screen text mentions K.Convolve'
+  text: On-screen text mentions K.Convolve
   context: 'ocr: K.Convolve
 
     (()
@@ -1774,13 +1779,13 @@ candidates:
     (*9)()=
 
     x(dotdx+'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w2.multi
   video: mit_imagenet_cnn
   type: multi
   start_s: 652.77
   end_s: 712.77
-  text: '[edit] explains continuous variable while showing K.Convolve'
+  text: Explains continuous variable while showing K.Convolve
   context: 'transcript: i''s, the index i is changing over to the continuous variable x. And now g, instead
     of dk minus i, what do I have here? S | ocr: K.Convolve
 
@@ -1791,23 +1796,23 @@ candidates:
     (*9)()=
 
     x(dotdx+'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w4.speech
   video: mit_imagenet_cnn
   type: speech
   start_s: 1163.64
   end_s: 1223.64
-  text: '[edit] talks about minus equals components'
+  text: Talks about minus equals components
   context: 'transcript: u minus 1 component. So that would have been the number that you somehow had to
     work out in that first lab. So that if this had n components and this had n, this would have 2n minus
     1. It''s just what '
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w4.ocr
   video: mit_imagenet_cnn
   type: ocr
   start_s: 1163.64
   end_s: 1223.64
-  text: '[edit] on-screen text mentions polyn'
+  text: On-screen text mentions polyn
   context: 'ocr: polyn
 
     Reriade
@@ -1829,13 +1834,13 @@ candidates:
     C、C2
 
     plits'
-  status: pending
+  status: rejected
 - id: mit_imagenet_cnn.w4.multi
   video: mit_imagenet_cnn
   type: multi
   start_s: 1163.64
   end_s: 1223.64
-  text: '[edit] explains minus equals components while showing polyn'
+  text: Explains minus equals components while showing polyn
   context: 'transcript: u minus 1 component. So that would have been the number that you somehow had to
     work out in that first lab. So that if t | ocr: polyn
 
@@ -1858,54 +1863,54 @@ candidates:
     C、C2
 
     plits'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w5.speech
   video: mit_imagenet_cnn
   type: speech
   start_s: 1419.07
   end_s: 1479.07
-  text: '[edit] talks about eigenvalues that''s'
+  text: Talks about eigenvalues that's
   context: 'transcript: The question I meant to ask is, what are its eigenvalues? That''s the key question.
     What are the eigenvalues? And I think that if I just multiply f times c, I get the eigenvalues of
     the matrix C. That'''
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w5.ocr
   video: mit_imagenet_cnn
   type: ocr
   start_s: 1419.07
   end_s: 1479.07
-  text: '[edit] on-screen text mentions evecta3oCircnants.clemns'
+  text: On-screen text mentions evecta3oCircnants.clemns
   context: 'ocr: evecta3oCircnants.clemns
 
     =CtP+GP'
-  status: pending
+  status: rejected
 - id: mit_imagenet_cnn.w5.multi
   video: mit_imagenet_cnn
   type: multi
   start_s: 1419.07
   end_s: 1479.07
-  text: '[edit] explains eigenvalues that''s while showing evecta3oCircnants.clemns'
+  text: Explains eigenvalues that's while showing evecta3oCircnants.clemns
   context: 'transcript: The question I meant to ask is, what are its eigenvalues? That''s the key question.
     What are the eigenvalues? And I think | ocr: evecta3oCircnants.clemns
 
     =CtP+GP'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w7.speech
   video: mit_imagenet_cnn
   type: speech
   start_s: 1929.94
   end_s: 1989.94
-  text: '[edit] talks about fft the fast'
+  text: Talks about fft the fast
   context: 'transcript: because of the FFT, the fast Fourier transform, to transform, whichever equal
     to transform, multiplied by F, transform. So it''s the presence of the FFT that makes this gives us
     a really two different '
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w7.ocr
   video: mit_imagenet_cnn
   type: ocr
   start_s: 1929.94
   end_s: 1989.94
-  text: '[edit] on-screen text mentions Conolnhsn'
+  text: On-screen text mentions Conolnhsn
   context: 'ocr: Conolnhsn
 
     -Vxs>
@@ -1929,13 +1934,13 @@ candidates:
     CyclxW
 
     byF'
-  status: pending
+  status: rejected
 - id: mit_imagenet_cnn.w7.multi
   video: mit_imagenet_cnn
   type: multi
   start_s: 1929.94
   end_s: 1989.94
-  text: '[edit] explains fft the fast while showing Conolnhsn'
+  text: Explains fft the fast while showing Conolnhsn
   context: 'transcript: because of the FFT, the fast Fourier transform, to transform, whichever equal
     to transform, multiplied by F, transform.  | ocr: Conolnhsn
 
@@ -1960,23 +1965,23 @@ candidates:
     CyclxW
 
     byF'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w9.speech
   video: mit_imagenet_cnn
   type: speech
   start_s: 2440.8
   end_s: 2500.8
-  text: '[edit] talks about matrix then a12'
+  text: Talks about matrix then a12
   context: 'transcript: And the appropriate way to do it is to take A11 and multiply by b. So there, what
     do I have? What size have I got there already, just in that one corner? n by n, right? It''s a number
     times an n by n m'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.w9.ocr
   video: mit_imagenet_cnn
   type: ocr
   start_s: 2440.8
   end_s: 2500.8
-  text: '[edit] on-screen text mentions ConvolntanRue'
+  text: On-screen text mentions ConvolntanRue
   context: 'ocr: ConvolntanRue
 
     muetiply
@@ -1996,13 +2001,13 @@ candidates:
     aBaBan
 
     Kron'
-  status: pending
+  status: rejected
 - id: mit_imagenet_cnn.w9.multi
   video: mit_imagenet_cnn
   type: multi
   start_s: 2440.8
   end_s: 2500.8
-  text: '[edit] explains matrix then a12 while showing ConvolntanRue'
+  text: Explains matrix then a12 while showing ConvolntanRue
   context: 'transcript: And the appropriate way to do it is to take A11 and multiply by b. So there, what
     do I have? What size have I got there  | ocr: ConvolntanRue
 
@@ -2023,39 +2028,39 @@ candidates:
     aBaBan
 
     Kron'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.wsemantic0.semantic
   video: mit_imagenet_cnn
   type: semantic
   start_s: 141.91
   end_s: 1479.07
-  text: '[edit] the section about neural network i''ll'
+  text: The section about neural network i'll
   context: 'combined keyphrases: neural network i''ll, history'
-  status: pending
+  status: approved
 - id: mit_imagenet_cnn.wsemantic1.semantic
   video: mit_imagenet_cnn
   type: semantic
   start_s: 1419.07
   end_s: 2500.8
-  text: '[edit] the section about eigenvalues convolving'
+  text: The section about eigenvalues convolving
   context: 'combined keyphrases: eigenvalues convolving, periodic but what''s'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w0.speech
   video: underactuated_robotics
   type: speech
   start_s: 222.57
   end_s: 282.57
-  text: '[edit] talks about honda''s asimo'
+  text: Talks about honda's asimo
   context: 'transcript: How many people have seen ASIMO before? Good. OK, so ASIMO, let''s watch the little
     promotional video for Honda''s ASIMO. This is a few years old now, but ASIMO absolutely is sort of
     the pinnacle of rob'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w0.ocr
   video: underactuated_robotics
   type: ocr
   start_s: 222.57
   end_s: 282.57
-  text: '[edit] on-screen text mentions Honda''sAsiMo'
+  text: On-screen text mentions Honda'sAsiMo
   context: 'ocr: Honda''sAsiMo
 
     (c)Honda,Inc.All rights reserved.This content is excluded
@@ -2063,36 +2068,36 @@ candidates:
     from our Creative Commons license.For more information,
 
     see http://ocw.mit.edu/fairuse'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w0.multi
   video: underactuated_robotics
   type: multi
   start_s: 222.57
   end_s: 282.57
-  text: '[edit] explains honda''s asimo while showing Honda''sAsiMo'
+  text: Explains honda's asimo while showing Honda'sAsiMo
   context: 'transcript: How many people have seen ASIMO before? Good. OK, so ASIMO, let''s watch the little
     promotional video for Honda''s ASIMO.  | ocr: Honda''sAsiMo
 
     (c)Honda,Inc.All rights reserved.This content is excluded
 
     from our Creative Commons license.For more inform'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w2.speech
   video: underactuated_robotics
   type: speech
   start_s: 1023.83
   end_s: 1083.83
-  text: '[edit] talks about rainbow trout out'
+  text: Talks about rainbow trout out
   context: 'transcript: This is a rainbow trout, OK? So the rainbow trout are the fish that swim upstream
     at mating season, OK? So every year, they make their march up the streams. It turns out, if you watch
     these rainbow tr'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w2.ocr
   video: underactuated_robotics
   type: ocr
   start_s: 1023.83
   end_s: 1083.83
-  text: '[edit] on-screen text mentions Example:Efficient swimming upstream'
+  text: On-screen text mentions Example:Efficient swimming upstream
   context: 'ocr: Example:Efficient swimming upstream
 
     from George Lauder and Mike
@@ -2100,13 +2105,13 @@ candidates:
     Triantafyllou(Liao et al,2003)
 
     Courtesy of George Lauder.Used with permission.'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w2.multi
   video: underactuated_robotics
   type: multi
   start_s: 1023.83
   end_s: 1083.83
-  text: '[edit] explains rainbow trout out while showing Example:Efficient swimming upstream'
+  text: Explains rainbow trout out while showing Example:Efficient swimming upstream
   context: 'transcript: This is a rainbow trout, OK? So the rainbow trout are the fish that swim upstream
     at mating season, OK? So every year, t | ocr: Example:Efficient swimming upstream
 
@@ -2115,23 +2120,23 @@ candidates:
     Triantafyllou(Liao et al,2003)
 
     Courtesy of George Lauder'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w4.speech
   video: underactuated_robotics
   type: speech
   start_s: 1825.09
   end_s: 1885.09
-  text: '[edit] talks about called feedback linearization'
+  text: Talks about called feedback linearization
   context: 'transcript: u prime. Where do you want q double dot? This is u prime, so just some other u.
     So what I''m trying to do is now say that I''m going to effectively change the equations of motion
     of my system into this,'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w4.ocr
   video: underactuated_robotics
   type: ocr
   start_s: 1825.09
   end_s: 1885.09
-  text: '[edit] on-screen text mentions f（geut)'
+  text: On-screen text mentions f（geut)
   context: 'ocr: f（geut)
 
     gf（-（
@@ -2145,13 +2150,13 @@ candidates:
     g=U''
 
     jes aka tons'
-  status: pending
+  status: rejected
 - id: underactuated_robotics.w4.multi
   video: underactuated_robotics
   type: multi
   start_s: 1825.09
   end_s: 1885.09
-  text: '[edit] explains called feedback linearization while showing f（geut)'
+  text: Explains called feedback linearization while showing f（geut)
   context: 'transcript: u prime. Where do you want q double dot? This is u prime, so just some other u.
     So what I''m trying to do is now say that | ocr: f（geut)
 
@@ -2166,23 +2171,23 @@ candidates:
     g=U''
 
     jes aka tons'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w5.speech
   video: underactuated_robotics
   type: speech
   start_s: 2225.73
   end_s: 2285.73
-  text: '[edit] talks about under-actuated robotics'
+  text: Talks about under-actuated robotics
   context: 'transcript: So are you interested in order to find out how large robots can use to have underactuated
     robotics? Absolutely. I''m going to finish making that argument, but absolutely. That''s exactly what
     I''m saying'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w5.ocr
   video: underactuated_robotics
   type: ocr
   start_s: 2225.73
   end_s: 2285.73
-  text: '[edit] on-screen text mentions bs.tc'
+  text: On-screen text mentions bs.tc
   context: 'ocr: bs.tc
 
     Preres
@@ -2192,13 +2197,13 @@ candidates:
     A gcb MAT CAB
 
     Cuvnsl'
-  status: pending
+  status: rejected
 - id: underactuated_robotics.w5.multi
   video: underactuated_robotics
   type: multi
   start_s: 2225.73
   end_s: 2285.73
-  text: '[edit] explains under-actuated robotics while showing bs.tc'
+  text: Explains under-actuated robotics while showing bs.tc
   context: 'transcript: So are you interested in order to find out how large robots can use to have underactuated
     robotics? Absolutely. I''m goin | ocr: bs.tc
 
@@ -2209,115 +2214,115 @@ candidates:
     A gcb MAT CAB
 
     Cuvnsl'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w7.speech
   video: underactuated_robotics
   type: speech
   start_s: 3026.99
   end_s: 3086.99
-  text: '[edit] talks about gravitational terms'
+  text: Talks about gravitational terms
   context: 'transcript: The C here is the Coriolis terms. The G here is the gravitational terms, potential
     terms. And then these are called the manipulator equations. We''re going to revisit them. You don''t
     have to have compl'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w7.ocr
   video: underactuated_robotics
   type: ocr
   start_s: 3026.99
   end_s: 3086.99
-  text: '[edit] on-screen text mentions （（'
+  text: On-screen text mentions （（
   context: 'ocr: （（
 
     wutas
 
     otalinrans'
-  status: pending
+  status: rejected
 - id: underactuated_robotics.w7.multi
   video: underactuated_robotics
   type: multi
   start_s: 3026.99
   end_s: 3086.99
-  text: '[edit] explains gravitational terms while showing （（'
+  text: Explains gravitational terms while showing （（
   context: 'transcript: The C here is the Coriolis terms. The G here is the gravitational terms, potential
     terms. And then these are called the  | ocr: （（
 
     wutas
 
     otalinrans'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w9.speech
   video: underactuated_robotics
   type: speech
   start_s: 3828.25
   end_s: 3888.25
-  text: '[edit] talks about underactuated'
+  text: Talks about underactuated
   context: 'transcript: a place where you might want it the most, your shoulder motor, your elbow motor,
     whatever it is, the place that connects you to the ground, you don''t have a motor. And you can''t
     have a motor unless yo'
-  status: pending
+  status: approved
 - id: underactuated_robotics.w9.ocr
   video: underactuated_robotics
   type: ocr
   start_s: 3828.25
   end_s: 3888.25
-  text: '[edit] on-screen text mentions X='
+  text: On-screen text mentions X=
   context: 'ocr: X=
 
     jotas'
-  status: pending
+  status: rejected
 - id: underactuated_robotics.w9.multi
   video: underactuated_robotics
   type: multi
   start_s: 3828.25
   end_s: 3888.25
-  text: '[edit] explains underactuated while showing X='
+  text: Explains underactuated while showing X=
   context: 'transcript: a place where you might want it the most, your shoulder motor, your elbow motor,
     whatever it is, the place that connects | ocr: X=
 
     jotas'
-  status: pending
+  status: approved
 - id: underactuated_robotics.wsemantic0.semantic
   video: underactuated_robotics
   type: semantic
   start_s: 222.57
   end_s: 2285.73
-  text: '[edit] the section about humanoid robot absolutely'
+  text: The section about humanoid robot absolutely
   context: 'combined keyphrases: humanoid robot absolutely, many other reasons'
-  status: pending
+  status: approved
 - id: underactuated_robotics.wsemantic1.semantic
   video: underactuated_robotics
   type: semantic
   start_s: 2225.73
   end_s: 3888.25
-  text: '[edit] the section about under-actuated robotics'
+  text: The section about under-actuated robotics
   context: 'combined keyphrases: under-actuated robotics, interesting because it''s'
-  status: pending
+  status: approved
 - id: tool_grab_only.w0.ocr
   video: tool_grab_only
   type: ocr
   start_s: 10.44
   end_s: 70.44
-  text: '[edit] on-screen text mentions ROBOT STATUS FOR AUTONOMOUS'
+  text: On-screen text mentions ROBOT STATUS FOR AUTONOMOUS
   context: 'ocr: ROBOT STATUS FOR AUTONOMOUS
 
     TASK DISPLAYED AND UPDATED AT
 
     EVERY STAGE'
-  status: pending
+  status: approved
 - id: tool_grab_only.w0.visual
   video: tool_grab_only
   type: visual
   start_s: 10.44
   end_s: 70.44
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: tool_grab_only.w1.ocr
   video: tool_grab_only
   type: ocr
   start_s: 70.44
   end_s: 130.44
-  text: '[edit] on-screen text mentions TOOLPOKSTAEUS:'
+  text: 'On-screen text mentions TOOLPOKSTAEUS:'
   context: 'ocr: TOOLPOKSTAEUS:
 
     home
@@ -2327,38 +2332,38 @@ candidates:
     COMPLETE GRASP IS CONF I MED&
 
     TOOL IS SECURED UPON SUCCESS'
-  status: pending
+  status: rejected
 - id: tool_grab_only.w1.visual
   video: tool_grab_only
   type: visual
   start_s: 70.44
   end_s: 130.44
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: tool_grab_only.w2.ocr
   video: tool_grab_only
   type: ocr
   start_s: 130.44
   end_s: 190.44
-  text: '[edit] on-screen text mentions V1J203'
+  text: On-screen text mentions V1J203
   context: 'ocr: V1J203
 
     J5:V.G.000'
-  status: pending
+  status: rejected
 - id: tool_grab_only.w2.visual
   video: tool_grab_only
   type: visual
   start_s: 130.44
   end_s: 190.44
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected
 - id: tool_grab_only.w3.visual
   video: tool_grab_only
   type: visual
   start_s: 190.44
   end_s: 207.88
-  text: '[edit] describe what is shown on screen'
+  text: Describe what is shown on screen
   context: 3 distinct scene(s) sampled, little or no speech/on-screen text
-  status: pending
+  status: rejected

@@ -1,0 +1,905 @@
+videos:
+- key: bigbuckbunny
+  title: Big Buck Bunny
+  file: eval/videos/real/Big Buck Bunny.mp4
+  license: unverified — Blender Foundation open movie, verify before reuse
+- key: spring
+  title: Spring
+  file: eval/videos/real/Spring - Blender Open Movie.mp4
+  license: unverified — Blender Foundation open movie, verify before reuse
+- key: tears_of_steel
+  title: Tears of Steel
+  file: eval/videos/real/Tears of Steel - Blender VFX Open Movie (1).mp4
+  license: unverified — Blender Foundation open movie, verify before reuse
+- key: mit_asymptotic
+  title: 'Lecture 2: Asymptotic Notation'
+  file: eval/videos/real/Lecture-2-Asymptotic-Notation.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_streams
+  title: 'Lecture 6: Streams'
+  file: eval/videos/real/Lecture6-Streams.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_redblack
+  title: 'Lecture 10: Red-Black Trees'
+  file: eval/videos/real/Lecture-10-Red-black-Trees.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_amortized
+  title: 'Lecture 13: Amortized Algorithms'
+  file: eval/videos/real/Lecture-13-Amortized-Algorithms.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_neural_nets
+  title: 'Lecture 26: Structure of Neural Nets'
+  file: eval/videos/real/Lecture26-Structure-of-Neural-Nets.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_imagenet_cnn
+  title: 'Lecture 32: ImageNet and CNNs'
+  file: eval/videos/real/Lecture32-ImageNet-CNN.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: underactuated_robotics
+  title: MIT Underactuated Robotics
+  file: eval/videos/real/MIT-Underactuated-Robotics.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: tool_grab_only
+  title: Tool Grab Only
+  file: eval/videos/real/ToolGrabOnly.mp4
+  license: unverified — robotics demo clip, verify before reuse
+queries:
+- id: bigbuckbunny.w0.visual
+  text: Big Buck Bunny wakes up, yawns, leaves home, scratches himself, walks over a flower and sniffs
+    it in enjoyment. His tail wags
+  modality: visual
+  relevant:
+  - video: bigbuckbunny
+    start_s: 29.83
+    end_s: 89.83
+- id: bigbuckbunny.w1.visual
+  text: Big Buck Bunny first dodges acorn thrown at him. Afterwards he gets repetitively hit by attacks
+    by squirrels and smaller creatures. The smaller creatures then kill a butterfly and mock Big Buck
+    Bunny, making him sad
+  modality: visual
+  relevant:
+  - video: bigbuckbunny
+    start_s: 164.06
+    end_s: 224.06
+- id: bigbuckbunny.w3.visual
+  text: Flying squirrel is flying then falls and narrowly avoids spikes. He then flies directly into Big
+    Bucky Bunnies hands. Big Buck Bunny grabs and chokes him
+  modality: visual
+  relevant:
+  - video: bigbuckbunny
+    start_s: 432.51
+    end_s: 492.51
+- id: spring.w0.visual
+  text: First scene is a camera pan of scenic mountains, little dog grabs branch thrown to him by owner
+    and fetches it. His owner then gives him treat. Then they begin walking down mountain range together
+  modality: visual
+  relevant:
+  - video: spring
+    start_s: 23.21
+    end_s: 83.21
+- id: tears_of_steel.w0.speech
+  text: Talks about i'm freaked out
+  modality: speech
+  relevant:
+  - video: tears_of_steel
+    start_s: 36.71
+    end_s: 96.71
+- id: tears_of_steel.w0.multi
+  text: Explains i'm freaked out while showing LMULATIONL
+  modality: multi
+  relevant:
+  - video: tears_of_steel
+    start_s: 36.71
+    end_s: 96.71
+- id: tears_of_steel.w1.speech
+  text: Talks about perfect we're
+  modality: speech
+  relevant:
+  - video: tears_of_steel
+    start_s: 201.91
+    end_s: 261.91
+- id: tears_of_steel.w2.speech
+  text: Talks about crush you i'm
+  modality: speech
+  relevant:
+  - video: tears_of_steel
+    start_s: 367.11
+    end_s: 427.11
+- id: tears_of_steel.w2.multi
+  text: Explains crush you i'm while showing gahg-
+  modality: multi
+  relevant:
+  - video: tears_of_steel
+    start_s: 367.11
+    end_s: 427.11
+- id: tears_of_steel.w3.speech
+  text: Talks about memory override
+  modality: speech
+  relevant:
+  - video: tears_of_steel
+    start_s: 532.31
+    end_s: 592.31
+- id: tears_of_steel.wsemantic0.semantic
+  text: The section about i'm freaked out
+  modality: semantic
+  relevant:
+  - video: tears_of_steel
+    start_s: 36.71
+    end_s: 427.11
+- id: tears_of_steel.wsemantic1.semantic
+  text: The section about sorry good ad-lib
+  modality: semantic
+  relevant:
+  - video: tears_of_steel
+    start_s: 367.11
+    end_s: 592.31
+- id: mit_asymptotic.w0.speech
+  text: Talks about bizarre notation
+  modality: speech
+  relevant:
+  - video: mit_asymptotic
+    start_s: 211.7
+    end_s: 271.7
+- id: mit_asymptotic.w0.multi
+  text: Explains bizarre notation while showing （6)0=（
+  modality: multi
+  relevant:
+  - video: mit_asymptotic
+    start_s: 211.7
+    end_s: 271.7
+- id: mit_asymptotic.w2.speech
+  text: Talks about solved some recurrences
+  modality: speech
+  relevant:
+  - video: mit_asymptotic
+    start_s: 973.82
+    end_s: 1033.82
+- id: mit_asymptotic.w2.multi
+  text: Explains solved some recurrences while showing Ex23=063
+  modality: multi
+  relevant:
+  - video: mit_asymptotic
+    start_s: 973.82
+    end_s: 1033.82
+- id: mit_asymptotic.w4.speech
+  text: Talks about squared minus negative
+  modality: speech
+  relevant:
+  - video: mit_asymptotic
+    start_s: 1735.94
+    end_s: 1795.94
+- id: mit_asymptotic.w4.multi
+  text: Explains squared minus negative while showing ）0=（2L
+  modality: multi
+  relevant:
+  - video: mit_asymptotic
+    start_s: 1735.94
+    end_s: 1795.94
+- id: mit_asymptotic.w5.speech
+  text: Talks about larger than positive
+  modality: speech
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2117.01
+    end_s: 2177.01
+- id: mit_asymptotic.w5.multi
+  text: Explains larger than positive while showing C=1
+  modality: multi
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2117.01
+    end_s: 2177.01
+- id: mit_asymptotic.w7.speech
+  text: Talks about recursion trees there's
+  modality: speech
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2879.13
+    end_s: 2939.13
+- id: mit_asymptotic.w7.ocr
+  text: On-screen text mentions method
+  modality: ocr
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2879.13
+    end_s: 2939.13
+- id: mit_asymptotic.w7.multi
+  text: Explains recursion trees there's while showing method
+  modality: multi
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2879.13
+    end_s: 2939.13
+- id: mit_asymptotic.w9.speech
+  text: Talks about using recursion trees
+  modality: speech
+  relevant:
+  - video: mit_asymptotic
+    start_s: 3641.25
+    end_s: 3701.25
+- id: mit_asymptotic.w9.multi
+  text: Explains using recursion trees while showing G=12
+  modality: multi
+  relevant:
+  - video: mit_asymptotic
+    start_s: 3641.25
+    end_s: 3701.25
+- id: mit_asymptotic.wsemantic0.semantic
+  text: The section about big omega notation
+  modality: semantic
+  relevant:
+  - video: mit_asymptotic
+    start_s: 211.7
+    end_s: 2177.01
+- id: mit_asymptotic.wsemantic1.semantic
+  text: The section about recursion trees there's
+  modality: semantic
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2117.01
+    end_s: 3701.25
+- id: mit_streams.w0.speech
+  text: Talks about onto the integers
+  modality: speech
+  relevant:
+  - video: mit_streams
+    start_s: 189.02
+    end_s: 249.02
+- id: mit_streams.w0.ocr
+  text: On-screen text mentions OEFINE <INTEGERS-FROM N)
+  modality: ocr
+  relevant:
+  - video: mit_streams
+    start_s: 189.02
+    end_s: 249.02
+- id: mit_streams.w0.multi
+  text: Explains onto the integers while showing OEFINE <INTEGERS-FROM N)
+  modality: multi
+  relevant:
+  - video: mit_streams
+    start_s: 189.02
+    end_s: 249.02
+- id: mit_streams.w2.speech
+  text: Talks about process the streams
+  modality: speech
+  relevant:
+  - video: mit_streams
+    start_s: 869.51
+    end_s: 929.51
+- id: mit_streams.w2.multi
+  text: Explains process the streams while showing HAROID ABELSON
+  modality: multi
+  relevant:
+  - video: mit_streams
+    start_s: 869.51
+    end_s: 929.51
+- id: mit_streams.w4.speech
+  text: Talks about recursive procedures
+  modality: speech
+  relevant:
+  - video: mit_streams
+    start_s: 1550.0
+    end_s: 1610.0
+- id: mit_streams.w4.multi
+  text: Explains recursive procedures while showing DGFNE FIBS
+  modality: multi
+  relevant:
+  - video: mit_streams
+    start_s: 1550.0
+    end_s: 1610.0
+- id: mit_streams.w5.speech
+  text: Talks about actual delayed object
+  modality: speech
+  relevant:
+  - video: mit_streams
+    start_s: 1890.24
+    end_s: 1950.24
+- id: mit_streams.w5.ocr
+  text: On-screen text mentions (define
+  modality: ocr
+  relevant:
+  - video: mit_streams
+    start_s: 1890.24
+    end_s: 1950.24
+- id: mit_streams.w5.multi
+  text: Explains actual delayed object while showing (define
+  modality: multi
+  relevant:
+  - video: mit_streams
+    start_s: 1890.24
+    end_s: 1950.24
+- id: mit_streams.w7.speech
+  text: Talks about identity function
+  modality: speech
+  relevant:
+  - video: mit_streams
+    start_s: 2570.73
+    end_s: 2630.73
+- id: mit_streams.w7.ocr
+  text: On-screen text mentions (define）
+  modality: ocr
+  relevant:
+  - video: mit_streams
+    start_s: 2570.73
+    end_s: 2630.73
+- id: mit_streams.w7.multi
+  text: Explains identity function while showing (define）
+  modality: multi
+  relevant:
+  - video: mit_streams
+    start_s: 2570.73
+    end_s: 2630.73
+- id: mit_streams.w9.speech
+  text: Talks about computer science
+  modality: speech
+  relevant:
+  - video: mit_streams
+    start_s: 3251.21
+    end_s: 3311.21
+- id: mit_streams.w9.multi
+  text: Explains computer science while showing OF
+  modality: multi
+  relevant:
+  - video: mit_streams
+    start_s: 3251.21
+    end_s: 3311.21
+- id: mit_streams.wsemantic0.semantic
+  text: The section about onto the integers
+  modality: semantic
+  relevant:
+  - video: mit_streams
+    start_s: 189.02
+    end_s: 1950.24
+- id: mit_streams.wsemantic1.semantic
+  text: The section about actual delayed object
+  modality: semantic
+  relevant:
+  - video: mit_streams
+    start_s: 1890.24
+    end_s: 3311.21
+- id: mit_redblack.w0.speech
+  text: Talks about binary search tree
+  modality: speech
+  relevant:
+  - video: mit_redblack
+    start_s: 251.67
+    end_s: 311.67
+- id: mit_redblack.w0.multi
+  text: Explains binary search tree while showing xamples
+  modality: multi
+  relevant:
+  - video: mit_redblack
+    start_s: 251.67
+    end_s: 311.67
+- id: mit_redblack.w2.speech
+  text: Talks about red node merge
+  modality: speech
+  relevant:
+  - video: mit_redblack
+    start_s: 1157.68
+    end_s: 1217.68
+- id: mit_redblack.w2.multi
+  text: Explains red node merge while showing Hegktfredblace
+  modality: multi
+  relevant:
+  - video: mit_redblack
+    start_s: 1157.68
+    end_s: 1217.68
+- id: mit_redblack.w4.speech
+  text: Talks about binary search tree
+  modality: speech
+  relevant:
+  - video: mit_redblack
+    start_s: 2063.69
+    end_s: 2123.69
+- id: mit_redblack.w4.multi
+  text: Explains binary search tree while showing t&eaes
+  modality: multi
+  relevant:
+  - video: mit_redblack
+    start_s: 2063.69
+    end_s: 2123.69
+- id: mit_redblack.w5.speech
+  text: Talks about red node
+  modality: speech
+  relevant:
+  - video: mit_redblack
+    start_s: 2516.69
+    end_s: 2576.69
+- id: mit_redblack.w5.ocr
+  text: On-screen text mentions BB-Insert（x)
+  modality: ocr
+  relevant:
+  - video: mit_redblack
+    start_s: 2516.69
+    end_s: 2576.69
+- id: mit_redblack.w5.multi
+  text: Explains red node while showing BB-Insert（x)
+  modality: multi
+  relevant:
+  - video: mit_redblack
+    start_s: 2516.69
+    end_s: 2576.69
+- id: mit_redblack.w7.speech
+  text: Talks about totally symmetric
+  modality: speech
+  relevant:
+  - video: mit_redblack
+    start_s: 3422.7
+    end_s: 3482.7
+- id: mit_redblack.w7.multi
+  text: Explains totally symmetric while showing sertT.x.
+  modality: multi
+  relevant:
+  - video: mit_redblack
+    start_s: 3422.7
+    end_s: 3482.7
+- id: mit_redblack.w9.speech
+  text: Talks about left child
+  modality: speech
+  relevant:
+  - video: mit_redblack
+    start_s: 4328.72
+    end_s: 4388.72
+- id: mit_redblack.w9.ocr
+  text: On-screen text mentions Case3
+  modality: ocr
+  relevant:
+  - video: mit_redblack
+    start_s: 4328.72
+    end_s: 4388.72
+- id: mit_redblack.w9.multi
+  text: Explains left child while showing Case3
+  modality: multi
+  relevant:
+  - video: mit_redblack
+    start_s: 4328.72
+    end_s: 4388.72
+- id: mit_redblack.wsemantic0.semantic
+  text: The section about binary search tree
+  modality: semantic
+  relevant:
+  - video: mit_redblack
+    start_s: 251.67
+    end_s: 2576.69
+- id: mit_redblack.wsemantic1.semantic
+  text: The section about red node
+  modality: semantic
+  relevant:
+  - video: mit_redblack
+    start_s: 2516.69
+    end_s: 4388.72
+- id: mit_amortized.w0.speech
+  text: Talks about hash table
+  modality: speech
+  relevant:
+  - video: mit_amortized
+    start_s: 237.4
+    end_s: 297.4
+- id: mit_amortized.w0.ocr
+  text: On-screen text mentions A marti zed Analysis
+  modality: ocr
+  relevant:
+  - video: mit_amortized
+    start_s: 237.4
+    end_s: 297.4
+- id: mit_amortized.w0.multi
+  text: Explains hash table while showing A marti zed Analysis
+  modality: multi
+  relevant:
+  - video: mit_amortized
+    start_s: 237.4
+    end_s: 297.4
+- id: mit_amortized.w2.speech
+  text: Talks about average cost
+  modality: speech
+  relevant:
+  - video: mit_amortized
+    start_s: 1092.05
+    end_s: 1152.05
+- id: mit_amortized.w2.multi
+  text: Explains average cost while showing Llg(n-1)
+  modality: multi
+  relevant:
+  - video: mit_amortized
+    start_s: 1092.05
+    end_s: 1152.05
+- id: mit_amortized.w4.speech
+  text: Talks about doubling the charges
+  modality: speech
+  relevant:
+  - video: mit_amortized
+    start_s: 1946.71
+    end_s: 2006.71
+- id: mit_amortized.w4.multi
+  text: Explains doubling the charges while showing 0/002222
+  modality: multi
+  relevant:
+  - video: mit_amortized
+    start_s: 1946.71
+    end_s: 2006.71
+- id: mit_amortized.w5.speech
+  text: Talks about method the accounting
+  modality: speech
+  relevant:
+  - video: mit_amortized
+    start_s: 2374.03
+    end_s: 2434.03
+- id: mit_amortized.w5.multi
+  text: Explains method the accounting while showing Llg(n-1)]
+  modality: multi
+  relevant:
+  - video: mit_amortized
+    start_s: 2374.03
+    end_s: 2434.03
+- id: mit_amortized.w7.speech
+  text: Talks about define our potential
+  modality: speech
+  relevant:
+  - video: mit_amortized
+    start_s: 3228.68
+    end_s: 3288.68
+- id: mit_amortized.w7.multi
+  text: Explains define our potential while showing A>O
+  modality: multi
+  relevant:
+  - video: mit_amortized
+    start_s: 3228.68
+    end_s: 3288.68
+- id: mit_amortized.w9.speech
+  text: Talks about multiply this through
+  modality: speech
+  relevant:
+  - video: mit_amortized
+    start_s: 4083.33
+    end_s: 4143.33
+- id: mit_amortized.w9.multi
+  text: Explains multiply this through while showing lse 1:L-isexactpouenof2
+  modality: multi
+  relevant:
+  - video: mit_amortized
+    start_s: 4083.33
+    end_s: 4143.33
+- id: mit_amortized.wsemantic0.semantic
+  text: The section about hash table
+  modality: semantic
+  relevant:
+  - video: mit_amortized
+    start_s: 237.4
+    end_s: 2434.03
+- id: mit_amortized.wsemantic1.semantic
+  text: The section about method the accounting
+  modality: semantic
+  relevant:
+  - video: mit_amortized
+    start_s: 2374.03
+    end_s: 4143.33
+- id: mit_neural_nets.w0.speech
+  text: Talks about neural nets
+  modality: speech
+  relevant:
+  - video: mit_neural_nets
+    start_s: 159.83
+    end_s: 219.83
+- id: mit_neural_nets.w0.ocr
+  text: On-screen text mentions Deep neu adl nets(CNNg
+  modality: ocr
+  relevant:
+  - video: mit_neural_nets
+    start_s: 159.83
+    end_s: 219.83
+- id: mit_neural_nets.w0.multi
+  text: Explains neural nets while showing Deep neu adl nets(CNNg
+  modality: multi
+  relevant:
+  - video: mit_neural_nets
+    start_s: 159.83
+    end_s: 219.83
+- id: mit_neural_nets.w2.speech
+  text: Talks about many epochs
+  modality: speech
+  relevant:
+  - video: mit_neural_nets
+    start_s: 735.21
+    end_s: 795.21
+- id: mit_neural_nets.w2.multi
+  text: Explains many epochs while showing playgaun@enorflow.og
+  modality: multi
+  relevant:
+  - video: mit_neural_nets
+    start_s: 735.21
+    end_s: 795.21
+- id: mit_neural_nets.w4.speech
+  text: Talks about layer one learns
+  modality: speech
+  relevant:
+  - video: mit_neural_nets
+    start_s: 1310.6
+    end_s: 1370.6
+- id: mit_neural_nets.w4.multi
+  text: Explains layer one learns while showing 1h0
+  modality: multi
+  relevant:
+  - video: mit_neural_nets
+    start_s: 1310.6
+    end_s: 1370.6
+- id: mit_neural_nets.w5.speech
+  text: Talks about nonlinear function became
+  modality: speech
+  relevant:
+  - video: mit_neural_nets
+    start_s: 1598.29
+    end_s: 1658.29
+- id: mit_neural_nets.w5.multi
+  text: Explains nonlinear function became while showing Leamingen
+  modality: multi
+  relevant:
+  - video: mit_neural_nets
+    start_s: 1598.29
+    end_s: 1658.29
+- id: mit_neural_nets.w7.speech
+  text: Talks about fold lines
+  modality: speech
+  relevant:
+  - video: mit_neural_nets
+    start_s: 2173.68
+    end_s: 2233.68
+- id: mit_neural_nets.w7.multi
+  text: Explains fold lines while showing 2-cls
+  modality: multi
+  relevant:
+  - video: mit_neural_nets
+    start_s: 2173.68
+    end_s: 2233.68
+- id: mit_neural_nets.w9.speech
+  text: Talks about here's their formula
+  modality: speech
+  relevant:
+  - video: mit_neural_nets
+    start_s: 2749.06
+    end_s: 2809.06
+- id: mit_neural_nets.w9.multi
+  text: Explains here's their formula while showing 0>（x
+  modality: multi
+  relevant:
+  - video: mit_neural_nets
+    start_s: 2749.06
+    end_s: 2809.06
+- id: mit_neural_nets.wsemantic0.semantic
+  text: The section about tensorflow org
+  modality: semantic
+  relevant:
+  - video: mit_neural_nets
+    start_s: 159.83
+    end_s: 1658.29
+- id: mit_neural_nets.wsemantic1.semantic
+  text: The section about piecewise linear
+  modality: semantic
+  relevant:
+  - video: mit_neural_nets
+    start_s: 1598.29
+    end_s: 2809.06
+- id: mit_imagenet_cnn.w0.speech
+  text: Talks about deep net network
+  modality: speech
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 141.91
+    end_s: 201.91
+- id: mit_imagenet_cnn.w0.multi
+  text: Explains deep net network while showing Cenvelutoh
+  modality: multi
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 141.91
+    end_s: 201.91
+- id: mit_imagenet_cnn.w2.speech
+  text: Talks about continuous variable
+  modality: speech
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 652.77
+    end_s: 712.77
+- id: mit_imagenet_cnn.w2.ocr
+  text: On-screen text mentions K.Convolve
+  modality: ocr
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 652.77
+    end_s: 712.77
+- id: mit_imagenet_cnn.w2.multi
+  text: Explains continuous variable while showing K.Convolve
+  modality: multi
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 652.77
+    end_s: 712.77
+- id: mit_imagenet_cnn.w4.speech
+  text: Talks about minus equals components
+  modality: speech
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1163.64
+    end_s: 1223.64
+- id: mit_imagenet_cnn.w4.multi
+  text: Explains minus equals components while showing polyn
+  modality: multi
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1163.64
+    end_s: 1223.64
+- id: mit_imagenet_cnn.w5.speech
+  text: Talks about eigenvalues that's
+  modality: speech
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1419.07
+    end_s: 1479.07
+- id: mit_imagenet_cnn.w5.multi
+  text: Explains eigenvalues that's while showing evecta3oCircnants.clemns
+  modality: multi
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1419.07
+    end_s: 1479.07
+- id: mit_imagenet_cnn.w7.speech
+  text: Talks about fft the fast
+  modality: speech
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1929.94
+    end_s: 1989.94
+- id: mit_imagenet_cnn.w7.multi
+  text: Explains fft the fast while showing Conolnhsn
+  modality: multi
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1929.94
+    end_s: 1989.94
+- id: mit_imagenet_cnn.w9.speech
+  text: Talks about matrix then a12
+  modality: speech
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 2440.8
+    end_s: 2500.8
+- id: mit_imagenet_cnn.w9.multi
+  text: Explains matrix then a12 while showing ConvolntanRue
+  modality: multi
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 2440.8
+    end_s: 2500.8
+- id: mit_imagenet_cnn.wsemantic0.semantic
+  text: The section about neural network i'll
+  modality: semantic
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 141.91
+    end_s: 1479.07
+- id: mit_imagenet_cnn.wsemantic1.semantic
+  text: The section about eigenvalues convolving
+  modality: semantic
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 1419.07
+    end_s: 2500.8
+- id: underactuated_robotics.w0.speech
+  text: Talks about honda's asimo
+  modality: speech
+  relevant:
+  - video: underactuated_robotics
+    start_s: 222.57
+    end_s: 282.57
+- id: underactuated_robotics.w0.ocr
+  text: On-screen text mentions Honda'sAsiMo
+  modality: ocr
+  relevant:
+  - video: underactuated_robotics
+    start_s: 222.57
+    end_s: 282.57
+- id: underactuated_robotics.w0.multi
+  text: Explains honda's asimo while showing Honda'sAsiMo
+  modality: multi
+  relevant:
+  - video: underactuated_robotics
+    start_s: 222.57
+    end_s: 282.57
+- id: underactuated_robotics.w2.speech
+  text: Talks about rainbow trout out
+  modality: speech
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1023.83
+    end_s: 1083.83
+- id: underactuated_robotics.w2.ocr
+  text: On-screen text mentions Example:Efficient swimming upstream
+  modality: ocr
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1023.83
+    end_s: 1083.83
+- id: underactuated_robotics.w2.multi
+  text: Explains rainbow trout out while showing Example:Efficient swimming upstream
+  modality: multi
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1023.83
+    end_s: 1083.83
+- id: underactuated_robotics.w4.speech
+  text: Talks about called feedback linearization
+  modality: speech
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1825.09
+    end_s: 1885.09
+- id: underactuated_robotics.w4.multi
+  text: Explains called feedback linearization while showing f（geut)
+  modality: multi
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1825.09
+    end_s: 1885.09
+- id: underactuated_robotics.w5.speech
+  text: Talks about under-actuated robotics
+  modality: speech
+  relevant:
+  - video: underactuated_robotics
+    start_s: 2225.73
+    end_s: 2285.73
+- id: underactuated_robotics.w5.multi
+  text: Explains under-actuated robotics while showing bs.tc
+  modality: multi
+  relevant:
+  - video: underactuated_robotics
+    start_s: 2225.73
+    end_s: 2285.73
+- id: underactuated_robotics.w7.speech
+  text: Talks about gravitational terms
+  modality: speech
+  relevant:
+  - video: underactuated_robotics
+    start_s: 3026.99
+    end_s: 3086.99
+- id: underactuated_robotics.w7.multi
+  text: Explains gravitational terms while showing （（
+  modality: multi
+  relevant:
+  - video: underactuated_robotics
+    start_s: 3026.99
+    end_s: 3086.99
+- id: underactuated_robotics.w9.speech
+  text: Talks about underactuated
+  modality: speech
+  relevant:
+  - video: underactuated_robotics
+    start_s: 3828.25
+    end_s: 3888.25
+- id: underactuated_robotics.w9.multi
+  text: Explains underactuated while showing X=
+  modality: multi
+  relevant:
+  - video: underactuated_robotics
+    start_s: 3828.25
+    end_s: 3888.25
+- id: underactuated_robotics.wsemantic0.semantic
+  text: The section about humanoid robot absolutely
+  modality: semantic
+  relevant:
+  - video: underactuated_robotics
+    start_s: 222.57
+    end_s: 2285.73
+- id: underactuated_robotics.wsemantic1.semantic
+  text: The section about under-actuated robotics
+  modality: semantic
+  relevant:
+  - video: underactuated_robotics
+    start_s: 2225.73
+    end_s: 3888.25
+- id: tool_grab_only.w0.ocr
+  text: On-screen text mentions ROBOT STATUS FOR AUTONOMOUS
+  modality: ocr
+  relevant:
+  - video: tool_grab_only
+    start_s: 10.44
+    end_s: 70.44
