@@ -225,6 +225,11 @@ def run(spec: ExperimentSpec, output: str | None = None, reports_dir: Path | Non
     cfg = SearchConfig.from_settings().with_overrides(spec.search)
     with _sync_session() as s:
         qs, vids, dataset_id = load_queries(s, spec)
+        if not qs:
+            raise RuntimeError(
+                f"no evaluable queries for {spec.dataset}/{spec.split}: run `scenepeek dataset import` "
+                "and make sure its videos are indexed"
+            )
         exp = Experiment(
             name=spec.name,
             dataset_id=dataset_id,
@@ -238,8 +243,6 @@ def run(spec: ExperimentSpec, output: str | None = None, reports_dir: Path | Non
         s.add(exp)
         s.commit()
         exp_id = exp.id
-    if not qs:
-        raise RuntimeError(f"no evaluable queries for {spec.dataset}/{spec.split} (are the videos indexed?)")
 
     prev = apply_overrides(spec.settings)
     try:

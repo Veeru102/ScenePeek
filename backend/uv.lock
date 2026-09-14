@@ -1088,6 +1088,7 @@ ml = [
 ]
 ml-query = [
     { name = "protobuf" },
+    { name = "scikit-learn" },
     { name = "sentence-transformers" },
     { name = "sentencepiece" },
     { name = "torch", version = "2.14.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'linux'" },
@@ -1124,7 +1125,7 @@ requires-dist = [
     { name = "rapidocr-onnxruntime", marker = "extra == 'ml'", specifier = ">=1.3" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "scenepeek", extras = ["ml-query"], marker = "extra == 'ml'" },
-    { name = "scikit-learn", marker = "extra == 'ml'", specifier = ">=1.5" },
+    { name = "scikit-learn", marker = "extra == 'ml-query'", specifier = ">=1.5" },
     { name = "sentence-transformers", marker = "extra == 'ml-query'", specifier = ">=3.0" },
     { name = "sentencepiece", marker = "extra == 'ml-query'", specifier = ">=0.2" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0" },

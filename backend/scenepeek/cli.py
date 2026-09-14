@@ -90,6 +90,35 @@ def versions_cmd(retire: str = typer.Option(None, help="kind:model_key to retire
         typer.echo(f"{v.kind:<9} {v.model_key:<40} dim={v.dim or '-':<5} {v.status:<9} {v.index_name or ''}")
 
 
+router_app = typer.Typer(help="Learned query routing")
+app.add_typer(router_app, name="router")
+
+
+@router_app.command("train")
+def router_train(
+    experiment: str = typer.Argument(
+        help="Experiment name or id whose lane attribution is the training signal"
+    ),
+    version: str = typer.Option(
+        "v1", help="Saved as models/router/<version>.joblib; use router: learned:<version>"
+    ),
+    holdout: float = typer.Option(0.2),
+    seed: int = typer.Option(0),
+    min_p: float = typer.Option(0.15, help="Lanes predicted below this probability are skipped"),
+):
+    """Fit per-lane usefulness classifiers from a recorded experiment (labels = did the lane's own
+    top-10 contain the answer) and report holdout AUC per lane."""
+    from scenepeek.search.learned_router import train
+
+    m = train(experiment, version, holdout=holdout, seed=seed, min_p=min_p)
+    typer.echo(
+        f"router {version}: lanes={m.lanes} n_train={m.meta['n_train']} n_holdout={m.meta['n_holdout']}"
+    )
+    for lane in m.lanes:
+        auc = m.meta["holdout_auc"].get(lane)
+        typer.echo(f"  {lane:<9} prior={m.priors[lane]:.2f}  holdout AUC={auc if auc is not None else 'n/a'}")
+
+
 eval_app = typer.Typer(help="Search quality evaluation")
 app.add_typer(eval_app, name="eval")
 

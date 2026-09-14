@@ -105,6 +105,7 @@ class QueryPlan:
     cues: list[str] = field(default_factory=list)
     source: str = "heuristic"  # who produced the sub-queries: heuristic | llm
     router: str = ""  # who produced the weights
+    probs: dict[str, float] = field(default_factory=dict)  # learned router: P(lane finds it)
 
     def to_dict(self) -> dict:
         return asdict(self)

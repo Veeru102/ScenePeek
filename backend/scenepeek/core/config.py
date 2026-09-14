@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     worker_heartbeat_s: float = 10.0
     worker_lease_timeout_s: float = 90.0
     media_cache_dir: Path = Path("~/.cache/scenepeek")
+    models_dir: Path = Path("../models")  # trained routers / fine-tuned rerankers (gitignored)
 
     # Chunking / segmentation
     chunk_seconds: float = 60.0
