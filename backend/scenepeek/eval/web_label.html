@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>ScenePeek — label real queries</title>
+<style>
+ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#111;color:#eee}
+ .wrap{display:grid;grid-template-columns:1fr 380px;gap:20px;padding:20px;max-width:1500px;margin:0 auto}
+ video{width:100%;background:#000;border-radius:8px}
+ select,textarea,input,button{font:inherit}
+ select,textarea,input{width:100%;box-sizing:border-box;background:#1c1c1c;color:#eee;border:1px solid #333;border-radius:6px;padding:8px}
+ textarea{min-height:80px;resize:vertical}
+ button{padding:8px 14px;border:0;border-radius:6px;cursor:pointer;font-weight:600;background:#2a2a2a;color:#eee}
+ button.primary{background:#4CAF50;color:#fff} button.mark{background:#2196F3;color:#fff} button.danger{background:#a33;color:#fff}
+ .row{display:flex;gap:8px;margin:10px 0;align-items:center;flex-wrap:wrap}
+ .hint{color:#999;font-size:13px}
+ .counts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+ .counts div{background:#1c1c1c;border-radius:6px;padding:8px;text-align:center}
+ .counts .ok{border:1px solid #4CAF50}
+ .span{font-variant-numeric:tabular-nums;font-size:18px}
+ ul{list-style:none;padding:0;margin:0;max-height:300px;overflow:auto} li{padding:6px 0;border-bottom:1px solid #222;font-size:13px}
+ label.radio{margin-right:10px}
+ .guide{background:#1a2230;border-left:3px solid #2196F3;padding:10px;border-radius:6px;font-size:13px;margin-bottom:10px}
+</style></head><body><div class="wrap">
+ <div>
+  <div class="row"><select id="video"></select></div>
+  <video id="v" controls preload="metadata"></video>
+  <div class="row">
+   <button class="mark" onclick="mark('s')">[ Mark start</button>
+   <button class="mark" onclick="mark('e')">] Mark end</button>
+   <span class="span" id="span">start — · end —</span>
+   <button onclick="jump(-5)">-5s</button><button onclick="jump(5)">+5s</button>
+   <span class="hint">keys: [ ] mark · space play/pause · ←/→ 5 s</span>
+  </div>
+ </div>
+ <div>
+  <div class="guide"><b>Write what you'd type into a search box</b> — not what was said. Paraphrase. For silent scenes,
+  describe what you see. For slides, what the slide is about (not its literal text). Pick a span that a good
+  result should land inside.</div>
+  <div class="counts" id="counts"></div>
+  <textarea id="text" placeholder="e.g. the part where he compares hash tables with balanced trees"></textarea>
+  <div class="row" id="mods"></div>
+  <input id="notes" placeholder="notes (optional): why this is hard / what to look for">
+  <div class="row"><button class="primary" onclick="save()">Save (⌘⏎)</button><span class="hint" id="status"></span></div>
+  <h4 style="margin:14px 0 6px">Saved for this video</h4>
+  <ul id="list"></ul>
+ </div>
+</div>
+<script>
+const $=id=>document.getElementById(id); const v=$('v'); let S=null,E=null,DATA=null;
+const fmt=t=>t==null?'—':`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}.${String(Math.floor((t%1)*10))}`;
+function mark(w){ if(w==='s'){S=v.currentTime; if(E!=null&&E<=S)E=null;} else {E=v.currentTime; if(S==null||S>=E)S=Math.max(0,E-10);} $('span').textContent=`start ${fmt(S)} · end ${fmt(E)}`; }
+function jump(d){ v.currentTime=Math.max(0,v.currentTime+d); }
+async function load(){ DATA=await (await fetch('/api/sources')).json();
+ const sel=$('video'); const cur=sel.value; sel.innerHTML=DATA.videos.map(x=>`<option value="${x.key}">${x.title} (${x.category||''})</option>`).join('');
+ if(cur) sel.value=cur; renderCounts(); renderList(); if(!v.src||!cur) pick(); }
+function renderCounts(){ $('counts').innerHTML=Object.entries(DATA.targets).map(([m,t])=>{const c=DATA.counts[m]||0;return `<div class="${c>=t?'ok':''}"><b>${c}</b>/${t}<br><span class="hint">${m}</span></div>`}).join(''); }
+function renderList(){ const key=$('video').value; $('list').innerHTML=DATA.queries.filter(q=>q.relevant[0].video===key).map(q=>`<li><b>${q.modality}</b> ${fmt(q.relevant[0].start_s)}–${fmt(q.relevant[0].end_s)} — ${q.text} <button class="danger" style="float:right;padding:2px 8px" onclick="del('${q.id}')">✕</button></li>`).join('')||'<li class="hint">nothing yet</li>'; }
+function pick(){ const key=$('video').value; v.src='/api/video/'+key; S=E=null; $('span').textContent='start — · end —'; renderList(); }
+$('video').onchange=pick;
+$('mods').innerHTML=['speech','visual','ocr','multi'].map((m,i)=>`<label class="radio"><input type="radio" name="m" value="${m}" ${i==0?'checked':''}> ${m}</label>`).join('');
+async function save(){ const text=$('text').value.trim(); if(S==null||E==null){$('status').textContent='mark start and end first';return;} if(text.length<3){$('status').textContent='write a query';return;}
+ const body={video:$('video').value,start_s:S,end_s:E,text,modality:document.querySelector('input[name=m]:checked').value,notes:$('notes').value||null};
+ const r=await fetch('/api/human',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ if(!r.ok){$('status').textContent='error: '+(await r.text());return;}
+ $('status').textContent='saved ✓'; $('text').value=''; $('notes').value=''; S=E=null; $('span').textContent='start — · end —'; await load(); }
+async function del(id){ await fetch('/api/human/'+id,{method:'DELETE'}); await load(); }
+document.addEventListener('keydown',e=>{ if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'){ if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)) save(); return; }
+ if(e.key==='[')mark('s'); else if(e.key===']')mark('e'); else if(e.key===' '){e.preventDefault(); v.paused?v.play():v.pause();} else if(e.key==='ArrowLeft')jump(-5); else if(e.key==='ArrowRight')jump(5); });
+load();
+</script></body></html>

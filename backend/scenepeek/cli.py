@@ -93,6 +93,22 @@ def eval_real_review_web(port: int = typer.Option(5173, help="Port to run web UI
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="info")
 
 
+@eval_app.command("real-label")
+def eval_real_label(port: int = typer.Option(5175, help="Port for the labeling UI")):
+    """Hand-write real search queries against eval/real videos -> eval/real/human.yaml."""
+    import socket
+
+    import uvicorn
+
+    from scenepeek.eval.web_label import HUMAN_PATH, app
+
+    with socket.socket() as sock:
+        if sock.connect_ex(("127.0.0.1", port)) == 0:
+            raise typer.BadParameter(f"port {port} is already in use — is another labeling server running?")
+    print(f"\nLabeling UI: http://localhost:{port}  (writes {HUMAN_PATH}; Ctrl+C when done)")
+    uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+
+
 @eval_app.command("real-auto-review")
 def eval_real_auto_review():
     """Automatically review all candidates using heuristics."""
