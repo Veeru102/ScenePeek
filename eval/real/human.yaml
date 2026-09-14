@@ -1,0 +1,366 @@
+videos:
+- key: bigbuckbunny
+  title: Big Buck Bunny
+  file: eval/videos/real/Big Buck Bunny.mp4
+  license: unverified — Blender Foundation open movie, verify before reuse
+- key: spring
+  title: Spring
+  file: eval/videos/real/Spring - Blender Open Movie.mp4
+  license: unverified — Blender Foundation open movie, verify before reuse
+- key: mit_asymptotic
+  title: 'Lecture 2: Asymptotic Notation'
+  file: eval/videos/real/Lecture-2-Asymptotic-Notation.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_streams
+  title: 'Lecture 6: Streams'
+  file: eval/videos/real/Lecture6-Streams.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_redblack
+  title: 'Lecture 10: Red-Black Trees'
+  file: eval/videos/real/Lecture-10-Red-black-Trees.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_amortized
+  title: 'Lecture 13: Amortized Algorithms'
+  file: eval/videos/real/Lecture-13-Amortized-Algorithms.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: tool_grab_only
+  title: Tool Grab Only
+  file: eval/videos/real/ToolGrabOnly.mp4
+  license: unverified — robotics demo clip, verify before reuse
+- key: underactuated_robotics
+  title: MIT Underactuated Robotics
+  file: eval/videos/real/MIT-Underactuated-Robotics.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+- key: mit_imagenet_cnn
+  title: 'Lecture 32: ImageNet and CNNs'
+  file: eval/videos/real/Lecture32-ImageNet-CNN.mp4
+  license: unverified — MIT OpenCourseWare style lecture, verify before reuse
+queries:
+- id: human.bigbuckbunny.1
+  text: River
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 13.23
+    end_s: 16.01
+- id: human.bigbuckbunny.2
+  text: Bird Chirping
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 16.0
+    end_s: 19.93
+- id: human.bigbuckbunny.3
+  text: Big Buck Bunny sleeping in home
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 34.35
+    end_s: 40.15
+- id: human.bigbuckbunny.4
+  text: Big Buck Bunny wakes up
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 50.02
+    end_s: 53.78
+- id: human.bigbuckbunny.5
+  text: Big Buck Bunny smells flowers
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 64.23
+    end_s: 70.01
+- id: human.bigbuckbunny.6
+  text: Big Buck Bunny admires flying Butterfly
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 76.4
+    end_s: 83.41
+- id: human.bigbuckbunny.7
+  text: Big Buck Bunny chases butterfly
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 113.44
+    end_s: 118.17
+- id: human.bigbuckbunny.8
+  text: Big Bucky Bunny gets hit with acorns
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 153.54
+    end_s: 178.23
+- id: human.bigbuckbunny.9
+  text: Big Buck Bunny shoots bow and arrow
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 315.07
+    end_s: 321.91
+- id: human.bigbuckbunny.10
+  text: Bird gets hit in head by acord
+  modality: visual
+  author: human
+  relevant:
+  - video: bigbuckbunny
+    start_s: 385.95
+    end_s: 388.94
+- id: human.spring.1
+  text: Beautiful Mountains
+  modality: visual
+  author: human
+  relevant:
+  - video: spring
+    start_s: 23.32
+    end_s: 36.12
+- id: human.spring.2
+  text: Dog fetches tree branch
+  modality: visual
+  author: human
+  relevant:
+  - video: spring
+    start_s: 44.36
+    end_s: 51.89
+- id: human.spring.3
+  text: Dog gets rewarded with treat
+  modality: visual
+  author: human
+  relevant:
+  - video: spring
+    start_s: 56.99
+    end_s: 60.86
+- id: human.spring.4
+  text: Dog and girl walk down mountain
+  modality: visual
+  author: human
+  relevant:
+  - video: spring
+    start_s: 75.99
+    end_s: 83.08
+- id: human.spring.5
+  text: Dog and girl walk through spooky forest
+  modality: visual
+  author: human
+  relevant:
+  - video: spring
+    start_s: 95.69
+    end_s: 111.66
+- id: human.spring.6
+  text: girls hits mysterious magical object
+  modality: visual
+  author: human
+  relevant:
+  - video: spring
+    start_s: 137.54
+    end_s: 146.26
+- id: human.mit_asymptotic.1
+  text: Professor makes joke about his strength
+  modality: speech
+  author: human
+  relevant:
+  - video: mit_asymptotic
+    start_s: 1474.75
+    end_s: 1478.82
+- id: human.mit_asymptotic.2
+  text: Professor answers questions about substitution method
+  modality: speech
+  author: human
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2199.06
+    end_s: 2245.72
+- id: human.mit_asymptotic.3
+  text: Example of recursion-tree method
+  modality: speech
+  author: human
+  relevant:
+  - video: mit_asymptotic
+    start_s: 2334.54
+    end_s: 2426.48
+- id: human.mit_asymptotic.4
+  text: Case 3 of recursion tree method
+  modality: ocr
+  author: human
+  relevant:
+  - video: mit_asymptotic
+    start_s: 3330.5
+    end_s: 3421.51
+- id: human.mit_streams.1
+  text: How to find nth element of a stream
+  modality: ocr
+  author: human
+  relevant:
+  - video: mit_streams
+    start_s: 72.57
+    end_s: 87.05
+- id: human.mit_streams.2
+  text: procedure to print stream
+  modality: ocr
+  author: human
+  relevant:
+  - video: mit_streams
+    start_s: 111.67
+    end_s: 134.34
+- id: human.mit_streams.3
+  text: Professor explains add streams
+  modality: ocr
+  author: human
+  relevant:
+  - video: mit_streams
+    start_s: 917.45
+    end_s: 954.47
+- id: human.mit_streams.4
+  text: Iterative factorial method
+  modality: ocr
+  author: human
+  relevant:
+  - video: mit_streams
+    start_s: 2338.72
+    end_s: 2427.51
+- id: human.mit_streams.5
+  text: Professor introduces functional programming
+  modality: multi
+  author: human
+  relevant:
+  - video: mit_streams
+    start_s: 2686.63
+    end_s: 2710.62
+- id: human.mit_streams.6
+  text: Professor explains functional programming with example of random streams
+  modality: multi
+  author: human
+  relevant:
+  - video: mit_streams
+    start_s: 2802.44
+    end_s: 2847.39
+- id: human.mit_redblack.1
+  text: Rotation example of red black tree
+  modality: multi
+  author: human
+  relevant:
+  - video: mit_redblack
+    start_s: 3008.11
+    end_s: 3064.25
+- id: human.mit_redblack.2
+  text: RBT Insert algorithm
+  modality: multi
+  author: human
+  relevant:
+  - video: mit_redblack
+    start_s: 3278.59
+    end_s: 3337.67
+- id: human.mit_redblack.3
+  text: BST rotation procedure
+  modality: ocr
+  author: human
+  relevant:
+  - video: mit_redblack
+    start_s: 2135.37
+    end_s: 2190.6
+- id: human.mit_amortized.1
+  text: Amortized Analysis Explained
+  modality: speech
+  author: human
+  relevant:
+  - video: mit_amortized
+    start_s: 1146.54
+    end_s: 1244.75
+- id: human.mit_amortized.2
+  text: 3 types of Amortized arguments
+  modality: multi
+  author: human
+  relevant:
+  - video: mit_amortized
+    start_s: 1277.35
+    end_s: 1368.69
+- id: human.mit_amortized.3
+  text: Recap of Amortized Algorithms
+  modality: multi
+  author: human
+  relevant:
+  - video: mit_amortized
+    start_s: 4379.47
+    end_s: 4730.12
+- id: human.tool_grab_only.1
+  text: Robot unscrews
+  modality: visual
+  author: human
+  relevant:
+  - video: tool_grab_only
+    start_s: 126.88
+    end_s: 151.88
+- id: human.tool_grab_only.2
+  text: Robot opens door
+  modality: visual
+  author: human
+  relevant:
+  - video: tool_grab_only
+    start_s: 159.4
+    end_s: 180.77
+- id: human.tool_grab_only.3
+  text: robot checks grasp
+  modality: multi
+  author: human
+  relevant:
+  - video: tool_grab_only
+    start_s: 60.32
+    end_s: 71.26
+- id: human.underactuated_robotics.1
+  text: Fish swimming upstream example
+  modality: speech
+  author: human
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1015.39
+    end_s: 1144.48
+- id: human.underactuated_robotics.2
+  text: Underactuated Explanation
+  modality: speech
+  author: human
+  relevant:
+  - video: underactuated_robotics
+    start_s: 1259.56
+    end_s: 1495.38
+- id: human.underactuated_robotics.3
+  text: unknown model explanation
+  modality: speech
+  author: human
+  relevant:
+  - video: underactuated_robotics
+    start_s: 4200.61
+    end_s: 4382.36
+- id: human.underactuated_robotics.4
+  text: under actuation is needed for robotics research
+  modality: speech
+  author: human
+  relevant:
+  - video: underactuated_robotics
+    start_s: 2239.34
+    end_s: 2297.5
+- id: human.mit_imagenet_cnn.1
+  text: progress of deep learning is based on neural network competitions
+  modality: speech
+  author: human
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 79.88
+    end_s: 120.21
+- id: human.mit_imagenet_cnn.2
+  text: Overfitting reduction
+  modality: speech
+  author: human
+  relevant:
+  - video: mit_imagenet_cnn
+    start_s: 257.51
+    end_s: 298.76
