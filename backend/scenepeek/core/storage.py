@@ -107,6 +107,10 @@ def download_file(key: str, path: Path) -> None:
     internal_client().download_file(bucket(), key, str(path))
 
 
+def delete_object(key: str) -> None:
+    internal_client().delete_object(Bucket=bucket(), Key=key)
+
+
 def delete_prefix(prefix: str) -> int:
     c = internal_client()
     paginator = c.get_paginator("list_objects_v2")

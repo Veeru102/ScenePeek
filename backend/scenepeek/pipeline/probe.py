@@ -30,6 +30,7 @@ def probe_video(ctx: JobContext, payload: dict) -> None:
         video.error = None
         s.commit()
         original_key = video.original_key
+        keep_original = video.source == "upload"
 
     ext = Path(original_key).suffix or ".bin"
     src = media.cached(video_id, original_key, f"original{ext}")
@@ -87,4 +88,8 @@ def probe_video(ctx: JobContext, payload: dict) -> None:
                 video_id=video_id,
             )
         s.commit()
+    if not keep_original:
+        # benchmark clips: the web rendition is all later stages need; the original only costs disk
+        storage.delete_object(original_key)
+        (settings.cache_dir / video_id / f"original{ext}").unlink(missing_ok=True)
     ctx.log.info("chunks planned", n=len(windows))

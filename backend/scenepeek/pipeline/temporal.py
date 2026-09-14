@@ -17,7 +17,7 @@ from scenepeek.jobs import priority
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
 from scenepeek.ml.video import get_encoder, sample_windows
-from scenepeek.models import Embedding, IndexVersion, Segment, VideoChunk
+from scenepeek.models import Embedding, IndexVersion, Segment, Video, VideoChunk
 from scenepeek.models.chunk import ChunkStatus
 from scenepeek.models.embedding import hnsw_index_name, hnsw_index_sql
 from scenepeek.models.index_version import IndexVersionStatus
@@ -99,7 +99,20 @@ def encode_temporal(ctx: JobContext, payload: dict) -> None:
         s.get(VideoChunk, chunk_id).temporal_at = datetime.now(UTC)
         s.commit()
     ensure_index(ctx.engine, enc.key, enc.dim)
+    _maybe_drop_cache(ctx, video_id)
     ctx.log.info("temporal windows encoded", windows=len(rows), model=enc.key)
+
+
+def _maybe_drop_cache(ctx: JobContext, video_id: str) -> None:
+    """Benchmark clips are numerous: once every chunk of a non-upload video has its windows, the
+    per-host media cache (web.mp4, audio, frames) has nothing left to serve."""
+    with ctx.session() as s:
+        source = s.scalar(select(Video.source).where(Video.id == video_id))
+        pending = s.scalar(
+            select(func.count()).where(VideoChunk.video_id == video_id, VideoChunk.temporal_at.is_(None))
+        )
+    if source != "upload" and pending == 0:
+        media.drop_cache(video_id)
 
 
 def ensure_index(engine: Engine, model_key: str, dim: int) -> None:
