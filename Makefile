@@ -38,7 +38,7 @@ eval:
 
 # Real-video ablations: every lane on/off + rerank + fusion method, then a paired-bootstrap comparison.
 REAL_SET ?= real
-REAL_VARIANTS = text_only no_visual no_ocr no_lexical no_rerank weighted no_caption ocr_damped visual_damped
+REAL_VARIANTS = text_only no_visual no_ocr no_lexical no_rerank rrf with_caption ocr_damped visual_damped
 eval-real:
 	cd backend && uv run scenepeek eval run -c ../eval/configs/$(REAL_SET).yaml
 	cd backend && for v in $(REAL_VARIANTS); do uv run scenepeek eval run -c ../eval/configs/$(REAL_SET)_$$v.yaml; done

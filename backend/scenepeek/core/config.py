@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     captions_enabled: bool = True
     caption_model: str = "Salesforce/blip-image-captioning-base"
     caption_max_tokens: int = 30
-    caption_in_rerank_passage: bool = True
+    caption_in_rerank_passage: bool = False
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:3b"
     ollama_enabled: bool = False  # force LLM query decomposition / topic titles on
@@ -64,13 +64,15 @@ class Settings(BaseSettings):
     search_candidates: int = 200
     rerank_top_k: int = 30
     rerank_enabled: bool = True
-    fusion_method: str = "rrf"  # rrf | weighted
+    fusion_method: str = "weighted"  # weighted | rrf — weighted min-max measured +0.05 MRR on human queries
     rrf_k: int = 60
     weight_text: float = 1.0
     weight_lexical: float = 0.8
     weight_visual: float = 0.8
     weight_ocr: float = 0.6
-    weight_caption: float = 0.7
+    # captions are indexed (filmstrip / explain panel) but 0 here: BLIP-base captions measured
+    # slightly negative for ranking on hand-written queries; raise once a stronger captioner lands
+    weight_caption: float = 0.0
     ocr_no_cue_factor: float = 1.0  # multiplier on weight_ocr when the query has no on-screen-text cue
     ocr_trgm_threshold: float = 0.45  # word_similarity floor for the OCR lane (noisy-OCR tolerance)
     dedup_window_s: float = 12.0

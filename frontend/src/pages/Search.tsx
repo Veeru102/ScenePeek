@@ -28,7 +28,7 @@ function readControls(params: URLSearchParams) {
   return {
     weights,
     rerank: params.get('rerank') !== '0',
-    fusion: (params.get('fusion') === 'weighted' ? 'weighted' : 'rrf') as 'rrf' | 'weighted',
+    fusion: (params.get('fusion') === 'rrf' ? 'rrf' : 'weighted') as 'rrf' | 'weighted',
   }
 }
 
@@ -37,7 +37,7 @@ export function SearchPage() {
   const q = params.get('q') ?? ''
   const search = useSearch()
   const initial = readControls(params)
-  const [advanced, setAdvanced] = useState(Object.keys(initial.weights).length > 0 || !initial.rerank || initial.fusion !== 'rrf')
+  const [advanced, setAdvanced] = useState(Object.keys(initial.weights).length > 0 || !initial.rerank || initial.fusion !== 'weighted')
   const [weights, setWeights] = useState<SearchWeights>(initial.weights)
   const [rerank, setRerank] = useState(initial.rerank)
   const [fusion, setFusion] = useState<'rrf' | 'weighted'>(initial.fusion)
@@ -49,7 +49,7 @@ export function SearchPage() {
     const next: Record<string, string> = { q: query }
     for (const k of LANES) if (weights[k] != null) next[`w.${k}`] = String(weights[k])
     if (!rerank) next.rerank = '0'
-    if (fusion !== 'rrf') next.fusion = fusion
+    if (fusion !== 'weighted') next.fusion = fusion
     setParams(next)
     search.mutate({ q: query, limit: 20, weights, rerank, fusion })
   }
@@ -114,11 +114,11 @@ export function SearchPage() {
                   <label key={k} className="space-y-1">
                     <div className="flex justify-between capitalize text-fg-muted">
                       <span>{k === 'text' ? 'speech' : k === 'ocr' ? 'on-screen' : k}</span>
-                      <span className="font-mono">{(weights[k] ?? { text: 1, lexical: 0.8, visual: 0.8, caption: 0.7, ocr: 0.6 }[k]).toFixed(1)}</span>
+                      <span className="font-mono">{(weights[k] ?? { text: 1, lexical: 0.8, visual: 0.8, caption: 0, ocr: 0.6 }[k]).toFixed(1)}</span>
                     </div>
                     <input
                       type="range" min={0} max={2} step={0.1}
-                      value={weights[k] ?? { text: 1, lexical: 0.8, visual: 0.8, caption: 0.7, ocr: 0.6 }[k]}
+                      value={weights[k] ?? { text: 1, lexical: 0.8, visual: 0.8, caption: 0, ocr: 0.6 }[k]}
                       onChange={(e) => setWeights((w) => ({ ...w, [k]: Number(e.target.value) }))}
                       className="w-full accent-[var(--color-accent)]"
                     />
