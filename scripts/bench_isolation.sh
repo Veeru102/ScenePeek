@@ -35,9 +35,10 @@ while :; do
   [ $(( $(date +%s) - START )) -gt 1800 ] && echo "timeout" && break
 done
 pkill -9 -f "scenepeek worker"
-curl -s localhost:8000/api/videos/$ID | python3 - "$MODE" <<'PY'
+curl -s localhost:8000/api/videos/$ID > /tmp/iso_video.json
+python3 - "$MODE" <<'PY'
 import json, sys, datetime as dt
-v = json.load(sys.stdin); mode = sys.argv[1]
+v = json.load(open("/tmp/iso_video.json")); mode = sys.argv[1]
 p = lambda s: dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
 ttfs = (p(v["first_searchable_at"]) - p(v["upload_completed_at"])).total_seconds()
 ttr = (p(v["completed_at"]) - p(v["upload_completed_at"])).total_seconds() if v.get("completed_at") else None

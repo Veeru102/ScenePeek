@@ -57,6 +57,7 @@ dev = [
     "pytest-asyncio>=0.24",
     "ruff>=0.6",
     "pillow>=10.4",  # pipeline modules import PIL at module level
+    "scikit-learn>=1.5",  # learned-router tests
 ]
 
 [project.scripts]
