@@ -82,5 +82,24 @@ def eval_real_review(type: str = typer.Option(None, "--type", help="Only review 
     review(type_filter=type)
 
 
+@eval_app.command("real-review-web")
+def eval_real_review_web(port: int = typer.Option(5173, help="Port to run web UI on")):
+    """Launch web UI for reviewing candidates (open http://localhost:PORT)."""
+    import uvicorn
+
+    from scenepeek.eval.web_review import app
+
+    print(f"\n🌐 Opening http://localhost:{port} in your browser...")
+    uvicorn.run(app, host="127.0.0.1", port=port, log_level="info")
+
+
+@eval_app.command("real-auto-review")
+def eval_real_auto_review():
+    """Automatically review all candidates using heuristics."""
+    from scenepeek.eval.auto_review import auto_review
+
+    auto_review()
+
+
 if __name__ == "__main__":
     app()
