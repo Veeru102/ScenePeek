@@ -59,12 +59,36 @@ app.add_typer(eval_app, name="eval")
 
 @eval_app.command("run")
 def eval_run(
-    config: str = typer.Option("../eval/configs/default.yaml", "-c"),
+    config: str = typer.Option("../eval/experiments/synthetic.yaml", "-c"),
     output: str = typer.Option(None, "-o"),
 ):
+    """Run an experiment YAML (eval/experiments/*.yaml). Legacy eval/configs files still work."""
+    import yaml
+
+    from scenepeek.eval.experiment import ExperimentSpec, run
     from scenepeek.eval.runner import run_eval
 
-    run_eval(config, output)
+    data = yaml.safe_load(open(config)) or {}
+    if str(data.get("dataset", "")).endswith(".yaml") or "overrides" in data:
+        run_eval(config, output)
+    else:
+        run(ExperimentSpec.from_yaml(config), output)
+
+
+@eval_app.command("list")
+def eval_list(limit: int = typer.Option(20)):
+    """Recent experiments recorded in Postgres."""
+    from sqlalchemy import select
+
+    from scenepeek.models import Experiment
+
+    with _sync_session() as s:
+        rows = s.scalars(select(Experiment).order_by(Experiment.started_at.desc()).limit(limit))
+        for e in rows:
+            m = e.metrics or {}
+            head = ", ".join(f"{k}={m[k]:.3f}" for k in ("mrr", "r1@0.5", "map") if k in m)
+            when = f"{e.started_at:%Y-%m-%d %H:%M}"
+            typer.echo(f"{when}  {str(e.id)[:8]}  {e.status:<7} {e.name:<32} n={e.n_queries:<4} {head}")
 
 
 @eval_app.command("compare")

@@ -1,0 +1,8 @@
+name: human_rrf
+dataset: scenepeek_human
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  fusion: rrf

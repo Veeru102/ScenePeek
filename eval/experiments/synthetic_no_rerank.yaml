@@ -1,0 +1,8 @@
+name: synthetic_no_rerank
+dataset: scenepeek_synthetic
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3.0
+search:
+  rerank: false

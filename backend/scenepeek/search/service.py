@@ -11,11 +11,11 @@ import numpy as np
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from scenepeek.core.config import get_settings
 from scenepeek.core.db import get_sessionmaker
 from scenepeek.core.metrics import SEARCH_LATENCY, record_sample
 from scenepeek.models import Segment, Video
 from scenepeek.search import candidates as cand
+from scenepeek.search.config import SearchConfig
 from scenepeek.search.dedup import Hit, suppress
 from scenepeek.search.fusion import Fused, fuse
 from scenepeek.search.planner import QueryPlan, plan
@@ -29,7 +29,22 @@ class SearchOptions:
     rerank: bool | None = None
     fusion: str | None = None
     candidates: int | None = None
+    router: str | None = None
     debug: bool = False  # also return each lane's ranked list (used by the eval harness)
+    config: SearchConfig | None = None  # full ranking configuration (experiments); settings otherwise
+
+    def resolve(self) -> SearchConfig:
+        cfg = self.config or SearchConfig.from_settings()
+        over: dict = {}
+        if self.rerank is not None:
+            over["rerank"] = self.rerank
+        if self.fusion:
+            over["fusion"] = self.fusion
+        if self.candidates:
+            over["candidates"] = self.candidates
+        if self.router:
+            over["router"] = self.router
+        return cfg.with_overrides(over)
 
 
 @dataclass
@@ -49,6 +64,8 @@ class SearchResult:
     timings_ms: dict[str, float]
     total_candidates: int
     lanes: dict[str, list[Hit]] | None = None  # per-lane ranked candidates, only when debug=True
+    config: SearchConfig | None = None
+    lanes_run: list[str] = field(default_factory=list)
 
 
 async def _own(fn, *args):
@@ -79,12 +96,12 @@ async def _empty():
 
 async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None) -> SearchResult:
     opts = opts or SearchOptions()
-    settings = get_settings()
+    cfg = opts.resolve()
     timings: dict[str, float] = {}
     t_all = time.perf_counter()
 
     t0 = time.perf_counter()
-    p = plan(query, opts.weights)
+    p = plan(query, opts.weights, cfg)
     timings["plan"] = (time.perf_counter() - t0) * 1000
 
     # a lane with weight 0 is skipped entirely: no encode, no query, no signal leaking into rerank
@@ -94,7 +111,7 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
     qv = await asyncio.to_thread(_encode, p, on)
     timings["encode"] = (time.perf_counter() - t0) * 1000
 
-    k = opts.candidates or settings.search_candidates
+    k = cfg.candidates
     vids = opts.video_ids
     t0 = time.perf_counter()
     # each lane gets its own session so the queries truly run in parallel
@@ -102,21 +119,24 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         _own(cand.by_text_vector, qv["text"], k, vids) if on["text"] else _empty(),
         _own(cand.by_visual_vector, qv["visual"], k, vids) if on["visual"] else _empty(),
         _own(cand.by_lexical, p.lexical_terms, p.exact_phrases, k, vids) if on["lexical"] else _empty(),
-        _own(cand.by_ocr, p.ocr_q, p.lexical_terms, p.exact_phrases, k, vids) if on["ocr"] else _empty(),
+        _own(cand.by_ocr, p.ocr_q, p.lexical_terms, p.exact_phrases, k, vids, cfg.ocr_trgm_threshold)
+        if on["ocr"]
+        else _empty(),
         _own(cand.by_caption, qv["caption"], k, vids) if on["caption"] else _empty(),
     )
     timings["candidates"] = (time.perf_counter() - t0) * 1000
     lists = {"text": text_c, "visual": vis_c, "lexical": lex_c, "ocr": ocr_c, "caption": cap_c}
+    lanes_run = [m for m, flag in on.items() if flag]
 
     t0 = time.perf_counter()
-    fused = fuse(lists, p.weights, opts.fusion or settings.fusion_method, settings.rrf_k)
+    fused = fuse(lists, p.weights, cfg.fusion, cfg.rrf_k)
     timings["fuse"] = (time.perf_counter() - t0) * 1000
     total = len(fused)
     if not fused:
-        return SearchResult(p, [], _finish(timings, t_all), 0)
+        return SearchResult(p, [], _finish(timings, t_all), 0, config=cfg, lanes_run=lanes_run)
 
     # hydrate top candidates (enough for rerank + dedup headroom)
-    top_n = max(settings.rerank_top_k, opts.limit * 4)
+    top_n = max(cfg.rerank_top_k, opts.limit * 4)
     head = fused[:top_n]
     seg_rows = {
         seg.id: seg
@@ -129,8 +149,8 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         )
     }
 
-    use_rerank = settings.rerank_enabled if opts.rerank is None else opts.rerank
-    scored = _final_scores(head, seg_rows, p, use_rerank, settings.rerank_top_k)
+    use_rerank = cfg.rerank
+    scored = _final_scores(head, seg_rows, p, cfg)
     if use_rerank:
         timings["rerank"] = scored.pop("_ms")
     else:
@@ -149,8 +169,8 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         if f.segment_id in seg_rows
     ]
     hits.sort(key=lambda h: h.score, reverse=True)
-    cap = None if (vids and len(vids) == 1) else settings.max_hits_per_video
-    kept = suppress(hits, settings.dedup_window_s, cap)[: opts.limit]
+    cap = None if (vids and len(vids) == 1) else cfg.max_hits_per_video
+    kept = suppress(hits, cfg.dedup_window_s, cap)[: opts.limit]
     timings["dedup"] = (time.perf_counter() - t0) * 1000
 
     out = []
@@ -162,7 +182,7 @@ async def search(s: AsyncSession, query: str, opts: SearchOptions | None = None)
         signals["fused"] = round(f.fused, 4)
         out.append(ResultHit(seg, videos[seg.video_id], h.start_s, h.end_s, round(h.score, 4), signals))
     lanes = await _lane_lists(s, fused, lists.keys()) if opts.debug else None
-    return SearchResult(p, out, _finish(timings, t_all), total, lanes)
+    return SearchResult(p, out, _finish(timings, t_all), total, lanes, config=cfg, lanes_run=lanes_run)
 
 
 async def _lane_lists(s: AsyncSession, fused: list, lane_names) -> dict[str, list[Hit]]:
@@ -183,15 +203,17 @@ async def _lane_lists(s: AsyncSession, fused: list, lane_names) -> dict[str, lis
     return lanes
 
 
-def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, use_rerank: bool, top_k: int) -> dict:
-    """final = 0.5*rerank + 0.3*fused_norm + 0.2*w_visual*visual_norm (rerank only for the top_k).
+def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, cfg: SearchConfig) -> dict:
+    """final = mix.rerank*rerank + mix.fused*fused_norm + mix.visual*w_visual*visual_norm
+    (rerank only for the top_k).
 
     The visual term is scaled by the plan's visual weight so a weight of 0 (e.g. a
     text-only ablation) contributes nothing; otherwise a "text only" run would still
     be quietly ranked by SigLIP.
     """
+    use_rerank, top_k, mix = cfg.rerank, cfg.rerank_top_k, cfg.final_mix
     max_f = max(f.fused for f in head) or 1.0
-    vis_coef = 0.2 * min(1.0, max(0.0, p.weights.get("visual", 0.0)))
+    vis_coef = mix["visual"] * min(1.0, max(0.0, p.weights.get("visual", 0.0)))
     vis = [f.signals.get("visual") for f in head if "visual" in f.signals]
     v_lo, v_hi = (min(vis), max(vis)) if vis else (0.0, 1.0)
 
@@ -209,26 +231,26 @@ def _final_scores(head: list[Fused], segs: dict, p: QueryPlan, use_rerank: bool,
 
         t0 = time.perf_counter()
         cands = [f for f in head[:top_k] if f.segment_id in segs]
-        passages = [_passage(segs[f.segment_id]) for f in cands]
-        for f, r in zip(cands, rerank_scores(p.speech_q, passages), strict=True):
+        passages = [_passage(segs[f.segment_id], cfg.caption_in_rerank_passage) for f in cands]
+        for f, r in zip(cands, rerank_scores(p.speech_q, passages, cfg.reranker), strict=True):
             rr[f.segment_id] = float(r)
             f.signals["_rerank"] = float(r)
         ms = (time.perf_counter() - t0) * 1000
     for f in head:
-        base = 0.3 * (f.fused / max_f) + vis_coef * vnorm(f)
+        base = mix["fused"] * (f.fused / max_f) + vis_coef * vnorm(f)
         if f.segment_id in rr:
-            scores[f.segment_id] = 0.5 * rr[f.segment_id] + base
+            scores[f.segment_id] = mix["rerank"] * rr[f.segment_id] + base
         else:
             scores[f.segment_id] = base * (1.0 if not use_rerank else 0.9)
     scores["_ms"] = ms
     return scores
 
 
-def _passage(seg: Segment) -> str:
+def _passage(seg: Segment, with_caption: bool = False) -> str:
     t = seg.text or ""
     if seg.ocr_text:
         t += "\n[on screen] " + seg.ocr_text.replace("\n", " ")
-    if seg.caption_text and get_settings().caption_in_rerank_passage:
+    if seg.caption_text and with_caption:
         t += "\n[visual] " + seg.caption_text
     return t[:1500]
 

@@ -1,0 +1,9 @@
+name: auto_no_ocr
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  lanes:
+    ocr: 0.0

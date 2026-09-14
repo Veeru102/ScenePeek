@@ -70,3 +70,22 @@ def test_apply_overrides_coerces_and_rejects_bad_values():
         apply_overrides({"rerank_enabled": "no"})
     with pytest.raises(TypeError):
         apply_overrides({"rrf_k": "seventy"})
+
+
+def test_search_config_overrides_are_validated():
+    import pytest
+
+    from scenepeek.search.config import SearchConfig
+
+    cfg = SearchConfig(lanes={"text": 1.0, "visual": 0.8}, rerank=True)
+    out = cfg.with_overrides({"lanes": {"visual": 0}, "rerank": False, "rrf_k": "70"})
+    assert out.lanes == {"text": 1.0, "visual": 0.0} and out.rerank is False and out.rrf_k == 70
+    assert cfg.lanes["visual"] == 0.8  # frozen: the original is untouched
+    with pytest.raises(KeyError):
+        cfg.with_overrides({"weight_visual": 0.0})
+    with pytest.raises(KeyError):
+        cfg.with_overrides({"lanes": {"vision": 0.0}})
+    with pytest.raises(TypeError):
+        cfg.with_overrides({"rerank": "no"})
+    with pytest.raises(ValueError):
+        cfg.with_overrides({"fusion": None})

@@ -1062,6 +1062,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+bench = [
+    { name = "yt-dlp" },
+]
 dev = [
     { name = "pillow" },
     { name = "pytest" },
@@ -1132,8 +1135,9 @@ requires-dist = [
     { name = "typer", specifier = ">=0.12" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
     { name = "wordninja", marker = "extra == 'ml'", specifier = ">=2.0" },
+    { name = "yt-dlp", marker = "extra == 'bench'", specifier = ">=2024.8" },
 ]
-provides-extras = ["ml-query", "ml", "mlx", "dev"]
+provides-extras = ["ml-query", "ml", "bench", "mlx", "dev"]
 
 [[package]]
 name = "scikit-learn"
@@ -1593,3 +1597,12 @@ name = "wordninja"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/30/15/abe4af50f4be92b60c25e43c1c64d08453b51e46c32981d80b3aebec0260/wordninja-2.0.0.tar.gz", hash = "sha256:1a1cc7ec146ad19d6f71941ee82aef3d31221700f0d8bf844136cf8df79d281a", size = 541572, upload-time = "2019-08-10T02:16:54.944Z" }
+
+[[package]]
+name = "yt-dlp"
+version = "2026.8.19"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/e0/832fa4ca334b766a06933a196066edc3dba37cdb6f14cd98d59bcc69a4b4/yt_dlp-2026.8.19.tar.gz", hash = "sha256:9e213e48cea35c66b378e4447903f118f6392a5fa380a2b6d7070ec86f4e0af1", size = 3052025, upload-time = "2026-08-19T23:48:59.291Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/69/b2/8cd1613f56eed7ceb64fbd4df3f1c01246bfb098e6f398228bafda22b80b/yt_dlp-2026.8.19-py3-none-any.whl", hash = "sha256:1d57897e94c6665a0a6f9bc54b34e584284e32c034ffab3a7df25d8f7b24eedf", size = 3185533, upload-time = "2026-08-19T23:48:56.925Z" },
+]

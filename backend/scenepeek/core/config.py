@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     ollama_auto: bool = True  # ...or use them automatically when a local Ollama server is running
 
     # Search
+    router: str = "heuristic"  # fixed | heuristic | learned:<version> — how lane weights are chosen per query
     search_candidates: int = 200
     rerank_top_k: int = 30
     rerank_enabled: bool = True
@@ -73,6 +74,12 @@ class Settings(BaseSettings):
     # captions are indexed (filmstrip / explain panel) but 0 here: BLIP-base captions measured
     # slightly negative for ranking on hand-written queries; raise once a stronger captioner lands
     weight_caption: float = 0.0
+    # temporal (multi-frame) lane: off until the encoder has been backfilled and measured
+    weight_temporal: float = 0.0
+    temporal_model: str = "microsoft/xclip-base-patch32"
+    temporal_window_s: float = 8.0
+    temporal_stride_s: float = 4.0
+    span_mode: str = "segment"  # segment | window — report a temporal-lane window as the hit span
     ocr_no_cue_factor: float = 1.0  # multiplier on weight_ocr when the query has no on-screen-text cue
     ocr_trgm_threshold: float = 0.45  # word_similarity floor for the OCR lane (noisy-OCR tolerance)
     dedup_window_s: float = 12.0

@@ -1,0 +1,6 @@
+name: auto
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3

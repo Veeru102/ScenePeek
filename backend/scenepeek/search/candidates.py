@@ -97,7 +97,13 @@ async def by_lexical(
 
 
 async def by_ocr(
-    s: AsyncSession, ocr_q: str, terms: list[str], phrases: list[str], k: int, video_ids=None
+    s: AsyncSession,
+    ocr_q: str,
+    terms: list[str],
+    phrases: list[str],
+    k: int,
+    video_ids=None,
+    trgm_threshold: float | None = None,
 ) -> list[Cand]:
     """FTS on the 'simple' config plus trigram word-similarity so noisy OCR still matches."""
     if not ocr_q.strip():
@@ -118,7 +124,7 @@ async def by_ocr(
         {
             "q": _websearch(terms, phrases) or ocr_q,
             "raw": ocr_q.lower(),
-            "trgm": get_settings().ocr_trgm_threshold,
+            "trgm": get_settings().ocr_trgm_threshold if trgm_threshold is None else trgm_threshold,
             "k": k,
             "vids": video_ids,
         },

@@ -1,0 +1,12 @@
+name: auto_text_only
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  rerank: false
+  lanes:
+    visual: 0.0
+    ocr: 0.0
+    lexical: 0.0

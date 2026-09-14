@@ -18,6 +18,7 @@ frontend/dist/
 
 # Data
 data/
+models/
 eval/videos/*.mp4
 eval/reports/*.json
 *.mp4

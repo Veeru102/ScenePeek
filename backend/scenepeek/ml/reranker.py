@@ -6,17 +6,22 @@ from scenepeek.core.config import get_settings
 from scenepeek.ml.registry import device, singleton, timed
 
 
-def _load():
-    from sentence_transformers import CrossEncoder
+def _load(name: str):
+    def factory():
+        from sentence_transformers import CrossEncoder
 
-    return CrossEncoder(get_settings().reranker_model, device=device(), max_length=512)
+        return CrossEncoder(name, device=device(), max_length=512)
+
+    return factory
 
 
-def rerank_scores(query: str, passages: list[str]) -> np.ndarray:
-    """Returns sigmoid-normalised relevance in [0,1] per passage."""
+def rerank_scores(query: str, passages: list[str], model_name: str | None = None) -> np.ndarray:
+    """Returns sigmoid-normalised relevance in [0,1] per passage. `model_name` may be an HF id or a
+    local fine-tuned checkpoint directory; each is cached separately so two can be compared."""
     if not passages:
         return np.zeros(0, dtype=np.float32)
-    model = singleton("reranker", _load)
+    name = model_name or get_settings().reranker_model
+    model = singleton(f"reranker:{name}", _load(name))
     import torch
 
     with timed("reranker"):

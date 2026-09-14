@@ -1,0 +1,9 @@
+name: human_no_visual
+dataset: scenepeek_human
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  lanes:
+    visual: 0.0

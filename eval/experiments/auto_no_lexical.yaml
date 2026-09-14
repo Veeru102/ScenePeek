@@ -1,0 +1,9 @@
+name: auto_no_lexical
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  lanes:
+    lexical: 0.0

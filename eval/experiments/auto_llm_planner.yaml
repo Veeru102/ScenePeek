@@ -1,0 +1,8 @@
+name: auto_llm_planner
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+settings:
+  ollama_enabled: true

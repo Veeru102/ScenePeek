@@ -17,6 +17,7 @@ async def search_endpoint(body: SearchRequest, s: AsyncSession = Depends(get_ses
         weights=body.weights.model_dump() if body.weights else None,
         rerank=body.rerank,
         fusion=body.fusion,
+        router=body.router,
     )
     res = await search(s, body.q, opts)
     terms = res.plan.lexical_terms + res.plan.exact_phrases

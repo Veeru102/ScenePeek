@@ -1,0 +1,8 @@
+name: auto_no_rerank
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  rerank: false

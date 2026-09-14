@@ -7,8 +7,6 @@ with a structured decomposition. The system never depends on the LLM being prese
 import re
 from dataclasses import asdict, dataclass, field
 
-from scenepeek.core.config import get_settings
-
 _LEAD = re.compile(
     r"^\s*(?:please\s+)?(?:can you\s+)?(?:find|show|search(?: for)?|locate|get|give)\s*(?:me)?\s*"
     r"(?:the\s+)?(?:all\s+)?(?:parts?|moments?|clips?|scenes?|places?|points?|segments?|times?|videos?)?\s*"
@@ -105,7 +103,8 @@ class QueryPlan:
     exact_phrases: list[str] = field(default_factory=list)
     weights: dict[str, float] = field(default_factory=dict)
     cues: list[str] = field(default_factory=list)
-    source: str = "heuristic"
+    source: str = "heuristic"  # who produced the sub-queries: heuristic | llm
+    router: str = ""  # who produced the weights
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -129,15 +128,8 @@ def terms(text: str) -> list[str]:
     return out
 
 
-def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
-    s = get_settings()
-    base = {
-        "text": s.weight_text,
-        "lexical": s.weight_lexical,
-        "visual": s.weight_visual,
-        "ocr": s.weight_ocr,
-        "caption": s.weight_caption,
-    }
+def parse(query: str) -> QueryPlan:
+    """Split the query into per-lane sub-queries and detect cues. Weights are the router's job."""
     exact = _QUOTED.findall(query)
     cleaned = _clean(query)
     cues: list[str] = []
@@ -162,34 +154,6 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
     if exact:
         cues.append("exact")
 
-    w = dict(base)
-    # captions describe what is on screen, so they follow the visual lane's cue multipliers
-    if "split" in cues:
-        w["visual"] *= 1.4
-        w["caption"] *= 1.4
-        w["ocr"] *= 1.3
-    elif "visual" in cues and "speech" not in cues:
-        w["visual"] *= 1.5
-        w["caption"] *= 1.5
-    if "speech" in cues and "visual" not in cues:
-        w["text"] *= 1.2
-        w["lexical"] *= 1.1
-        w["visual"] *= 0.6
-        w["caption"] *= 0.6
-    if "ocr" in cues:
-        w["ocr"] *= 1.6
-    else:
-        # no on-screen-text cue: the OCR lane still runs (slide titles are often unmentioned) but can
-        # be damped; 1.0 keeps today's behaviour, the real_ocr_damped ablation measures lower values
-        w["ocr"] *= s.ocr_no_cue_factor
-    if exact:
-        w["lexical"] *= 1.5
-        w["ocr"] *= 1.3
-    if overrides:
-        for k, v in overrides.items():
-            if v is not None and k in w:
-                w[k] = float(v)
-
     p = QueryPlan(
         raw=query,
         speech_q=speech_q or cleaned,
@@ -197,7 +161,6 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
         ocr_q=ocr_q or cleaned,
         lexical_terms=terms(speech_q or cleaned),
         exact_phrases=exact,
-        weights=w,
         cues=cues,
     )
     from scenepeek.ml import llm as llm_mod
@@ -210,4 +173,22 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
             p.ocr_q = llm.get("ocr") or p.ocr_q
             p.lexical_terms = terms(p.speech_q)
             p.source = "llm"
+    return p
+
+
+def plan(query: str, overrides: dict[str, float] | None = None, config=None) -> QueryPlan:
+    """parse + route with the configured router; `overrides` pin individual lane weights."""
+    from scenepeek.search.config import SearchConfig
+    from scenepeek.search.routing import get_router
+
+    cfg = config or SearchConfig.from_settings()
+    p = parse(query)
+    router = get_router(cfg.router, ocr_no_cue_factor=cfg.ocr_no_cue_factor)
+    w = router.route(p, cfg.lanes)
+    if overrides:
+        for k, v in overrides.items():
+            if v is not None and k in w:
+                w[k] = float(v)
+    p.weights = w
+    p.router = router.name
     return p

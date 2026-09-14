@@ -101,9 +101,12 @@ def test_final_scores_visual_term_respects_weight():
     c = _fused(0.5, visual=0.1)  # gives the visual min-max some spread
 
     # text-only ablation: visual weight 0 -> the visual signal must not be able to reorder a and b
-    zero = _final_scores([a, b, c], {}, _plan_with(0.0), use_rerank=False, top_k=10)
+    from scenepeek.search.config import SearchConfig
+
+    cfg = SearchConfig(rerank=False, rerank_top_k=10)
+    zero = _final_scores([a, b, c], {}, _plan_with(0.0), cfg)
     assert zero[a.segment_id] > zero[b.segment_id]
 
     # default weights: the visual term is allowed to lift b over a
-    full = _final_scores([a, b, c], {}, _plan_with(1.0), use_rerank=False, top_k=10)
+    full = _final_scores([a, b, c], {}, _plan_with(1.0), cfg)
     assert full[b.segment_id] > full[a.segment_id]

@@ -3,7 +3,7 @@
 N ?= 1
 
 install:
-	cd backend && uv sync --extra ml --extra dev
+	cd backend && uv sync --extra ml --extra dev --extra bench
 	cd frontend && npm install
 
 up:
@@ -34,15 +34,22 @@ lint:
 	cd backend && uv run ruff check scenepeek tests
 
 eval:
-	cd backend && uv run scenepeek eval run -c ../eval/configs/default.yaml
+	cd backend && uv run scenepeek eval run -c ../eval/experiments/synthetic.yaml
 
-# Real-video ablations: every lane on/off + rerank + fusion method, then a paired-bootstrap comparison.
-REAL_SET ?= real
-REAL_VARIANTS = text_only no_visual no_ocr no_lexical no_rerank rrf with_caption ocr_damped visual_damped
-eval-real:
-	cd backend && uv run scenepeek eval run -c ../eval/configs/$(REAL_SET).yaml
-	cd backend && for v in $(REAL_VARIANTS); do uv run scenepeek eval run -c ../eval/configs/$(REAL_SET)_$$v.yaml; done
-	cd backend && uv run scenepeek eval compare ../eval/reports/$(REAL_SET).json $(foreach v,$(REAL_VARIANTS),../eval/reports/$(REAL_SET)_$(v).json)
+# Ablation suite for one dataset (SET = human | auto | qvh_val): every lane on/off + rerank + fusion
+# method, then a paired-bootstrap comparison. Specs live in eval/experiments/<SET>_<variant>.yaml.
+SET ?= human
+VARIANTS = text_only no_visual no_ocr no_lexical no_rerank rrf with_caption ocr_damped visual_damped
+eval-suite:
+	cd backend && uv run scenepeek eval run -c ../eval/experiments/$(SET).yaml
+	cd backend && for v in $(VARIANTS); do uv run scenepeek eval run -c ../eval/experiments/$(SET)_$$v.yaml; done
+	cd backend && uv run scenepeek eval compare ../eval/reports/$(SET).json $(foreach v,$(VARIANTS),../eval/reports/$(SET)_$(v).json)
+
+# QVHighlights: annotations go in data/qvhighlights/ (moment_detr release), videos come via yt-dlp.
+QVH_LIMIT ?= 300
+qvh-import:
+	cd backend && uv run scenepeek dataset import qvhighlights --dir ../data/qvhighlights --split val --limit $(QVH_LIMIT)
+	cd backend && uv run scenepeek dataset fetch qvhighlights --split val
 
 observability:
 	docker compose --profile observability up -d prometheus grafana

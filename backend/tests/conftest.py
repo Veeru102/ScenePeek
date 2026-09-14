@@ -34,7 +34,21 @@ def test_db_url():
 def engine(test_db_url):
     eng = create_engine(test_db_url)
     with eng.begin() as conn:
-        for t in ("jobs", "topics", "frames", "segments", "utterances", "video_chunks", "videos"):
+        for t in (
+            "jobs",
+            "topics",
+            "frames",
+            "segments",
+            "utterances",
+            "video_chunks",
+            "videos",
+            "experiment_results",
+            "experiments",
+            "dataset_queries",
+            "dataset_videos",
+            "datasets",
+            "index_versions",
+        ):
             conn.execute(text(f"TRUNCATE {t} CASCADE"))
     yield eng
     eng.dispose()

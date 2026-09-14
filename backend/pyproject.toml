@@ -42,6 +42,10 @@ ml = [
     "opencv-python-headless>=4.10",
     "wordninja>=2.0",
 ]
+# benchmark ingestion (YouTube-hosted datasets such as QVHighlights)
+bench = [
+    "yt-dlp>=2024.8",
+]
 # Apple-silicon ASR via MLX (optional; select with WHISPER_BACKEND=mlx_whisper)
 mlx = [
     "mlx-whisper>=0.4; sys_platform == 'darwin'",

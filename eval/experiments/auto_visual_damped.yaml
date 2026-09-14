@@ -1,0 +1,9 @@
+name: auto_visual_damped
+dataset: scenepeek_auto
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3
+search:
+  lanes:
+    visual: 0.3

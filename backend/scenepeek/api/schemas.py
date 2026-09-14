@@ -79,6 +79,7 @@ class SearchWeights(BaseModel):
     visual: float | None = None
     ocr: float | None = None
     caption: float | None = None
+    temporal: float | None = None
 
 
 class SearchRequest(BaseModel):
@@ -88,6 +89,7 @@ class SearchRequest(BaseModel):
     weights: SearchWeights | None = None
     rerank: bool | None = None
     fusion: str | None = None
+    router: str | None = None
 
 
 class SearchVideo(BaseModel):

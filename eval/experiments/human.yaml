@@ -1,0 +1,6 @@
+name: human
+dataset: scenepeek_human
+split: test
+scope: dataset
+limit: 10
+tolerance_s: 3

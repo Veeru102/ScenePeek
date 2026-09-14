@@ -6,7 +6,20 @@ from pathlib import Path
 
 COLS = ["mrr", "recall@1", "recall@5", "recall@10", "ndcg@10", "latency_p50_ms", "latency_p95_ms", "n"]
 CMP_COLS = ["mrr", "recall@1", "recall@5", "recall@10", "ndcg@10", "latency_p50_ms"]
+TEMPORAL_COLS = ["r1@0.5", "r1@0.7", "r5@0.5", "map@0.5", "map"]
 DELTA_METRICS = ("mrr", "recall@5")
+TEMPORAL_DELTAS = ("r1@0.5", "map")
+
+
+def _cols(report: dict, base: list[str]) -> list[str]:
+    """Temporal-grounding columns appear when the report has them (benchmark runs)."""
+    if "r1@0.5" in report.get("overall", {}):
+        return base[:1] + TEMPORAL_COLS + base[1:]
+    return base
+
+
+def _deltas(report: dict) -> tuple[str, ...]:
+    return DELTA_METRICS + TEMPORAL_DELTAS if "r1@0.5" in report.get("overall", {}) else DELTA_METRICS
 
 
 def _fmt(v) -> str:
@@ -39,12 +52,13 @@ def _lane_table(agg: dict) -> list[str]:
 
 
 def print_report(report: dict) -> None:
+    cols = _cols(report, COLS)
     print(f"\n## {report['name']}  ({report['overall'].get('n', 0)} queries)\n")
-    print("| scope | " + " | ".join(COLS) + " |")
-    print("|---|" + "---|" * len(COLS))
-    print("| overall | " + " | ".join(_fmt(report["overall"].get(c, "")) for c in COLS) + " |")
+    print("| scope | " + " | ".join(cols) + " |")
+    print("|---|" + "---|" * len(cols))
+    print("| overall | " + " | ".join(_fmt(report["overall"].get(c, "")) for c in cols) + " |")
     for m, agg in report.get("by_modality", {}).items():
-        print(f"| {m} | " + " | ".join(_fmt(agg.get(c, "")) for c in COLS) + " |")
+        print(f"| {m} | " + " | ".join(_fmt(agg.get(c, "")) for c in cols) + " |")
     print("\n".join(_lane_table(report["overall"])))
     misses = [q for q in report["queries"] if q["first_hit_rank"] is None or q["first_hit_rank"] > 5]
     if misses:
@@ -56,7 +70,11 @@ def print_report(report: dict) -> None:
 
 
 def _delta_line(name: str, metric: str, base_q: dict, q_rows: list[dict]) -> str | None:
-    pairs = [(q[metric], base_q[q["id"]][metric]) for q in q_rows if q["id"] in base_q]
+    pairs = [
+        (q[metric], base_q[q["id"]][metric])
+        for q in q_rows
+        if q["id"] in base_q and metric in q and metric in base_q[q["id"]]
+    ]
     if not pairs:
         return None
     mean, lo, hi = paired_bootstrap([a - b for a, b in pairs])
@@ -66,10 +84,11 @@ def _delta_line(name: str, metric: str, base_q: dict, q_rows: list[dict]) -> str
 
 def compare_reports(paths: list[str]) -> None:
     reports = [json.loads(Path(p).read_text()) for p in paths]
-    print("\n| config | " + " | ".join(CMP_COLS) + " |")
-    print("|---|" + "---|" * len(CMP_COLS))
+    cmp_cols = _cols(reports[0], CMP_COLS)
+    print("\n| config | " + " | ".join(cmp_cols) + " |")
+    print("|---|" + "---|" * len(cmp_cols))
     for r in reports:
-        print(f"| {r['name']} | " + " | ".join(_fmt(r["overall"].get(c, "")) for c in CMP_COLS) + " |")
+        print(f"| {r['name']} | " + " | ".join(_fmt(r["overall"].get(c, "")) for c in cmp_cols) + " |")
     if len(reports) < 2:
         return
 
@@ -77,7 +96,7 @@ def compare_reports(paths: list[str]) -> None:
     base_q = {q["id"]: q for q in base["queries"]}
     print(f"\nPaired bootstrap vs {base['name']} (1000 resamples, * = 95% CI excludes 0):")
     for r in reports[1:]:
-        for metric in DELTA_METRICS:
+        for metric in _deltas(base):
             line = _delta_line(r["name"], metric, base_q, r["queries"])
             if line:
                 print(line)
@@ -85,11 +104,11 @@ def compare_reports(paths: list[str]) -> None:
     modalities = sorted({m for r in reports for m in r.get("by_modality", {})})
     for m in modalities:
         print(f"\n### {m}\n")
-        print("| config | " + " | ".join(CMP_COLS) + " |")
-        print("|---|" + "---|" * len(CMP_COLS))
+        print("| config | " + " | ".join(cmp_cols) + " |")
+        print("|---|" + "---|" * len(cmp_cols))
         for r in reports:
             agg = r.get("by_modality", {}).get(m, {})
-            print(f"| {r['name']} | " + " | ".join(_fmt(agg.get(c, "")) for c in CMP_COLS) + " |")
+            print(f"| {r['name']} | " + " | ".join(_fmt(agg.get(c, "")) for c in cmp_cols) + " |")
         for r in reports[1:]:
             rows = [q for q in r["queries"] if q["modality"] == m]
             line = _delta_line(r["name"], "mrr", base_q, rows)
