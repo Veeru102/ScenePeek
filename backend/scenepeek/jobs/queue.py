@@ -6,7 +6,7 @@ double-processing. Running jobs heartbeat; a reaper requeues jobs whose worker w
 
 import random
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import text
@@ -25,7 +25,7 @@ _ENQUEUE_SQL = text(
     INSERT INTO jobs (id, type, queue, payload, idempotency_key, status, priority, max_attempts,
                       run_after, video_id)
     VALUES (:id, :type, :queue, CAST(:payload AS jsonb), :key, 'queued', :priority, :max_attempts,
-            :run_after, :video_id)
+            COALESCE(:run_after, now()), :video_id)
     ON CONFLICT (idempotency_key) DO NOTHING
     RETURNING id
     """
@@ -54,7 +54,7 @@ _COMPLETE_SQL = text("UPDATE jobs SET status = 'succeeded', finished_at = now() 
 
 _RETRY_SQL = text(
     """
-    UPDATE jobs SET status = 'queued', run_after = :run_after, last_error = :error,
+    UPDATE jobs SET status = 'queued', run_after = now() + make_interval(secs => :delay), last_error = :error,
                     locked_by = NULL, locked_at = NULL, heartbeat_at = NULL
     WHERE id = :id
     """
@@ -100,7 +100,9 @@ def _params(
         "key": idempotency_key,
         "priority": priority,
         "max_attempts": max_attempts,
-        "run_after": run_after or datetime.now(UTC),
+        # NULL -> DB now(): lease() compares against the DB clock, so a Python timestamp here
+        # makes a job invisible for as long as the two clocks disagree (flaky lease-after-enqueue).
+        "run_after": run_after,
         "video_id": uuid.UUID(str(video_id)) if video_id else None,
     }
 
@@ -171,7 +173,7 @@ def fail(conn: Connection, job: dict[str, Any], error: str, *, retryable: bool =
         delay = backoff_delay(job["attempts"])
         conn.execute(
             _RETRY_SQL,
-            {"id": job["id"], "error": error, "run_after": datetime.now(UTC) + timedelta(seconds=delay)},
+            {"id": job["id"], "error": error, "delay": delay},
         )
         JOB_RETRIES.labels(type=job["type"]).inc()
         JOBS_TOTAL.labels(type=job["type"], status="retried").inc()
