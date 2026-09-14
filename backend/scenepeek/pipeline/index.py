@@ -1,5 +1,6 @@
 """index_chunk (ml queue): transcribe, segment, embed, OCR, and commit the chunk atomically."""
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
 from scenepeek.ml import ocr as ocr_mod
 from scenepeek.ml import siglip, text_embed, whisper
+from scenepeek.ml.whisper import UtteranceOut, Word
 from scenepeek.models import Frame, Segment, Utterance, Video, VideoChunk
 from scenepeek.models.chunk import ChunkStatus
 from scenepeek.models.video import VideoStatus
@@ -56,8 +58,30 @@ def _set_stage(ctx: JobContext, chunk_id, stage: str) -> None:
         s.commit()
 
 
-def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, settings) -> None:
-    # 1. transcribe a padded slice, keep words that start inside the chunk
+def transcript_key(video_id: str, chunk_index: int) -> str:
+    return f"videos/{video_id}/chunks/{chunk_index}/utterances.json"
+
+
+def _transcribe_chunk(ctx, video_id: str, idx: int, start: float, end: float) -> list[UtteranceOut]:
+    """Whisper is the expensive stage, so its output is checkpointed to storage: a retry after a
+    crash in embedding/OCR/write reuses the transcript instead of re-running ASR."""
+    key = transcript_key(video_id, idx)
+    model = get_settings().whisper_model
+    exists, _ = storage.object_exists(key)
+    if exists:
+        raw = json.loads(
+            storage.internal_client().get_object(Bucket=storage.bucket(), Key=key)["Body"].read()
+        )
+        if raw.get("model") == model:  # a checkpoint from a different ASR model must not be reused
+            utterances = [
+                UtteranceOut(
+                    u["start"], u["end"], u["text"], [Word(w["w"], w["s"], w["e"]) for w in u["words"]]
+                )
+                for u in raw["utterances"]
+            ]
+            ctx.log.info("transcript reused from checkpoint", utterances=len(utterances))
+            return utterances
+
     audio = media.cached(video_id, storage.audio_key(video_id), "audio.wav")
     slice_path = media.workdir(video_id, f"chunk_{idx}") / "audio.wav"
     slice_start = max(0.0, start - AUDIO_PAD_S)
@@ -69,7 +93,27 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
     for u in utterances:
         u.start, u.end = u.words[0].s, max(u.words[-1].e, u.words[0].s + 0.2)
         u.text = " ".join(w.w for w in u.words)
+    payload = [
+        {
+            "start": u.start,
+            "end": u.end,
+            "text": u.text,
+            "words": [{"w": w.w, "s": w.s, "e": w.e} for w in u.words],
+        }
+        for u in utterances
+    ]
+    checkpoint = json.dumps({"model": model, "utterances": payload}).encode()
+    storage.upload_bytes(checkpoint, key, "application/json")
     ctx.log.info("transcribed", utterances=len(utterances), words=sum(len(u.words) for u in utterances))
+    return utterances
+
+
+def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, settings) -> None:
+    # 1. transcribe (or reuse the checkpointed transcript)
+    utterances = _transcribe_chunk(ctx, video_id, idx, start, end)
+    with ctx.session() as s:
+        s.get(VideoChunk, chunk_id).transcribed_at = datetime.now(UTC)
+        s.commit()
 
     # 2. segments
     _set_stage(ctx, chunk_id, "segment")
@@ -174,7 +218,7 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
         now = datetime.now(UTC)
         c = s.get(VideoChunk, chunk_id)
         c.status, c.stage, c.error, c.done_at = ChunkStatus.DONE, None, None, now
-        c.transcribed_at = c.embedded_at = now
+        c.embedded_at = now
         c.ocr_at = now if settings.ocr_enabled else None
         video = s.get(Video, video_id)
         if video.first_searchable_at is None:
