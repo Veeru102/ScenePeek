@@ -35,6 +35,7 @@ FRAME_FPS = 1.0 / 3.0
 MAX_KEYFRAMES_PER_WINDOW = 3
 MIN_SPEECH_WORDS = 8
 MIN_OCR_CHARS = 6
+MAX_EMIT_WINDOWS_PER_VIDEO = 6  # keep total candidate volume manageable for a human reviewer
 
 
 def load_sources(path: Path = SOURCES_PATH) -> list[dict]:
@@ -229,11 +230,20 @@ def scan_video(v: dict) -> list[dict]:
                 keyframes=w.n_keyframes,
             )
 
+    emit_at = _evenly_spaced_indices(len(results), min(MAX_EMIT_WINDOWS_PER_VIDEO, len(results)))
     candidates = []
-    for i, w in enumerate(results):
-        candidates.extend(_window_candidates(v["key"], i, w))
-    candidates.extend(_semantic_candidates(v["key"], results))
+    for i in emit_at:
+        candidates.extend(_window_candidates(v["key"], i, results[i]))
+    candidates.extend(_semantic_candidates(v["key"], results))  # uses every scanned window
     return candidates
+
+
+def _evenly_spaced_indices(n: int, k: int) -> list[int]:
+    """k indices spread across range(n), e.g. to sample a subset of scanned windows for
+    candidates while still using every window's transcript for the semantic pass."""
+    if n <= k:
+        return list(range(n))
+    return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)}) if k > 1 else [n // 2]
 
 
 def scan_videos(
