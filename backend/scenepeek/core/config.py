@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     visual_embed_dim: int = 768
     reranker_model: str = "BAAI/bge-reranker-base"
     ocr_enabled: bool = True
+    ocr_min_conf: float = 0.5  # RapidOCR line confidence below which text is dropped at index time
     captions_enabled: bool = True
     caption_model: str = "Salesforce/blip-image-captioning-base"
     caption_max_tokens: int = 30
@@ -69,6 +70,8 @@ class Settings(BaseSettings):
     weight_visual: float = 0.8
     weight_ocr: float = 0.6
     weight_caption: float = 0.7
+    ocr_no_cue_factor: float = 1.0  # multiplier on weight_ocr when the query has no on-screen-text cue
+    ocr_trgm_threshold: float = 0.45  # word_similarity floor for the OCR lane (noisy-OCR tolerance)
     dedup_window_s: float = 12.0
     max_hits_per_video: int = 3
 

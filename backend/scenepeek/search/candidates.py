@@ -7,6 +7,8 @@ import numpy as np
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from scenepeek.core.config import get_settings
+
 
 @dataclass
 class Cand:
@@ -105,13 +107,20 @@ async def by_ocr(
         SELECT s.id,
                GREATEST(ts_rank_cd(s.ocr_tsv, q, 32), word_similarity(:raw, s.ocr_text)) AS score
         FROM segments s, websearch_to_tsquery('simple', :q) q
-        WHERE s.ocr_text <> '' AND (s.ocr_tsv @@ q OR word_similarity(:raw, s.ocr_text) > 0.45)
+        WHERE s.ocr_text <> '' AND (s.ocr_tsv @@ q OR word_similarity(:raw, s.ocr_text) > :trgm)
               {_filter(video_ids, "s")}
         ORDER BY score DESC
         LIMIT :k
         """
     )
     rows = await s.execute(
-        sql, {"q": _websearch(terms, phrases) or ocr_q, "raw": ocr_q.lower(), "k": k, "vids": video_ids}
+        sql,
+        {
+            "q": _websearch(terms, phrases) or ocr_q,
+            "raw": ocr_q.lower(),
+            "trgm": get_settings().ocr_trgm_threshold,
+            "k": k,
+            "vids": video_ids,
+        },
     )
     return [Cand(r[0], float(r[1])) for r in rows]

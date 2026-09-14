@@ -3,6 +3,7 @@
 import re
 from dataclasses import dataclass
 
+from scenepeek.core.config import get_settings
 from scenepeek.ml.registry import singleton, timed
 
 
@@ -19,7 +20,9 @@ def _load():
     return RapidOCR()
 
 
-def ocr_image(path: str, min_conf: float = 0.5) -> list[OcrLine]:
+def ocr_image(path: str, min_conf: float | None = None) -> list[OcrLine]:
+    if min_conf is None:
+        min_conf = get_settings().ocr_min_conf
     engine = singleton("rapidocr", _load)
     with timed("rapidocr"):
         result, _elapse = engine(path)

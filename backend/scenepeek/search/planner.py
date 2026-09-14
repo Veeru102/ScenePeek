@@ -114,8 +114,7 @@ class QueryPlan:
 def _clean(q: str) -> str:
     q = _QUOTED.sub(lambda m: m.group(1), q)
     q = _LEAD.sub("", q, count=1)
-    q = re.sub(r"\s+", " ", q).strip(" .?!,")
-    return q or q
+    return re.sub(r"\s+", " ", q).strip(" .?!,")
 
 
 def terms(text: str) -> list[str]:
@@ -179,6 +178,10 @@ def plan(query: str, overrides: dict[str, float] | None = None) -> QueryPlan:
         w["caption"] *= 0.6
     if "ocr" in cues:
         w["ocr"] *= 1.6
+    else:
+        # no on-screen-text cue: the OCR lane still runs (slide titles are often unmentioned) but can
+        # be damped; 1.0 keeps today's behaviour, the real_ocr_damped ablation measures lower values
+        w["ocr"] *= s.ocr_no_cue_factor
     if exact:
         w["lexical"] *= 1.5
         w["ocr"] *= 1.3
