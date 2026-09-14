@@ -34,6 +34,8 @@ class Video(Base):
     status: Mapped[str] = mapped_column(String(32), server_default=VideoStatus.UPLOADING, nullable=False)
     error: Mapped[str | None] = mapped_column(Text)
     chunk_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    source: Mapped[str] = mapped_column(String(32), server_default="upload", nullable=False)
+    priority_band: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
 
     created_at: Mapped[datetime] = created_at_col()
     upload_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

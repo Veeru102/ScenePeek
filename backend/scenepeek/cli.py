@@ -136,5 +136,68 @@ def eval_real_upload():
     upload_all()
 
 
+dataset_app = typer.Typer(help="Benchmark datasets (QVHighlights, the ScenePeek YAML sets)")
+app.add_typer(dataset_app, name="dataset")
+
+
+def _sync_session():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from scenepeek.core.config import get_settings
+
+    return Session(create_engine(get_settings().sync_database_url), expire_on_commit=False)
+
+
+@dataset_app.command("import")
+def dataset_import(
+    name: str = typer.Argument(help="qvhighlights | scenepeek_human | scenepeek_auto | scenepeek_synthetic"),
+    dir: str = typer.Option("..", "--dir", help="Directory holding the annotation files"),
+    split: str = typer.Option("val"),
+    limit: int = typer.Option(None, help="Seeded random subset of videos (all their queries come along)"),
+    seed: int = typer.Option(0),
+):
+    """Register a dataset's videos + queries in Postgres (idempotent). Fetching is a separate step."""
+    from pathlib import Path
+
+    from scenepeek.datasets.importer import import_split
+    from scenepeek.datasets.registry import get_adapter
+
+    adapter = get_adapter(name)
+    with _sync_session() as s:
+        r = import_split(s, adapter, Path(dir), split, limit=limit, seed=seed)
+    typer.echo(f"{name}/{split}: {r.videos} videos, {r.queries} queries, {r.linked} already in the library")
+
+
+@dataset_app.command("fetch")
+def dataset_fetch(
+    name: str = typer.Argument(),
+    split: str = typer.Option(None),
+    limit: int = typer.Option(None, help="Enqueue at most this many fetches"),
+):
+    """Enqueue fetch jobs (benchmark priority) for every pending video; workers do the rest."""
+    from scenepeek.datasets.importer import enqueue_fetches, get_or_create_dataset
+    from scenepeek.datasets.registry import get_adapter
+
+    with _sync_session() as s:
+        ds = get_or_create_dataset(s, get_adapter(name))
+        n = enqueue_fetches(s, ds, split=split, limit=limit)
+    typer.echo(f"enqueued {n} fetch jobs")
+
+
+@dataset_app.command("status")
+def dataset_status(name: str = typer.Argument()):
+    """Per-split counts of pending / fetched / indexed / unavailable videos and queries."""
+    from scenepeek.datasets.importer import get_or_create_dataset, link_library_videos, status
+    from scenepeek.datasets.registry import get_adapter
+
+    with _sync_session() as s:
+        ds = get_or_create_dataset(s, get_adapter(name))
+        link_library_videos(s, ds)
+        s.commit()
+        for split, counts in status(s, ds).items():
+            typer.echo(f"{split}: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())))
+
+
 if __name__ == "__main__":
     app()

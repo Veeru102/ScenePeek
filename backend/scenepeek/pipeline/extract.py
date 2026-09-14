@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from scenepeek.core import storage
 from scenepeek.core.config import get_settings
+from scenepeek.jobs import priority
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
 from scenepeek.models import VideoChunk
@@ -30,6 +31,7 @@ def extract_chunk(ctx: JobContext, payload: dict) -> None:
         chunk.status, chunk.stage, chunk.attempts = ChunkStatus.RUNNING, "extract", chunk.attempts + 1
         s.commit()
         start, end, chunk_id = chunk.start_s, chunk.end_s, chunk.id
+        band = chunk.video.priority_band
 
     try:
         if chunk.extracted_at is None:
@@ -64,7 +66,7 @@ def extract_chunk(ctx: JobContext, payload: dict) -> None:
             {"video_id": video_id, "chunk_index": idx},
             idempotency_key=f"index:{video_id}:{idx}",
             queue="ml",
-            priority=-idx,
+            priority=priority.chunk_priority(band, idx),
             video_id=video_id,
         )
         s.commit()

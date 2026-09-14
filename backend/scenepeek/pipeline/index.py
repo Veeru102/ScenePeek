@@ -15,11 +15,12 @@ from scenepeek.core.logging import get_logger
 from scenepeek.core.metrics import INDEXED_VIDEO_SECONDS, TIME_TO_FIRST_SEARCHABLE, VIDEO_INDEX_WALL
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
-from scenepeek.ml import captioner, siglip, text_embed, whisper
+from scenepeek.ml import captioner, siglip, text_embed, versions, whisper
 from scenepeek.ml import ocr as ocr_mod
 from scenepeek.ml.whisper import UtteranceOut, Word
-from scenepeek.models import Frame, Segment, Utterance, Video, VideoChunk
+from scenepeek.models import DatasetVideo, Frame, Segment, Utterance, Video, VideoChunk
 from scenepeek.models.chunk import ChunkStatus
+from scenepeek.models.dataset import DatasetVideoStatus
 from scenepeek.models.video import VideoStatus
 from scenepeek.pipeline import media
 from scenepeek.pipeline.extract import manifest_key
@@ -190,7 +191,9 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
 
     # 5. atomic write
     _set_stage(ctx, chunk_id, "write")
+    keys = versions.model_keys()
     with ctx.session() as s:
+        versions.register(s, keys)
         s.execute(delete(Segment).where(Segment.chunk_id == chunk_id))
         s.execute(delete(Utterance).where(Utterance.chunk_id == chunk_id))
         for u in utterances:
@@ -218,7 +221,8 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
                 context_text=d.context_text,
                 ocr_text=ocr_text,
                 text_embedding=text_vecs[si].tolist() if has_text else None,
-                embedding_model=settings.text_embed_model if has_text else None,
+                embedding_model=keys["text"] if has_text else None,
+                ocr_model=keys["ocr"] if settings.ocr_enabled else None,
                 caption_text=caption_texts[si],
                 caption_embedding=cap_vecs[si].tolist()
                 if (cap_vecs is not None and caption_texts[si])
@@ -236,6 +240,7 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
                     t_s=f.t_s,
                     image_key=f.key,
                     visual_embedding=vis_vecs[k].tolist(),
+                    visual_model=keys["frame"],
                     ocr_text=frame_ocr[k],
                     caption=frame_caps[k],
                     ocr_boxes=frame_boxes[k],
@@ -246,6 +251,7 @@ def _index(ctx, video_id: str, idx: int, chunk_id, start: float, end: float, set
         c = s.get(VideoChunk, chunk_id)
         c.status, c.stage, c.error, c.done_at = ChunkStatus.DONE, None, None, now
         c.embedded_at = now
+        c.asr_model = keys["asr"]
         c.ocr_at = now if settings.ocr_enabled else None
         c.captioned_at = now if settings.captions_enabled else None
         video = s.get(Video, video_id)
@@ -303,6 +309,9 @@ def finalize_if_complete(s: Session, video: Video) -> None:
         video.error = None
         if video.upload_completed_at:
             VIDEO_INDEX_WALL.observe((now - video.upload_completed_at).total_seconds())
+        if video.source != "upload":
+            for dv in s.scalars(select(DatasetVideo).where(DatasetVideo.video_id == video.id)):
+                dv.status = DatasetVideoStatus.INDEXED
     if counts.get(ChunkStatus.DONE, 0):
         q.enqueue_sync(
             s.connection(),
@@ -310,7 +319,7 @@ def finalize_if_complete(s: Session, video: Video) -> None:
             {"video_id": str(video.id)},
             idempotency_key=f"timeline:{video.id}:{int(now.timestamp())}",
             queue="ml",
-            priority=5,
+            priority=video.priority_band + 5,
             video_id=video.id,
         )
 

@@ -18,6 +18,7 @@ from scenepeek.api.schemas import (
 )
 from scenepeek.core import storage
 from scenepeek.core.db import get_session
+from scenepeek.jobs import priority
 from scenepeek.jobs import queue as q
 from scenepeek.models import Frame, Topic, Utterance, Video, VideoChunk
 from scenepeek.models.chunk import ChunkStatus
@@ -79,6 +80,7 @@ async def create_video(body: VideoCreate, s: AsyncSession = Depends(get_session)
         content_type=body.content_type,
         size_bytes=body.size_bytes,
         status=VideoStatus.UPLOADING,
+        priority_band=priority.INTERACTIVE,
     )
     s.add(video)
     await s.flush()
@@ -108,7 +110,7 @@ async def complete_upload(video_id: uuid.UUID, s: AsyncSession = Depends(get_ses
         {"video_id": str(video.id)},
         idempotency_key=f"probe:{video.id}",
         queue="cpu",
-        priority=10,
+        priority=video.priority_band + 10,
         video_id=video.id,
     )
     await s.commit()
@@ -204,7 +206,7 @@ async def retry_video(video_id: uuid.UUID, s: AsyncSession = Depends(get_session
             {"video_id": str(video.id)},
             idempotency_key=f"probe:{video.id}:retry:{datetime.now(UTC).timestamp():.0f}",
             queue="cpu",
-            priority=10,
+            priority=video.priority_band + 10,
             video_id=video.id,
         )
     video.status = VideoStatus.PROCESSING

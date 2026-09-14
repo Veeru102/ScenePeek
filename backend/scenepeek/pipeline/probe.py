@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from scenepeek.core import storage
 from scenepeek.core.config import get_settings
+from scenepeek.jobs import priority
 from scenepeek.jobs import queue as q
 from scenepeek.jobs.registry import JobContext
 from scenepeek.models import Video, VideoChunk
@@ -82,7 +83,7 @@ def probe_video(ctx: JobContext, payload: dict) -> None:
                 {"video_id": video_id, "chunk_index": w.index},
                 idempotency_key=f"extract:{video_id}:{w.index}",
                 queue="cpu",
-                priority=-w.index,
+                priority=priority.chunk_priority(video.priority_band, w.index),
                 video_id=video_id,
             )
         s.commit()

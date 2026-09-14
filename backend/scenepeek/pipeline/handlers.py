@@ -2,10 +2,12 @@
 
 from scenepeek.jobs.registry import job
 from scenepeek.pipeline.extract import extract_chunk
+from scenepeek.pipeline.fetch import fetch_dataset_video
 from scenepeek.pipeline.index import index_chunk
 from scenepeek.pipeline.probe import probe_video
 
 job("probe_video", queue="cpu")(probe_video)
+job("fetch_dataset_video", queue="cpu")(fetch_dataset_video)
 job("extract_chunk", queue="cpu")(extract_chunk)
 job("index_chunk", queue="ml")(index_chunk)
 from scenepeek.pipeline.timeline import build_timeline  # noqa: E402

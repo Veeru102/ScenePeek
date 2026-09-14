@@ -73,3 +73,53 @@ def lane_attribution(
         "ceiling": bool(found),  # some lane had it in its top-k, so fusion *could* have surfaced it
         "unique": found[0] if len(found) == 1 else None,
     }
+
+
+# -- temporal grounding (IoU-based, as used by QVHighlights / Charades-STA / ActivityNet) ---------
+
+
+def iou(hit: Range, rel: Range) -> float:
+    if hit.video != rel.video:
+        return 0.0
+    inter = max(0.0, min(hit.end_s, rel.end_s) - max(hit.start_s, rel.start_s))
+    union = (hit.end_s - hit.start_s) + (rel.end_s - rel.start_s) - inter
+    return inter / union if union > 0 else 0.0
+
+
+def recall_at_iou(hits: list[Range], relevant: list[Range], k: int, thr: float) -> float:
+    """R@k,IoU>=thr: 1 if any of the top-k predictions overlaps some ground-truth window at >= thr."""
+    return 1.0 if any(iou(h, r) >= thr for h in hits[:k] for r in relevant) else 0.0
+
+
+def average_precision_at_iou(hits: list[Range], relevant: list[Range], thr: float) -> float:
+    """AP over a ranked list with multiple ground-truth windows: a prediction is a true positive if it
+    matches a not-yet-matched GT window at IoU >= thr (greedy, highest-IoU window first)."""
+    if not relevant:
+        return 0.0
+    remaining = list(relevant)
+    tp, precisions = 0, []
+    for i, h in enumerate(hits, start=1):
+        best = max(remaining, key=lambda r: iou(h, r), default=None)
+        if best is not None and iou(h, best) >= thr:
+            remaining.remove(best)
+            tp += 1
+            precisions.append(tp / i)
+    return sum(precisions) / len(relevant)
+
+
+def mean_ap(hits: list[Range], relevant: list[Range], thresholds: tuple[float, ...] | None = None) -> float:
+    """QVHighlights-style mAP averaged over IoU thresholds 0.5:0.05:0.95."""
+    thresholds = thresholds or tuple(round(0.5 + 0.05 * i, 2) for i in range(10))
+    return sum(average_precision_at_iou(hits, relevant, t) for t in thresholds) / len(thresholds)
+
+
+def temporal_metrics(hits: list[Range], relevant: list[Range]) -> dict[str, float]:
+    return {
+        "r1@0.5": recall_at_iou(hits, relevant, 1, 0.5),
+        "r1@0.7": recall_at_iou(hits, relevant, 1, 0.7),
+        "r5@0.5": recall_at_iou(hits, relevant, 5, 0.5),
+        "r5@0.7": recall_at_iou(hits, relevant, 5, 0.7),
+        "map@0.5": average_precision_at_iou(hits, relevant, 0.5),
+        "map@0.75": average_precision_at_iou(hits, relevant, 0.75),
+        "map": mean_ap(hits, relevant),
+    }

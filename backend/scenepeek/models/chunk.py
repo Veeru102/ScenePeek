@@ -33,6 +33,7 @@ class VideoChunk(Base):
     stage: Mapped[str | None] = mapped_column(String(32))
     attempts: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
     error: Mapped[str | None] = mapped_column(Text)
+    asr_model: Mapped[str | None] = mapped_column(String(128))
 
     extracted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     transcribed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

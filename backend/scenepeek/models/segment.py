@@ -57,6 +57,7 @@ class Segment(Base):
     caption_text: Mapped[str] = mapped_column(Text, server_default="", nullable=False)
     caption_embedding = mapped_column(Vector(_TEXT_DIM))  # bge embedding of the keyframe captions
     embedding_model: Mapped[str | None] = mapped_column(String(128))
+    ocr_model: Mapped[str | None] = mapped_column(String(128))
     keyframe_key: Mapped[str | None] = mapped_column(String(1024))
     text_tsv = mapped_column(TSVECTOR, Computed("to_tsvector('english', text)", persisted=True))
     ocr_tsv = mapped_column(TSVECTOR, Computed("to_tsvector('simple', ocr_text)", persisted=True))
