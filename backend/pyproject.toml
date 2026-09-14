@@ -46,6 +46,7 @@ dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
     "ruff>=0.6",
+    "pillow>=10.4",  # pipeline modules import PIL at module level
 ]
 
 [project.scripts]
