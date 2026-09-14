@@ -30,7 +30,7 @@ export function WhyPanel({ hit }: { hit: SearchHit }) {
         {present.length === 0 && <div className="text-fg-dim">no lane scores recorded</div>}
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-2 font-mono text-fg-muted">
-        {s.fused != null && <span>fused (RRF) {s.fused.toFixed(4)}</span>}
+        {s.fused != null && <span>fused {s.fused.toFixed(4)}</span>}
         {s.rerank != null && <span>cross-encoder {s.rerank.toFixed(3)}</span>}
         <span>final {hit.score.toFixed(3)}</span>
       </div>

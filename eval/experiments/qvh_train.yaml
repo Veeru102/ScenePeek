@@ -1,0 +1,9 @@
+name: qvh_train
+dataset: qvhighlights
+split: train
+scope: video
+limit: 20
+tolerance_s: 3.0
+subset:
+  limit: 1000
+  seed: 0

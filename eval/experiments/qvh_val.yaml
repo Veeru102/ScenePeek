@@ -1,0 +1,6 @@
+name: qvh_val
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0

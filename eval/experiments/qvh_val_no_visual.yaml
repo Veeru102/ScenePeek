@@ -1,0 +1,9 @@
+name: qvh_val_no_visual
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0
+search:
+  lanes:
+    visual: 0.0

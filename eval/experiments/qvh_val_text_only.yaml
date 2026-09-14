@@ -1,0 +1,12 @@
+name: qvh_val_text_only
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0
+search:
+  rerank: false
+  lanes:
+    visual: 0.0
+    ocr: 0.0
+    lexical: 0.0

@@ -1,0 +1,8 @@
+name: qvh_val_rerank_hn
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0
+search:
+  reranker: ../models/reranker/hn-v1

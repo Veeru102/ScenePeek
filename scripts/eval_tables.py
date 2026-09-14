@@ -22,6 +22,17 @@ ABLATIONS = [
     ("no_ocr", "− OCR lane"),
     ("rrf", "RRF fusion instead of weighted"),
     ("with_caption", "+ BLIP caption lane (w=0.7)"),
+    ("temporal", "+ temporal lane (X-CLIP, w=0.8)"),
+    ("temporal_only", "temporal lane instead of SigLIP frames"),
+    ("temporal_window", "+ temporal lane, window spans"),
+    ("router_fixed", "fixed weights (no cue heuristics)"),
+    ("router_learned", "learned router"),
+    ("rerank_hn", "hard-negative-tuned reranker"),
+]
+SETS = [
+    ("human", "Hand-written queries (41, the headline number)", "mrr"),
+    ("auto", "Auto-generated queries (119)", "mrr"),
+    ("qvh_val", "QVHighlights val (single-video grounding, R1@0.5 is the literature metric)", "r1@0.5"),
 ]
 
 
@@ -43,22 +54,27 @@ def _ci(base: dict, other: dict, metric: str = "mrr") -> str:
     return f"{sum(deltas) / m:+.3f} [{lo:+.3f}, {hi:+.3f}]{star}"
 
 
-def ablation_table(prefix: str) -> str:
+def ablation_table(prefix: str, delta_metric: str = "mrr") -> str:
     base = _load(prefix)
     if not base:
         return f"_no report for {prefix}_"
     o = base["overall"]
+    temporal = prefix.startswith("qvh") and "r1@0.5" in o
+    cols = ["mrr", "r1@0.5", "r1@0.7", "map"] if temporal else ["mrr", "recall@1", "recall@5", "recall@10"]
+    head = ["MRR", "R1@0.5", "R1@0.7", "mAP"] if temporal else ["MRR", "R@1", "R@5", "R@10"]
     rows = [
-        "| configuration | MRR | R@1 | R@5 | R@10 | ΔMRR vs default [95% CI] |",
-        "|---|---|---|---|---|---|",
-        f"| **default** (weighted fusion of text + keyword + visual + OCR, reranked) | **{o['mrr']:.3f}** | {o['recall@1']:.3f} | {o['recall@5']:.3f} | {o['recall@10']:.3f} | — |",
+        f"| configuration | {' | '.join(head)} | Δ{delta_metric} vs default [95% CI] |",
+        "|---|" + "---|" * (len(cols) + 1),
+        "| **default** (heuristic routing, weighted fusion of text + keyword + visual + OCR, reranked) | "
+        + " | ".join(f"**{o[c]:.3f}**" if i == 0 else f"{o[c]:.3f}" for i, c in enumerate(cols))
+        + " | — |",
     ]
     for key, label in ABLATIONS:
         r = _load(f"{prefix}_{key}")
         if not r:
             continue
         a = r["overall"]
-        rows.append(f"| {label} | {a['mrr']:.3f} | {a['recall@1']:.3f} | {a['recall@5']:.3f} | {a['recall@10']:.3f} | {_ci(base, r)} |")
+        rows.append(f"| {label} | " + " | ".join(f"{a[c]:.3f}" for c in cols) + f" | {_ci(base, r, delta_metric)} |")
     return "\n".join(rows)
 
 
@@ -89,8 +105,10 @@ def lane_table(prefix: str) -> str:
 
 def render() -> str:
     parts = []
-    for prefix, title in (("real_human", "Hand-written queries (41, the headline number)"), ("real", "Auto-generated queries (119)")):
-        parts.append(f"**{title}**\n\n{ablation_table(prefix)}\n\n{modality_table(prefix)}\n\n{lane_table(prefix)}")
+    for prefix, title, metric in SETS:
+        if not _load(prefix):
+            continue
+        parts.append(f"**{title}**\n\n{ablation_table(prefix, metric)}\n\n{modality_table(prefix)}\n\n{lane_table(prefix)}")
     return "\n\n".join(parts)
 
 

@@ -1,0 +1,8 @@
+name: qvh_val_router_learned
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0
+search:
+  router: learned:qvh-v1

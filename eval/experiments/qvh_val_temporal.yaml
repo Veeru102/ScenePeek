@@ -1,0 +1,9 @@
+name: qvh_val_temporal
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0
+search:
+  lanes:
+    temporal: 0.8

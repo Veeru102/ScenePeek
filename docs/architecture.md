@@ -10,10 +10,17 @@
 | `segments` | ~10 s retrieval units: `text`, `context_text` (± neighbours, what gets embedded), `text_embedding vector(384)`, `ocr_text`, generated `tsvector`s |
 | `frames` | keyframes with `visual_embedding vector(768)`, OCR lines + boxes, phash |
 | `topics` | semantic timeline spans with labels, keyphrases, centroid embedding |
+| `embeddings` | **versioned vector store**: `(video, segment, chunk, kind, model_key, start_s, end_s, embedding)` with a dimension-less `vector` column. Holds the temporal (X-CLIP) windows today; any new text/frame encoder version goes here too, next to the old one |
 | `jobs` | durable queue rows: `idempotency_key`, `priority`, `attempts`, `run_after`, `locked_by`, `heartbeat_at` |
+| `datasets` / `dataset_videos` / `dataset_queries` | benchmark registry: clips per split (with the library `video_id` once fetched + indexed) and queries with `[[start, end], …]` ground truth |
+| `experiments` / `experiment_results` | one row per evaluation run (full `SearchConfig`, code SHA, model versions, aggregate metrics) + one row per query (metrics, lane attribution, top hits with segment ids) |
+| `index_versions` | which model produced which stored artifact (`kind`, `model_key`, `dim`, `status`, HNSW index name); routers and fine-tuned rerankers register here too |
+| `training_examples` | mined (query, positive segment, hard-negative segment) triples with the rank/score/lanes that produced the mistake |
 | `metric_samples` | append-only timing samples (inference, job, search) for exact percentiles in the System page |
 
-Indexes: HNSW (cosine) on both embedding columns, GIN on `text_tsv` / `ocr_tsv`, trigram GIN on `ocr_text`, btree `(video_id, start_s)`.
+Indexes: HNSW (cosine) on `segments.text_embedding` / `caption_embedding` / `frames.visual_embedding`; on `embeddings`, one **partial expression HNSW index per (kind, model_key)** — `USING hnsw ((embedding::vector(512)) vector_cosine_ops) WHERE kind='temporal' AND model_key='xclip-base-patch32'` — created when a version becomes ready, so versions of different widths coexist in one table and each lane query hits exactly its version's index; GIN on `text_tsv` / `ocr_tsv`, trigram GIN on `ocr_text`, btree `(video_id, start_s)`.
+
+Every artifact row carries its producer: `video_chunks.asr_model`, `segments.embedding_model` / `ocr_model`, `frames.visual_model`, `embeddings.model_key` (`ml/versions.py` derives the keys from settings). A model change is therefore a **backfill** (`scenepeek backfill temporal --model …`, lowest priority) followed by an experiment, never an in-place overwrite; `scenepeek versions --retire kind:key` retires the loser.
 
 ## Job queue
 
@@ -21,6 +28,9 @@ Indexes: HNSW (cosine) on both embedding columns, GIN on `text_tsv` / `ocr_tsv`,
 UPDATE jobs SET status='running', locked_by=:w, heartbeat_at=now(), attempts=attempts+1
 WHERE id = (SELECT id FROM jobs
             WHERE status='queued' AND queue = ANY(:queues) AND run_after <= now()
+              AND priority >= :min_priority                       -- reserved interactive worker
+              AND (priority >= 0 OR :offline_budget IS NULL       -- offline concurrency budget
+                   OR (SELECT count(*) FROM jobs WHERE status='running' AND priority < 0) < :offline_budget)
             ORDER BY priority DESC, created_at
             FOR UPDATE SKIP LOCKED LIMIT 1)
 RETURNING ...
@@ -29,15 +39,18 @@ RETURNING ...
 - `enqueue` is `INSERT … ON CONFLICT (idempotency_key) DO NOTHING`, so re-enqueuing is safe.
 - A heartbeat thread touches `heartbeat_at` every 10 s. Each worker also runs a **reaper** every 30 s that requeues jobs whose heartbeat is older than the lease timeout (90 s) — or marks them `dead` when `attempts ≥ max_attempts`.
 - Failures: retryable → `queued` with `run_after = now + 5s·2^attempts + jitter`; `NonRetryableError` (corrupt media) → `dead` immediately. Chunk rows record the error; the video flips to `failed` only once every chunk is terminal, and "Retry" in the UI resets attempts.
-- Queues: `cpu` (probe, extract) and `ml` (index, timeline). `scenepeek worker --queues ml` lets a GPU box take only inference work.
-- Priority `-chunk_index`: chunk 0 of every video outranks chunk 1 of any video, which minimises time-to-first-searchable when several uploads are in flight.
+- Queues are workload classes: `cpu` (probe, extract, dataset fetch), `ml` (index, timeline — ASR + embeddings + OCR stay in one job so the chunk commit stays atomic), `vision` (temporal encoding, safe to run on a GPU box only: `scenepeek worker --queues vision`).
+- **Priority bands** (`jobs/priority.py`): interactive uploads `+100`, benchmark imports `−100`, model backfills `−200`, each minus the chunk index, with a `+50` bonus for chunk 0 of interactive work — so chunk 0 of any upload outranks everything else and time-to-first-searchable stays low when several uploads are in flight. Temporal encoding runs at chunk priority − 10, after the chunk is already searchable.
+- **Isolation without a second queue**: `OFFLINE_MAX_RUNNING=k` caps how many priority < 0 jobs run cluster-wide (one subquery in the lease), and `scenepeek worker --min-priority 0` is a worker that never takes offline work. `scripts/bench_isolation.sh` measures an interactive upload's time-to-first-searchable under a full-library backfill with shared / budgeted / reserved layouts.
 
 ## Pipeline stages
 
 1. **probe_video** — ffprobe; remux or transcode to h264/aac `web.mp4` with `+faststart` (browser seeking); poster; 16 kHz mono `audio.wav`; create chunk rows; enqueue `extract_chunk` per chunk.
 2. **extract_chunk** — sample frames at 1 fps (≤480 px) from the web rendition; keep a frame when its perceptual hash differs from the last kept frame by ≥8 bits or 8 s have elapsed; upload keyframes and a JSON manifest. Object keys are deterministic (`videos/{id}/chunks/{i}/frames/{t_ms}.jpg`) so re-runs overwrite.
 3. **index_chunk** — slice `[start−1 s, end+1 s]` of audio, transcribe with word timestamps, keep words starting inside the chunk; plan contiguous ~10 s windows snapped to utterance boundaries (silent spans still get windows so visual-only content is indexed); pick up to 3 mutually distinct keyframes per window; batch-embed `context_text` (bge) and keyframes (SigLIP); OCR keyframes (skipping identical phashes); **delete + insert the chunk's rows in one transaction** and mark the chunk done. Because rows only appear on commit, search is incremental by construction.
-4. **build_timeline** — order segment embeddings; forced boundaries where the on-screen heading (tallest OCR line, forward-filled) changes and persists; TextTiling-style depth scores over ±3-segment windows add boundaries for topic shifts without a slide change; labels = slide heading, else KeyBERT-style MMR keyphrases (optionally rewritten by Ollama).
+4. **encode_temporal** (vision queue, after the chunk is searchable) — re-sample the chunk at 1 fps from the cached web rendition, slide 8 s windows with a 4 s stride (8 frames each), embed with the configured `VideoEncoder` (X-CLIP base by default; `siglip-meanpool` = mean of per-frame SigLIP vectors, the no-new-model control), assign each window to the segment containing its centre and write `embeddings(kind='temporal', model_key=…)` rows for the chunk in one transaction (delete + insert per chunk + model, so re-runs are idempotent). The same handler backfills old chunks for a new encoder.
+5. **fetch_dataset_video** (cpu queue) — for benchmark clips: the dataset adapter downloads the clip (yt-dlp with `--download-sections`), a `Video` row is created with `source=<dataset>` and `priority_band=BENCHMARK`, and `probe_video` is enqueued — from there a benchmark clip is indistinguishable from an upload.
+6. **build_timeline** — order segment embeddings; forced boundaries where the on-screen heading (tallest OCR line, forward-filled) changes and persists; TextTiling-style depth scores over ±3-segment windows add boundaries for topic shifts without a slide change; labels = slide heading, else KeyBERT-style MMR keyphrases (optionally rewritten by Ollama).
 
 Workers cache `web.mp4` / `audio.wav` per video under `~/.cache/scenepeek` behind a file lock, so several worker processes on one host download once.
 
@@ -71,7 +84,9 @@ Planner cues: leading "find/show me where…" is stripped; "the professor explai
 - **Postgres for everything (pgvector + FTS + queue)** — one transactional store means chunk state, vectors and job leases commit together; metadata filters are plain `WHERE` clauses; there is no vector-store/DB sync problem. At the scale one machine can index (tens of thousands of hours) HNSW in Postgres is more than fast enough.
 - **Hybrid runtime** — Docker can't reach the Apple GPU, so infra runs in Compose and the worker runs natively with MPS (5–10× faster Whisper/SigLIP). The same package has a CPU Dockerfile target for Linux/GPU hosts.
 - **API loads only text-side encoders** — bge, SigLIP's text tower and the reranker (≈1.5 GB) are enough to encode queries; all audio/image inference stays in workers, so the API is horizontally cheap and the heavy models are separable.
-- **RRF over score fusion by default** — modality scores live on incompatible scales (SigLIP logits, ts_rank, cosine); rank fusion is robust without calibration. Weighted min-max fusion is implemented for the eval harness to compare.
+- **Weighted min-max fusion by default, RRF kept** — RRF gives a lane's rank-1 candidate nearly full credit even when that lane has nothing relevant; per-lane min-max normalisation was measured better once the caption lane was in the mix (README). Both are one `fusion:` switch in an experiment.
+- **Benchmarks go through the pipeline** — QVHighlights clips are fetched and indexed exactly like uploads (at benchmark priority), never loaded as precomputed features; the benchmark exercises the ASR/frame/OCR/temporal path users hit, and its ingestion doubles as the load test for workload isolation.
+- **Segments stay the retrieval unit** — lanes, fusion, NMS and the UI all work on ~10 s segments; the temporal lane attaches its best window to a segment (`spans`) instead of introducing a second unit, and `span_mode: window` is where IoU-level precision comes from when a query needs it.
 - **Chunks as the unit of work** — independent, idempotent, retryable, and small enough that a crash loses at most ~20 s of compute. Within a chunk the Whisper transcript is checkpointed to object storage (tagged with the model name), so a retry after an embedding/OCR/caption failure skips ASR entirely.
 - **Clocks come from Postgres** — `run_after`, leases and backoff all use the database's `now()`. Mixing the worker's clock with the DB's produced a subtle flake: a job enqueued and leased within the clock skew was invisible to `lease()`.
 
@@ -85,4 +100,5 @@ Prometheus (`/metrics` on the API and each worker): `scenepeek_jobs_total{type,s
 
 - More throughput: `make worker N=4` on one host, or run the worker image on more machines pointing at the same Postgres/MinIO; `--queues ml` on GPU nodes.
 - Bigger library: pgvector HNSW handles millions of rows; partition `segments`/`frames` by `video_id` range or move vectors to a dedicated store behind the same `candidates.py` interface.
-- Better ranking: swap models via env (`TEXT_EMBED_MODEL`, `VISUAL_EMBED_MODEL`, `RERANKER_MODEL`), re-index into a fresh database, and compare with the eval harness.
+- Better ranking: a new temporal encoder is a `VideoEncoder` implementation + `scenepeek backfill temporal --model <key>` (rows land next to the old version) + an experiment with `models.temporal: <key>`; a new text/frame encoder follows the same path into `embeddings` once its lane reads from there. Rerankers and routers are paths/versions in `SearchConfig`.
+- Bigger training sets: `dataset import qvhighlights --split train --limit N` + `eval run qvh_train.yaml` produce the lane-attribution labels for the router and the hits for hard-negative mining at whatever scale the workers can index.

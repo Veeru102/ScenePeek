@@ -39,7 +39,7 @@ eval:
 # Ablation suite for one dataset (SET = human | auto | qvh_val): every lane on/off + rerank + fusion
 # method, then a paired-bootstrap comparison. Specs live in eval/experiments/<SET>_<variant>.yaml.
 SET ?= human
-VARIANTS = text_only no_visual no_ocr no_lexical no_rerank rrf with_caption ocr_damped visual_damped
+VARIANTS ?= text_only no_visual no_ocr no_lexical no_rerank rrf with_caption ocr_damped visual_damped
 eval-suite:
 	cd backend && uv run scenepeek eval run -c ../eval/experiments/$(SET).yaml
 	cd backend && for v in $(VARIANTS); do uv run scenepeek eval run -c ../eval/experiments/$(SET)_$$v.yaml; done

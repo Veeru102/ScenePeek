@@ -1,0 +1,11 @@
+name: qvh_val_temporal_meanpool
+dataset: qvhighlights
+split: val
+scope: video
+limit: 10
+tolerance_s: 3.0
+search:
+  lanes:
+    temporal: 0.8
+  models:
+    temporal: siglip-meanpool

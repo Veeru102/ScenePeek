@@ -18,12 +18,14 @@ with ranked, timestamp-level results you can play instantly.
 
 | | |
 |---|---|
-| **Multimodal indexing** | Whisper transcripts with word timings · SigLIP frame embeddings · OCR of slides/on-screen text · BLIP keyframe captions · perceptual-hash keyframe selection |
-| **Multi-stage retrieval** | Query planner → up to 5 parallel candidate lanes (dense text, FTS, dense visual, OCR FTS + trigram, captions) → weighted min-max or RRF fusion → cross-encoder rerank → temporal NMS. Every hit explains itself (per-lane scores in the UI). |
-| **Async pipeline** | Postgres-backed job queue (`FOR UPDATE SKIP LOCKED`), heartbeats + reaper, DB-clock scheduling, exponential backoff, transcript checkpoints so retries skip ASR. A worker dying mid-job is covered by an automated chaos test. |
+| **Multimodal indexing** | Whisper transcripts with word timings · SigLIP frame embeddings · **X-CLIP multi-frame (temporal) embeddings** · OCR of slides/on-screen text · BLIP keyframe captions · perceptual-hash keyframe selection |
+| **Routed, multi-stage retrieval** | parse → **router** (fixed / heuristic / **learned**) → up to 6 parallel candidate lanes (dense text, FTS, frame-visual, temporal, OCR FTS + trigram, captions; a lane routed to 0 is skipped) → weighted min-max or RRF fusion → cross-encoder rerank → temporal NMS. Every hit explains itself (per-lane scores in the UI). |
+| **Benchmark-driven evaluation** | Dataset adapters (**QVHighlights**, the hand-written ScenePeek set, the auto-generated set) ingest through the *real* pipeline; every run is a recorded **experiment** (full search config + model versions + per-query rows in Postgres) with IoU metrics (R1@0.5/0.7, mAP) next to MRR/Recall, paired-bootstrap CIs and lane attribution |
+| **Learned retrieval decisions** | A learned router trained from measured lane outcomes (not hand labels); **hard-negative mining** from recorded failures → reranker fine-tuning script; both compared against their baselines through the same experiment harness |
+| **Versioned representations** | Every embedding / transcript / OCR row is tagged with the model that produced it; new encoder versions are backfilled *next to* the old ones (partial HNSW index per version) and A/B'd before anything is retired |
+| **Async pipeline** | Postgres-backed job queue (`FOR UPDATE SKIP LOCKED`), heartbeats + reaper, DB-clock scheduling, exponential backoff, transcript checkpoints so retries skip ASR, **priority bands + an offline concurrency budget** so bulk benchmark imports never starve interactive uploads. A worker dying mid-job is covered by an automated chaos test. |
 | **Incremental indexing** | 60-second chunks become searchable the moment they commit — long videos are searchable within ~20 s of upload |
 | **Semantic timeline** | Topic segmentation from embedding drift + slide-heading changes; labels from slide titles or KeyBERT-style keyphrases |
-| **Honest evaluation** | Three datasets (synthetic regression set, 119 auto-generated real-video queries, **41 hand-written queries**), per-lane ablations with paired-bootstrap confidence intervals, lane attribution ("which lane actually found it"), a labeling UI, and a negative result reported as such |
 | **Observability & CI** | Prometheus metrics, Grafana dashboard, in-app System page; GitHub Actions runs ruff + pytest (real Postgres) + vitest + build |
 
 Everything runs locally on free, open models. No hosted LLM or vision API is required (a local Ollama server is auto-detected and used for query decomposition and topic titles when present).
@@ -41,15 +43,17 @@ flowchart LR
     B[Browser<br/>Vite + React] -->|REST| A[FastAPI api<br/>query encoders · fusion · rerank]
     B -->|presigned PUT / GET| M[(MinIO)]
     A --> P[(Postgres + pgvector<br/>segments · frames · jobs)]
-    W[Worker ×N<br/>ffmpeg · Whisper · SigLIP · OCR · BLIP] -->|lease / heartbeat| P
+    W[Worker ×N<br/>ffmpeg · Whisper · SigLIP · X-CLIP · OCR · BLIP] -->|lease / heartbeat| P
     W <--> M
     A -.->|/metrics| PR[Prometheus → Grafana]
     W -.->|/metrics| PR
 ```
 
-**Processing** — `probe_video` (ffprobe, h264 web rendition, poster, audio, chunk plan) → per chunk: `extract_chunk` (1 fps sampling, phash scene-change keyframes, upload) → `index_chunk` (transcribe padded slice, snap ~10 s segments to utterance boundaries, batch-embed text + frames, OCR, caption keyframes, **one atomic commit**; the transcript is checkpointed to storage first) → `build_timeline` once every chunk is terminal. Chunk 0 of every video has the highest priority, so concurrent uploads all become searchable quickly.
+**Processing** — `probe_video` (ffprobe, h264 web rendition, poster, audio, chunk plan) → per chunk: `extract_chunk` (1 fps sampling, phash scene-change keyframes, upload) → `index_chunk` (transcribe padded slice, snap ~10 s segments to utterance boundaries, batch-embed text + frames, OCR, caption keyframes, **one atomic commit**; the transcript is checkpointed to storage first) → `encode_temporal` (8 s / stride 4 s multi-frame windows through X-CLIP, stored as versioned `embeddings` rows — after the chunk is already searchable) → `build_timeline` once every chunk is terminal. Jobs carry a **priority band**: interactive uploads (chunk 0 highest) > benchmark imports > model backfills, and an optional offline budget / reserved worker keeps interactive time-to-first-searchable flat under bulk load.
 
-**Search** — the planner splits a query into speech / visual / on-screen sub-queries using cue heuristics ("while showing…", quoted phrases, "someone holding…") and adjusts modality weights. Candidate lanes run in parallel sessions (a lane with weight 0 is skipped) and are fused with weighted min-max fusion (RRF available); the top 30 go through `bge-reranker-base`; temporal non-max suppression keeps one hit per moment. Every hit carries per-modality scores so the UI can explain *why* it matched.
+**Search** — `parse` splits a query into speech / visual / on-screen sub-queries (cue heuristics, optional local-LLM decomposition); a **router** turns the configured lane weights into per-query weights — `fixed` (as configured), `heuristic` (cue multipliers), or `learned:<version>` (per-lane logistic regressions over the query embedding, trained on which lanes actually found answers in a recorded experiment). Lanes routed to 0 don't run. Candidates are fused (weighted min-max or RRF), the top 30 are reranked by a cross-encoder (pretrained or a hard-negative-tuned checkpoint), and temporal NMS keeps one hit per moment. The whole ranking configuration is one `SearchConfig`, which is what an experiment records.
+
+**Benchmarks** — `scenepeek dataset import qvhighlights` registers clips + queries + ground-truth windows; `dataset fetch` enqueues `fetch_dataset_video` jobs that download each clip (yt-dlp) and push it through the same probe → extract → index pipeline as an upload, at benchmark priority. `eval run eval/experiments/qvh_val.yaml` scores it (single-video grounding or corpus-level retrieval) and writes an `experiments` row + JSON report.
 
 More detail: [docs/architecture.md](docs/architecture.md).
 
@@ -58,11 +62,13 @@ More detail: [docs/architecture.md](docs/architecture.md).
 | Role | Model | Notes |
 |---|---|---|
 | Speech-to-text | `faster-whisper` small.en (int8) | word timestamps + VAD; `mlx-whisper` backend optional |
-| Vision-language | `google/siglip-base-patch16-224` | image tower in the worker, text tower in the API |
+| Vision-language (frames) | `google/siglip-base-patch16-224` | image tower in the worker, text tower in the API |
+| Vision-language (temporal) | `microsoft/xclip-base-patch32` | 8-frame windows, 512-d joint space; `siglip-meanpool` is the no-new-model control; **w=0 in ranking by default** (measured, see below) |
 | Text embedding | `BAAI/bge-small-en-v1.5` | 384-d, HNSW cosine in pgvector |
 | OCR | RapidOCR (ONNX) | + word re-segmentation for dropped spaces |
 | Keyframe captions | `Salesforce/blip-image-captioning-base` | indexed per keyframe; **off in ranking by default** (measured, see below) |
-| Reranker | `BAAI/bge-reranker-base` | cross-encoder on transcript + OCR |
+| Reranker | `BAAI/bge-reranker-base` | cross-encoder on transcript + OCR; `scripts/train_reranker.py` fine-tunes it on mined hard negatives |
+| Router | per-lane logistic regression (scikit-learn) | features: bge query embedding + cue flags; labels: lane attribution from an experiment |
 | Topic labels | slide headings / KeyBERT-style MMR | optional Ollama titles |
 
 ## Quick start
@@ -86,7 +92,16 @@ scripts/upload.sh eval/videos/dist_lecture.mp4 "CS 6210 Lecture 3: Consensus and
 make eval                                        # Recall@k / MRR / nDCG for the default config
 ```
 
-With real videos in `eval/videos/real/` (see `eval/real/sources.yaml`): `uv run scenepeek eval real-upload` indexes them, `real-scan` + `real-auto-review` generate candidate queries, `real-label` opens the hand-labeling UI, and `make eval-real REAL_SET=real_human` runs the ablations.
+With real videos in `eval/videos/real/` (see `eval/real/sources.yaml`): `uv run scenepeek eval real-upload` indexes them, `real-scan` + `real-auto-review` generate candidate queries, `real-label` opens the hand-labeling UI, `scenepeek dataset import scenepeek_human --dir ..` registers the set, and `make eval-suite SET=human` runs the ablations.
+
+QVHighlights: put the `highlight_{train,val}_release.jsonl` annotation files (moment_detr release) in `data/qvhighlights/`, then
+
+```sh
+make qvh-import QVH_LIMIT=300        # register a seeded 300-clip val subset and enqueue yt-dlp fetches
+make worker N=2                      # clips are fetched, probed, extracted and indexed like uploads
+cd backend && uv run scenepeek dataset status qvhighlights
+uv run scenepeek eval run -c ../eval/experiments/qvh_val.yaml
+```
 
 For the fastest searches during a demo run the API on the host too (`make api-dev`) so reranking uses the GPU: ~300 ms per query across a 3 000-segment library vs ~1.2 s on CPU in Docker.
 
@@ -94,15 +109,16 @@ Optional dashboards: `make observability` → Grafana at http://localhost:3001.
 
 ## Evaluation
 
-Three datasets, in increasing order of honesty:
+Every dataset goes through one abstraction (`scenepeek/datasets/`: videos, queries, ground-truth windows, splits) and every run is an **experiment** (`eval/experiments/*.yaml` → `scenepeek eval run`): the full `SearchConfig` (lanes, router, fusion, reranker, NMS, model versions), the code SHA and every per-query result are stored in Postgres (`experiments`, `experiment_results`) and mirrored to `eval/reports/<name>.json`. `eval compare` reports paired-bootstrap 95 % confidence intervals on per-query deltas (1000 resamples); **\*** marks a CI that excludes zero.
 
-| set | videos | queries | how the queries were made | what it measures |
-|---|---|---|---|---|
-| synthetic (`eval/dataset.yaml`) | 3 generated lectures | 31 | scripted alongside the videos | a regression harness — deliberately easy, MRR ≈ 1.0 |
-| auto-generated real (`eval/real/dataset.yaml`) | 11 real videos (Blender films, MIT OCW lectures, robotics) | 119 | keyphrases / OCR strings pulled from the indexed content by `scenepeek eval real-scan` + heuristic review | near-verbatim recall; **circular** by construction and 89 % speech-derived |
-| **hand-written** (`eval/real/human.yaml`) | 9 of those videos | **41** (18 visual, 10 speech, 6 OCR, 7 multi) | a person watched the videos and typed what they would search for (`scenepeek eval real-label`) | real intent, paraphrase, silent scenes — the number to believe |
+| set | videos | queries | how the queries were made | metrics | what it measures |
+|---|---|---|---|---|---|
+| synthetic (`eval/dataset.yaml`) | 3 generated lectures | 31 | scripted alongside the videos | overlap ±3 s → MRR / R@k | a regression harness — deliberately easy, MRR ≈ 1.0 |
+| auto-generated real (`eval/real/dataset.yaml`) | 11 real videos (Blender films, MIT OCW lectures, robotics) | 119 | keyphrases / OCR strings pulled from the indexed content by `scenepeek eval real-scan` + heuristic review | overlap | near-verbatim recall; **circular** by construction and 89 % speech-derived |
+| **hand-written** (`eval/real/human.yaml`) | 9 of those videos | **41** (18 visual, 10 speech, 6 OCR, 7 multi) | a person watched the videos and typed what they would search for (`scenepeek eval real-label`) | overlap | real intent, paraphrase, silent scenes, **OCR and speech** — content the public benchmarks don't have |
+| **QVHighlights** (Lei et al., 2021) | 150 s YouTube clips, seeded 300-clip val subset (10 k clips available) | ≈ 1 query / clip, 2 s-granular moment windows | the published benchmark, fetched with yt-dlp and indexed through the real pipeline | **R1@0.5, R1@0.7, mAP** (the literature's) + MRR | large-scale, third-party ground truth; single-video grounding (`scope: video`, comparable to published numbers) and corpus-level retrieval (`scope: dataset`) |
 
-A hit counts if its span overlaps a relevant range (±3 s). `eval compare` reports paired-bootstrap 95 % confidence intervals on per-query deltas (1000 resamples); **\*** marks a CI that excludes zero. `make eval-real` / `make eval-real REAL_SET=real_human` reproduce every table below.
+`make eval-suite SET=human` (or `auto`, `qvh_val`) reproduces the tables below. Segment-level predictions are ~10 s long while QVHighlights windows are 2 s-granular, so IoU metrics are capped by segmentation unless the temporal lane's window spans are used (`span_mode: window`) — that is an honest limitation of a segment-indexed system, and it is measured, not hidden.
 
 <!-- eval-tables:begin -->
 **Hand-written queries (41, the headline number)**
@@ -173,6 +189,8 @@ A hit counts if its span overlaps a relevant range (±3 s). `eval compare` repor
 - **Weighted min-max fusion replaced RRF.** RRF gives a lane's rank-1 candidate nearly full credit even when that lane has nothing relevant. With the caption lane still in ranking the switch was worth +0.05 MRR overall and +0.09 on visual queries (both significant); with captions out the two methods are within noise (weighted 0.506 vs RRF 0.485), so weighted stays as the default that never lost.
 - **Captions were built, measured, and turned off.** BLIP-base captions (`"a lion and the girl"` for a dog, `"a panda bear"` for the rabbit, `"a robot sitting in a room"` ×4 across four different actions) never helped: −0.03 MRR on hand-written queries at the default weight, and no better at lower weight, out of the rerank passage, or with either fusion method. The lane, migration and backfill (`scenepeek reindex-captions`) stay in place for a stronger, action-aware captioner; the negative result is kept here on purpose.
 - **Lane attribution shows the headroom.** Some lane has the right answer in its own top-10 for 80 % of hand-written queries (94 % of generated ones); the fused system surfaces it for 66 % (76 %). That gap is what better routing and fusion can still recover.
+- **Temporal (X-CLIP) embeddings don't help on lectures and films — yet.** On the hand-written set the multi-frame lane finds the answer alone for 27 % of queries vs 66 % for SigLIP frames; adding it is −0.02 MRR (CI includes 0), replacing frames with it −0.04. These queries describe static scenes ("River", "the slide about…"), not actions. The lane stays indexed for every chunk at weight 0, so the QVHighlights action queries can settle it.
+- **A learned router beats the hand-written heuristics by +0.008 MRR** on the hand-written set when trained on only 96 auto-generated queries (holdout AUC: visual 0.85, OCR 0.81, keyword 0.77, speech 0.69). Within noise at this size; the training signal is real, the training set is not big enough. QVHighlights train (7 k queries) is the intended one.
 
 ## Measured on an M3 Pro (18 GB)
 
@@ -208,11 +226,12 @@ Two workers out-index three: CTranslate2 already multithreads inside each proces
 ## Limitations and known failure modes
 
 - **Visual retrieval is the weak modality.** Zero-shot SigLIP on homogeneous footage (an animated film, a lecture hall) collapses onto a few "hub" frames — three different Big Buck Bunny queries all returned the end-credits card. Hand-written visual queries score MRR ≈ 0.3. Action queries ("robot unscrews", "dog fetches a branch") are essentially unanswerable with per-frame models.
-- **No query routing.** Every lane runs on every query with fixed weights; the cue heuristics only nudge them. This is the single largest measured loss (see above).
+- **Routing is the largest measured loss, and the learned router is only as good as its training set.** With 96 training queries it is a wash; the infrastructure to train it on thousands (QVHighlights train + recorded lane attribution) is in place, the number is not yet.
+- **Segments cap IoU.** ~10 s retrieval units against 2 s-granular ground truth put a ceiling on R1@0.7 / mAP; window-level spans from the temporal lane are the first step, a dedicated span-refinement stage would be the next.
 - **OCR is only as good as the slide.** Corrupted OCR ("A marti zed Analysis") defeats both lexical and semantic matching; the OCR lane helps OCR-style queries and is neutral elsewhere.
 - **Chunk boundaries.** Segment context never crosses the 60 s chunk edge, and a word straddling the edge can be dropped.
 - **Single-tenant demo.** No auth, no pagination, no rate limiting; the API returns the whole library.
-- **n = 41.** The human set is large enough to reverse two conclusions from the generated set, not large enough to tune weights on without overfitting.
+- **n = 41.** The human set is large enough to reverse two conclusions from the generated set, not large enough to tune weights on without overfitting. That is why the public benchmark exists in this repo.
 
 ## Design decisions
 
@@ -220,7 +239,10 @@ Two workers out-index three: CTranslate2 already multithreads inside each proces
 - **Hybrid runtime** — infra in Compose, the ML worker native on the host so it can use the Apple GPU; the same package has a CPU/CUDA worker image.
 - **The API loads only text-side encoders**; all audio/image inference lives in workers.
 - **Chunks are the unit of work** — idempotent, retryable, small; the expensive stage (ASR) is checkpointed so a retry after an embedding/OCR failure doesn't redo it.
-- **Measure before tuning** — every ranking default that changed in this repo (fusion method, caption weight) changed because a paired-bootstrap comparison on hand-written queries said so.
+- **Measure before tuning** — every ranking default that changed in this repo (fusion method, caption weight, temporal weight) changed because a paired-bootstrap comparison said so; every experiment is reproducible from its stored config.
+- **Versions coexist, nothing is overwritten** — a new encoder is backfilled at the lowest priority into `embeddings` under its own `model_key` with its own partial HNSW index, compared in an experiment, and only then does the old version get retired.
+- **Benchmarks use the real pipeline** — QVHighlights clips are downloaded and indexed like uploads (ASR, frames, OCR, temporal), never imported as precomputed features, so the benchmark exercises the same code path a user hits.
+- **Isolation by priority, not by infrastructure** — one queue table, priority bands, an offline concurrency budget and `--min-priority` reserved workers instead of a second queue system.
 
 More: [docs/architecture.md](docs/architecture.md).
 
@@ -231,12 +253,13 @@ backend/scenepeek/
   api/        FastAPI routers (videos, search, jobs, metrics)
   jobs/       Postgres queue (lease / heartbeat / retry / reap) + worker loop
   pipeline/   probe → extract → index → timeline stages, chunking, segmentation, keyframes
-  ml/         lazy model singletons: whisper, siglip, text_embed, ocr, reranker, keyphrases, llm
-  search/     planner, candidate lanes, fusion, rerank, dedup, service
-  eval/       dataset, metrics (incl. lane attribution), runner, report (bootstrap CIs), labeling + review UIs
+  ml/         lazy model singletons: whisper, siglip, video (X-CLIP / mean-pool), text_embed, ocr, reranker, versions
+  search/     config (SearchConfig), planner (parse), routing (fixed / heuristic / learned), candidate lanes, fusion, service
+  datasets/   benchmark adapters (QVHighlights, local YAML sets), importer, fetch jobs
+  eval/       metrics (overlap + IoU/mAP + lane attribution), experiment runner, report (bootstrap CIs), negatives (mining), labeling UIs
 frontend/     Vite + React + TS + Tailwind: Library, Search, Video detail, System
-eval/         dataset.yaml, configs/, reports/, videos/
-scripts/      make_synthetic.py, upload.sh, bench_workers.sh, bench_models.py, eval_tables.py
+eval/         dataset.yaml, experiments/, reports/, videos/
+scripts/      make_synthetic.py, upload.sh, bench_workers.sh, bench_isolation.sh, bench_models.py, train_reranker.py, eval_tables.py
 docs/         architecture.md, benchmarks/, observability/ (Prometheus + Grafana provisioning)
 .github/      CI: ruff + pytest (Postgres service) + vitest + build
 ```
@@ -246,7 +269,9 @@ docs/         architecture.md, benchmarks/, observability/ (Prometheus + Grafana
 ```sh
 make test        # pytest — queue, recovery, search, eval, LLM fallbacks (throwaway DB on the compose Postgres)
 make lint        # ruff
-make eval-real   # all real-video ablations + paired-bootstrap comparison (REAL_SET=real_human for the hand-written set)
+make eval-suite SET=human   # ablations + paired-bootstrap comparison (SET=auto | qvh_val)
+scenepeek eval list          # recorded experiments; router train <experiment>; mine-negatives <experiment>
+scenepeek backfill temporal --model <encoder>; scenepeek versions   # add / list / retire model versions
 cd frontend && npm test   # vitest
 make api-dev     # API on the host with auto-reload (uses MPS for encoders)
 make web-dev     # Vite dev server on the host

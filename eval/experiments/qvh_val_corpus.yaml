@@ -1,0 +1,6 @@
+name: qvh_val_corpus
+dataset: qvhighlights
+split: val
+scope: dataset
+limit: 10
+tolerance_s: 3.0
