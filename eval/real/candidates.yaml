@@ -587,7 +587,7 @@ candidates:
     int))))
 
     int)'
-  status: approved
+  status: rejected
 - id: mit_streams.w5.multi
   video: mit_streams
   type: multi
@@ -636,7 +636,7 @@ candidates:
     iii
 
     iii'
-  status: approved
+  status: rejected
 - id: mit_streams.w7.multi
   video: mit_streams
   type: multi
@@ -1779,7 +1779,7 @@ candidates:
     (*9)()=
 
     x(dotdx+'
-  status: approved
+  status: rejected
 - id: mit_imagenet_cnn.w2.multi
   video: mit_imagenet_cnn
   type: multi

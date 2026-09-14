@@ -294,13 +294,6 @@ queries:
   - video: mit_streams
     start_s: 1890.24
     end_s: 1950.24
-- id: mit_streams.w5.ocr
-  text: On-screen text mentions (define
-  modality: ocr
-  relevant:
-  - video: mit_streams
-    start_s: 1890.24
-    end_s: 1950.24
 - id: mit_streams.w5.multi
   text: Explains actual delayed object while showing (define
   modality: multi
@@ -311,13 +304,6 @@ queries:
 - id: mit_streams.w7.speech
   text: Talks about identity function
   modality: speech
-  relevant:
-  - video: mit_streams
-    start_s: 2570.73
-    end_s: 2630.73
-- id: mit_streams.w7.ocr
-  text: On-screen text mentions (define）
-  modality: ocr
   relevant:
   - video: mit_streams
     start_s: 2570.73
@@ -696,13 +682,6 @@ queries:
 - id: mit_imagenet_cnn.w2.speech
   text: Talks about continuous variable
   modality: speech
-  relevant:
-  - video: mit_imagenet_cnn
-    start_s: 652.77
-    end_s: 712.77
-- id: mit_imagenet_cnn.w2.ocr
-  text: On-screen text mentions K.Convolve
-  modality: ocr
   relevant:
   - video: mit_imagenet_cnn
     start_s: 652.77

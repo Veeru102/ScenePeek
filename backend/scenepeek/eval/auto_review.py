@@ -15,6 +15,7 @@ DATASET_PATH = REPO_ROOT / "eval/real/dataset.yaml"
 DICT_PATH = Path("/usr/share/dict/words")
 
 _EDIT_PREFIX = re.compile(r"^\[edit\]\s*")
+_GENERIC_VISUAL_TEMPLATE = "describe what is shown on screen"
 
 
 def _load_dictionary() -> set[str]:
@@ -46,10 +47,43 @@ def _ocr_fragment(text: str) -> str | None:
     return m.group(1) if m else None
 
 
-def should_keep(candidate: dict) -> tuple[bool, str]:
+def _window_key(candidate_id: str) -> str:
+    """"mit_streams.w0.ocr" -> "mit_streams.w0" — groups candidates from the same window."""
+    return ".".join(candidate_id.split(".")[:-1])
+
+
+def _build_ocr_window_index(candidates: list[dict]) -> dict[str, dict[str, set[str]]]:
+    """video -> token -> set of window keys whose OCR text contains that token.
+
+    Used to catch OCR fragments that recur throughout a video (e.g. "method",
+    "(define") — technically real words, but not unique to the window they
+    were pulled from, so a poor search target for that specific timestamp.
+    """
+    index: dict[str, dict[str, set[str]]] = {}
+    for c in candidates:
+        if c["type"] not in ("ocr", "multi"):
+            continue
+        ctx = c.get("context") or ""
+        m = re.search(r"ocr:\s*(.*)$", ctx, re.IGNORECASE | re.DOTALL)
+        ocr_blob = m.group(1) if m else ""
+        tokens = {t.lower() for t in re.findall(r"[a-zA-Z]+", ocr_blob) if len(t) >= 3}
+        video_index = index.setdefault(c["video"], {})
+        wkey = _window_key(c["id"])
+        for t in tokens:
+            video_index.setdefault(t, set()).add(wkey)
+    return index
+
+
+def _is_discriminative(fragment: str, video: str, window_key: str, ocr_index: dict) -> bool:
+    """True if at least one real-word token in fragment is unique to this window in its video."""
+    tokens = [t.lower() for t in re.findall(r"[a-zA-Z]+", fragment) if len(t) >= 3]
+    video_index = ocr_index.get(video, {})
+    return any(len(video_index.get(t, set())) <= 1 for t in tokens)
+
+
+def should_keep(candidate: dict, ocr_index: dict) -> tuple[bool, str]:
     """Decide whether to approve a candidate. Returns (keep, cleaned_text)."""
     raw_text = candidate["text"]
-    was_template = bool(_EDIT_PREFIX.match(raw_text))
     text = _clean_text(raw_text)
 
     if not text or len(text) < 5:
@@ -61,11 +95,16 @@ def should_keep(candidate: dict) -> tuple[bool, str]:
         # No vision-captioning model in this pipeline, so a still-templated
         # visual candidate carries zero real content signal — drop it.
         # Only keep visual candidates that already have real hand-written text.
-        return (not was_template), text
+        # (Checked against the template phrase itself, not an "[edit]" prefix,
+        # since that prefix is stripped by _clean_text and won't survive a
+        # second pass over already-cleaned candidates.)
+        return (text.strip().lower() != _GENERIC_VISUAL_TEMPLATE), text
 
     if ctype == "ocr":
         frag = _ocr_fragment(raw_text) or text
-        return _has_real_word(frag), text
+        wkey = _window_key(candidate["id"])
+        keep = _has_real_word(frag) and _is_discriminative(frag, candidate["video"], wkey, ocr_index)
+        return keep, text
 
     if ctype == "multi":
         # Keep if either the speech or OCR half has real signal.
@@ -79,13 +118,14 @@ def should_keep(candidate: dict) -> tuple[bool, str]:
 def auto_review() -> dict:
     cand_data = _load_candidates(CANDIDATES_PATH)
     sources = {v["key"]: v for v in load_sources(SOURCES_PATH)}
+    ocr_index = _build_ocr_window_index(cand_data["candidates"])
 
     dataset: dict = {"videos": [], "queries": []}
     approved = rejected = 0
     by_type: dict[str, int] = {}
 
     for c in cand_data["candidates"]:
-        keep, cleaned_text = should_keep(c)
+        keep, cleaned_text = should_keep(c, ocr_index)
         c["text"] = cleaned_text
 
         if keep:
